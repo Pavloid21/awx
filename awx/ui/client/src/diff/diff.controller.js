@@ -7,6 +7,7 @@ Wait("start");
 $('#diffCompareButton').css('cursor','not-allowed');
 
 $scope.diffView = 'APP_CFG';
+console.log(process.env.NODE_ENV)
 
 //$http({method: 'GET', url: '/environments.j
 $http({method: 'GET', url: '/diff/environments/'}).
@@ -131,7 +132,7 @@ let env1 = $scope.diffEnvironments.versions.filter(version => {
 let env2 = $scope.diffEnvironments.versions.filter(version => {
     if(version.id === $scope.env2) return version
 })
-var url = `/diff/compare/${$scope.env1Version.target}/${$scope.env2Version.target}/?env1=${env1[0].name}&env2=${env2[0].name}&v1=${$scope.env1Version.name}&v2=${$scope.env2Version.name}`;
+var url = `/diff/compare/${$scope.env1Version.target}/${$scope.env2Version.target}/?env1=${env1[0].name}&env2=${env2[0].name}&v1=${$scope.env1Version.name}&v2=${$scope.env2Version.name}&isnode=${process.env.NODE_ENV}`;
 //  url = 'compare.js';
 $http({method: 'GET', url: url}).
 then(

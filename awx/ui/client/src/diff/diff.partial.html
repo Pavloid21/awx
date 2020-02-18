@@ -3,14 +3,14 @@
 <div ng-show="diffSuccessMessage != null"><font color="green">{{diffSuccessMessage}}</font></div>
 
 <div class="DashboardGraphs">
-<div class="btn-group" style="position: absolute; right: 35px;">
+<!-- <div class="btn-group" style="position: absolute; right: 35px;">
 <button id="diffAppButton" class="btn btn-xs btn-primary" ng-click="diffSwitchView('APP_CFG')">APP</button>
 <button id="diffDomainButton" class="btn btn-xs Button-primary--hollow" ng-click="diffSwitchView('DOMAIN_CFG')">DOMAIN</button>
 <button id="diffSoaConfigButton" class="btn btn-xs Button-primary--hollow" ng-click="diffSwitchView('SOACONFIG')">SOA</button>
 <button id="diffFmwButton" class="btn btn-xs Button-primary--hollow" ng-click="diffSwitchView('FMW_PATCH')">FMW Patches</button>
 <button id="diffDatabaseButton" class="btn btn-xs Button-primary--hollow" ng-click="diffSwitchView('DATABASE_CFG')">DATABASE</button>
 <button id="diffOSButton" class="btn btn-xs Button-primary--hollow" ng-click="diffSwitchView('OS_CFG')">OS</button>
-</div>
+</div> -->
 <br><br>
 Source Environment
 <select style="width: 70px" ng-model="env1" ng-change="getDataEnv1()">
@@ -172,7 +172,7 @@ Target Environment
 </li>
 </ul>
 </div>
-<center><button id="diffApplyButtonAPP" class="SmartSearch-keyToggle btn" ng-click="diffApply()" ng-show="compareData != null">Apply</button></center>
+<!-- <center><button id="diffApplyButtonAPP" class="SmartSearch-keyToggle btn" ng-click="diffApply()" ng-show="compareData != null">Apply</button></center> -->
 <br>
 </div>
 

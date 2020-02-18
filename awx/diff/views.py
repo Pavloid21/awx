@@ -41,7 +41,10 @@ class VersionList(View):
 class DiffView(View):
 
     def get(self, request, *args, **kwargs):
-        jobLaunchResponse = requests.post(AWX_API_PATH + '/api/v2/job_templates/10/launch/', json={
+        path = AWX_API_PATH           
+        if request.GET['isnode'] != 'development':
+            path = 'http://localhost'
+        jobLaunchResponse = requests.post(path + '/api/v2/job_templates/10/launch/', json={
             'extra_vars': {
                 'compare_domain_one': request.GET['env1'],
                 'compare_domain_two': request.GET['env2'],
@@ -54,7 +57,7 @@ class DiffView(View):
         jsonDump = json.dumps(jsonObj)
         obj = json.loads(jsonDump)
         time.sleep(60)
-        response = requests.get(AWX_API_PATH + '/api/v2/jobs/' + str(obj['job']) + '/job_events/?page=2', auth=('admin', 'password'))
+        response = requests.get(path + '/api/v2/jobs/' + str(obj['job']) + '/job_events/?page=2', auth=('admin', 'password'))
         return JsonResponse({'compare': response.json()})
 
 

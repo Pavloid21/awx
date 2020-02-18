@@ -204,6 +204,9 @@ const base = {
             chunks: CHUNKS,
             chunksSortMode: chunk => (chunk.names[0] === 'vendor' ? -1 : 1)
         }),
+        new webpack.DefinePlugin({
+            'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
+        }),
     ],
     resolve: {
         alias: {
