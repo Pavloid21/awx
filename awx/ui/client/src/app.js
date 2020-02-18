@@ -11,6 +11,8 @@ if ($basePath) {
     urlPrefix = `${$basePath}`;
 }
 
+import diff from './diff/main';
+
 import start from './app.start';
 import inventoriesHosts from './inventories-hosts/main';
 import inventoryScripts from './inventory-scripts/main';
@@ -88,6 +90,7 @@ angular
         users.name,
         projects.name,
         scheduler.name,
+        diff.name,
 
         'Utilities',
         'templates',

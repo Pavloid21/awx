@@ -104,6 +104,14 @@
         <at-side-nav-item icon-class="fa-cog" route="settings" name="SETTINGS"
             system-admin-only="true" show-settings-sub-menu="true" no-tooltip-on-collapsed="true">
         </at-side-nav-item>
+        <div class="at-Layout-sideNavSpacer" ng-show="$parent.layoutVm.isSuperUser || $parent.layoutVm.isOrgAdmin">
+            <span class="at-Layout-sideNavHeader">
+                MCD
+            <span>
+        </div>
+        <at-side-nav-item icon-class="fa-sitemap" route="diff" name="DIFF"
+            ng-show="$parent.layoutVm.isSuperUser || $parent.layoutVm.isOrgAdmin">
+        </at-side-nav-item>
     </at-side-nav>
     <div class="at-Layout-main" ng-class="{'at-Layout-main--noLicense': vm.licenseIsMissing}">
         <div class="at-Layout-content">
