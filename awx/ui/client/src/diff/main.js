@@ -4,13 +4,15 @@
  * All Rights Reserved
  *************************************************/
 
-import controller from './diff.controller';
-import route from './diff.route';
+import controller from "./diff.controller";
+import route from "./diff.route";
 
-export default
-    angular.module('diff', [])
-        .controller('diff', controller)
-        .run(['$stateExtender', function($stateExtender){
-            $stateExtender.addState(route);
-        }]);
-
+export default angular
+  .module("diff", [])
+  .controller("diff", controller)
+  .run([
+    "$stateExtender",
+    function($stateExtender) {
+      $stateExtender.addState(route);
+    }
+  ]);

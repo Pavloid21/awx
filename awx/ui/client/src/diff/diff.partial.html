@@ -1,9 +1,12 @@
-
-<div ng-show="diffErrorMessage != null"><font color="red">{{diffErrorMessage}}</font></div>
-<div ng-show="diffSuccessMessage != null"><font color="green">{{diffSuccessMessage}}</font></div>
+<!-- <div ng-show="diffErrorMessage != null">
+  <font color="red">{{diffErrorMessage}}</font>
+</div>
+<div ng-show="diffSuccessMessage != null">
+  <font color="green">{{diffSuccessMessage}}</font>
+</div> -->
 
 <div class="DashboardGraphs">
-<!-- <div class="btn-group" style="position: absolute; right: 35px;">
+  <!-- <div class="btn-group" style="position: absolute; right: 35px;">
 <button id="diffAppButton" class="btn btn-xs btn-primary" ng-click="diffSwitchView('APP_CFG')">APP</button>
 <button id="diffDomainButton" class="btn btn-xs Button-primary--hollow" ng-click="diffSwitchView('DOMAIN_CFG')">DOMAIN</button>
 <button id="diffSoaConfigButton" class="btn btn-xs Button-primary--hollow" ng-click="diffSwitchView('SOACONFIG')">SOA</button>
@@ -11,43 +14,69 @@
 <button id="diffDatabaseButton" class="btn btn-xs Button-primary--hollow" ng-click="diffSwitchView('DATABASE_CFG')">DATABASE</button>
 <button id="diffOSButton" class="btn btn-xs Button-primary--hollow" ng-click="diffSwitchView('OS_CFG')">OS</button>
 </div> -->
-<br><br>
-Source Environment
-<select style="width: 70px" ng-model="env1" ng-change="getDataEnv1()">
-<option ng-repeat="env1option in diffEnvironments.versions" ng-value="env1option.id">{{env1option.name}}</option>
-</select>
-<!-- {{env1}} -->
+  <br /><br />
+  Source Environment
+  <select style="width: 70px" ng-model="env1" ng-change="getDataEnv1()">
+    <option
+      ng-repeat="env1option in diffEnvironments.versions"
+      ng-value="env1option.id"
+      >{{env1option.name}}</option
+    >
+  </select>
+  <!-- {{env1}} -->
 
-<select style="width: 170px" ng-model="env1VersionChoosen" ng-change="setVersionEnv1()">
-<option ng-repeat="env1version in env1Versions track by $index">{{env1version.name}}</option>
-</select>
-<br>
-<!-- <br>{{env1VersionChoosen}}<br>{{env1Version}}<br> -->
-Target Environment
-<select style="width: 70px" ng-model="env2" ng-change="getDataEnv2()" >
-<option ng-repeat="env2option in diffEnvironments.versions" ng-value="env2option.id">{{env2option.name}}</option>
-</select>
-<!-- {{env2}} -->
+  <select
+    style="width: 170px"
+    ng-model="env1VersionChoosen"
+    ng-change="setVersionEnv1()"
+  >
+    <option ng-repeat="env1version in env1Versions track by $index"
+      >{{env1version.name}}</option
+    >
+  </select>
+  <br />
+  <!-- <br>{{env1VersionChoosen}}<br>{{env1Version}}<br> -->
+  Target Environment
+  <select style="width: 70px" ng-model="env2" ng-change="getDataEnv2()">
+    <option
+      ng-repeat="env2option in diffEnvironments.versions"
+      ng-value="env2option.id"
+      >{{env2option.name}}</option
+    >
+  </select>
+  <!-- {{env2}} -->
 
-<select style="width: 170px" ng-model="env2VersionChoosen" ng-change="setVersionEnv2()">
-<option ng-repeat="env2version in env2Versions track by $index">{{env2version.name}}</option>
-</select>
-<!-- <br>{{env2VersionChoosen}}<br>{{env2Version}}<br> -->
+  <select
+    style="width: 170px"
+    ng-model="env2VersionChoosen"
+    ng-change="setVersionEnv2()"
+  >
+    <option ng-repeat="env2version in env2Versions track by $index"
+      >{{env2version.name}}</option
+    >
+  </select>
+  <!-- <br>{{env2VersionChoosen}}<br>{{env2Version}}<br> -->
 
-<button id="diffCompareButton" class="SmartSearch-keyToggle btn" ng-click="compare()">Compare</button>
-<br>
+  <button
+    id="diffCompareButton"
+    class="SmartSearch-keyToggle btn"
+    ng-click="compare()"
+  >
+    Compare
+  </button>
+  <br />
 
-<!-- {{env1Data}}
+  <!-- {{env1Data}}
 {{env2Data}} -->
-<br>
+  <br />
 
-<!-- <p><b>Filter</b>
+  <!-- <p><b>Filter</b>
 <input type="text" size="40" ng-model="diffFilter">
 </p> -->
 
-<!-- <br> -->
+  <!-- <br> -->
 
-<!-- <p>
+  <!-- <p>
 <input type="checkbox" size="40" ng-model="showDiffOnly">
 <b>Show only differencies</b>
 </p>
@@ -61,355 +90,613 @@ Target Environment
 <br><br> -->
 </div>
 
-<div ng-show="diffView==='APP_CFG' && compareData != null" class="DashboardGraphs">
-
-    <table border="1" class="diff_table" ng-repeat="(key, value) in final" ng-if="key === 'changes' || key ==='new_value'">
-        <tr>
-            <td>{{key}}</td>
-        </tr>
-        <tr>
+<div
+  ng-show="diffView==='APP_CFG' && compareData != null"
+  class="DashboardGraphs"
+>
+  <table
+    border="1"
+    class="diff_table"
+    ng-repeat="(key, value) in final"
+    ng-if="key === 'changes' || key ==='new_value'"
+  >
+    <tr>
+      <td>{{key}}</td>
+    </tr>
+    <tr>
+      <td>
+        <table
+          border="1"
+          class="table_container"
+          ng-repeat="(k, val) in final[key]"
+        >
+          <tr>
+            <td class="strong_title">{{k}}</td>
+          </tr>
+          <tr>
             <td>
-                <table border="1" class="table_container" ng-repeat="(k, val) in final[key]">
-                    <tr>
-                        <td class="strong_title">{{k}}</td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <table border="1" class="diff_gray_table" ng-repeat="(k1, val) in final[key][k]">
-                                <tr>
-                                    <td class="td_anchor">{{k1}}</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td class="td_anchor"><strong>anchor</strong></td>
-                                    <td><strong>parameter</strong></td>
-                                    <td><strong>first_diff_value</strong></td>
-                                    <td><strong>second_diff_value</strong></td>
-                                </tr>
-                                <tr ng-repeat="item in final[key][k][k1]">
-                                    <td class="td_anchor">{{item.anchor}}</td>
-                                    <td class="td_parameter">{{item.parameter}}</td>
-                                    <td class="td_difference">{{item.first_diff_value}}</td>
-                                    <td class="td_difference">{{item.second_diff_value}}</td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                </table>
+              <table
+                border="1"
+                class="diff_gray_table"
+                ng-repeat="(k1, val) in final[key][k]"
+              >
+                <tr>
+                  <td class="td_anchor">{{k1}}</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td class="td_anchor"><strong>anchor</strong></td>
+                  <td><strong>parameter</strong></td>
+                  <td><strong>first_diff_value</strong></td>
+                  <td><strong>second_diff_value</strong></td>
+                </tr>
+                <tr ng-repeat="item in final[key][k][k1]">
+                  <td class="td_anchor">{{item.anchor}}</td>
+                  <td class="td_parameter">{{item.parameter}}</td>
+                  <td class="td_difference">{{item.first_diff_value}}</td>
+                  <td class="td_difference">{{item.second_diff_value}}</td>
+                </tr>
+              </table>
             </td>
-        </tr>
-    </table>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 
-<div>
-<ul ng-repeat="x in compareData.APP_CFG.data track by $index" ng-hide="(x.diff === null || x.diff === 'incompatible') && showDiffOnly">
-<hr>
-<li>
-<h5><b>{{ x.config }}</b></h5>
-<!-- <span>(Version: " {{ x.left_revision }} " -> " {{ x.right_revision }} " ) </span> -->
-<table border="1">
-<!-- <tr><td colspan=2><h5><b>{{ x.config }}</b></h5></td></tr> -->
-<tr><td>Source version ({{env1}})</td><td>Target version ({{env2}})</td></tr>
-<tr><td>{{ formatVersionValue(x.left_revision) }}</td><td>{{ formatVersionValue(x.right_revision) }}</td></tr>
-</table>
+  <div>
+    <ul
+      ng-repeat="x in compareData.APP_CFG.data track by $index"
+      ng-hide="(x.diff === null || x.diff === 'incompatible') && showDiffOnly"
+    >
+      <hr />
+      <li>
+        <h5><b>{{ x.config }}</b></h5>
+        <!-- <span>(Version: " {{ x.left_revision }} " -> " {{ x.right_revision }} " ) </span> -->
+        <table border="1">
+          <!-- <tr><td colspan=2><h5><b>{{ x.config }}</b></h5></td></tr> -->
+          <tr>
+            <td>Source version ({{env1}})</td>
+            <td>Target version ({{env2}})</td>
+          </tr>
+          <tr>
+            <td>{{ formatVersionValue(x.left_revision) }}</td>
+            <td>{{ formatVersionValue(x.right_revision) }}</td>
+          </tr>
+        </table>
 
-<br><br>
+        <br /><br />
 
+        <div ng-repeat="item in x.diff">
+          <span ng-show="item.properties == null && !showDiffTables"
+            >{{ item.pathText }}
+            <b> ({{formatStatus(item.status.toUpperCase())}})</b></span
+          >
+          <br /><br />
 
-<div ng-repeat="item in x.diff">
+          <p ng-repeat="prop in item.properties" ng-show="!showDiffTables">
+            <input type="checkbox" ng-model="prop.checked" />
+            <span ng-show="!prop.checked"
+              >{{ item.pathText }}
+              <b
+                >{{formatProperty(prop.name,item.status.toUpperCase())}}</b
+              ></span
+            >
+            <span ng-show="prop.checked" style="color: red"
+              >{{ item.pathText }}
+              <b
+                >{{formatProperty(prop.name,item.status.toUpperCase())}}</b
+              ></span
+            >
+            <br />
 
-<span ng-show="item.properties == null && !showDiffTables">{{ item.pathText }} <b> ({{formatStatus(item.status.toUpperCase())}})</b></span>
-<br><br>
+            <span ng-show="!prop.checked"
+              ><u>Source Value ({{env1}}):</u>
+              "{{formatSourceValue(prop.left_value)}}"</span
+            >
+            <span ng-show="prop.checked" style="color: red"
+              ><u>Old Value:</u> "{{formatOldValue(prop.right_value)}}"</span
+            >
+            <br />
+            <span ng-show="!prop.checked"
+              ><u>Target Value ({{env2}}):</u>
+              "{{formatTargetValue(prop.right_value)}}"</span
+            >
+            <span ng-show="prop.checked" style="color: red"
+              ><b
+                ><u>New Value:</u> "{{formatNewValue(prop.left_value)}}"</b
+              ></span
+            >
+            <br />
+          </p>
 
-<p ng-repeat="prop in item.properties" ng-show="!showDiffTables">
-<input type="checkbox" ng-model="prop.checked">
-<span ng-show="!prop.checked">{{ item.pathText }} <b>{{formatProperty(prop.name,item.status.toUpperCase())}}</b></span>
-<span ng-show="prop.checked" style="color: red">{{ item.pathText }} <b>{{formatProperty(prop.name,item.status.toUpperCase())}}</b></span>
-<br>
+          <table
+            border="1"
+            style="width: 100%"
+            ng-click="prop.checked = !prop.checked"
+            ng-show="item.properties == null && showDiffTables"
+          >
+            <tr>
+              <td colspan="2">
+                {{ item.pathText }}
+                <b>{{formatStatus(item.status.toUpperCase())}}</b>
+              </td>
+            </tr>
+          </table>
 
-<span ng-show="!prop.checked"><u>Source Value ({{env1}}):</u> "{{formatSourceValue(prop.left_value)}}"</span>
-<span ng-show="prop.checked" style="color: red"><u>Old Value:</u> "{{formatOldValue(prop.right_value)}}"</span>
-<br>
-<span ng-show="!prop.checked"><u>Target Value ({{env2}}):</u> "{{formatTargetValue(prop.right_value)}}"</span>
-<span ng-show="prop.checked" style="color: red"><b><u>New Value:</u> "{{formatNewValue(prop.left_value)}}"</b></span>
-<br>
-</p>
+          <div ng-repeat="prop in item.properties" ng-show="showDiffTables">
+            <table
+              border="1"
+              style="width: 100%"
+              ng-click="prop.checked = !prop.checked"
+              ng-show="!prop.checked && showDiffTables"
+            >
+              <tr>
+                <td colspan="2">
+                  {{ item.pathText }}
+                  <b>{{formatProperty(prop.name,item.status.toUpperCase())}}</b>
+                </td>
+              </tr>
+              <tr>
+                <td style="width: 160px">Source Value ({{env1}})</td>
+                <td>{{formatSourceValue(prop.left_value)}}</td>
+              </tr>
+              <tr>
+                <td style="width: 160px">Target Value ({{env2}})</td>
+                <td>{{formatTargetValue(prop.right_value)}}</td>
+              </tr>
+            </table>
 
-<table border="1" style="width: 100%" ng-click="prop.checked = !prop.checked" ng-show="item.properties == null && showDiffTables">
-<tr>
-<td colspan="2">{{ item.pathText }} <b>{{formatStatus(item.status.toUpperCase())}}</b></td>
-</tr>
-</table>
+            <table
+              bordercolor="red"
+              border="3"
+              style="width: 100%"
+              ng-click="prop.checked = !prop.checked"
+              ng-show="prop.checked && showDiffTables"
+              style="color: red"
+            >
+              <tr>
+                <td colspan="2">
+                  {{ item.pathText }}
+                  <b>{{formatProperty(prop.name,item.status.toUpperCase())}}</b>
+                </td>
+              </tr>
+              <tr>
+                <td style="width: 160px">Old Value</td>
+                <td>{{formatOldValue(prop.right_value)}}</td>
+              </tr>
+              <tr>
+                <td style="width: 160px"><b>New Value</b></td>
+                <td><b>{{formatNewValue(prop.left_value)}}</b></td>
+              </tr>
+            </table>
 
-<div ng-repeat="prop in item.properties" ng-show="showDiffTables">
-<table border="1" style="width: 100%" ng-click="prop.checked = !prop.checked" ng-show="!prop.checked && showDiffTables">
-<tr>
-<td colspan="2">{{ item.pathText }} <b>{{formatProperty(prop.name,item.status.toUpperCase())}}</b></td>
-</tr>
-<tr>
-<td style="width: 160px">Source Value ({{env1}})</td><td>{{formatSourceValue(prop.left_value)}}</td>
-</tr>
-<tr>
-<td style="width: 160px">Target Value ({{env2}})</td><td>{{formatTargetValue(prop.right_value)}}</td>
-</tr>
-</table>
-<table bordercolor="red" border="3" style="width: 100%" ng-click="prop.checked = !prop.checked" ng-show="prop.checked && showDiffTables" style="color: red">
-<tr>
-<td colspan="2">{{ item.pathText }} <b>{{formatProperty(prop.name,item.status.toUpperCase())}}</b></td>
-</tr>
-<tr>
-<td style="width: 160px">Old Value</td><td>{{formatOldValue(prop.right_value)}}</td>
-</tr>
-<tr>
-<td style="width: 160px"><b>New Value</b></td><td><b>{{formatNewValue(prop.left_value)}}</b></td>
-</tr>
-</table>
-<br>
+            <br />
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <!-- <center><button id="diffApplyButtonAPP" class="SmartSearch-keyToggle btn" ng-click="diffApply()" ng-show="compareData != null">Apply</button></center> -->
+  <br />
 </div>
 
+<div
+  ng-show="diffView==='DOMAIN_CFG' && compareData != null"
+  class="DashboardGraphs"
+>
+  <div>
+    <ul
+      ng-repeat="x in compareData.DOMAIN_CFG.data track by $index"
+      ng-hide="(x.diff === null || x.diff === 'incompatible') && showDiffOnly"
+    >
+      <hr />
+      <li>
+        <h5><b>{{ x.config }}</b></h5>
+        <br />
+
+        <p ng-show="x.diff === 'incompatible'" style="color: red">
+          INCOMPATIBLE
+        </p>
+
+        <div ng-repeat="item in x.diff">
+          <span ng-show="item.properties == null && !showDiffTables"
+            >{{ item.pathText }}
+            <b> ({{formatStatus(item.status.toUpperCase())}})</b></span
+          >
+          <br /><br />
+
+          <p ng-repeat="prop in item.properties" ng-show="!showDiffTables">
+            <input type="checkbox" ng-model="prop.checked" />
+            <span ng-show="!prop.checked"
+              >{{ item.pathText }}
+              <b
+                >{{formatProperty(prop.name,item.status.toUpperCase())}}</b
+              ></span
+            >
+            <span ng-show="prop.checked" style="color: red"
+              >{{ item.pathText }}
+              <b
+                >{{formatProperty(prop.name,item.status.toUpperCase())}}</b
+              ></span
+            >
+            <br />
+
+            <span ng-show="!prop.checked"
+              ><u>Source Value ({{env1}}):</u>
+              "{{formatSourceValue(prop.left_value)}}"</span
+            >
+            <span ng-show="prop.checked" style="color: red"
+              ><u>Old Value:</u> "{{formatOldValue(prop.right_value)}}"</span
+            >
+            <br />
+            <span ng-show="!prop.checked"
+              ><u>Target Value ({{env2}}):</u>
+              "{{formatTargetValue(prop.right_value)}}"</span
+            >
+            <span ng-show="prop.checked" style="color: red"
+              ><b
+                ><u>New Value:</u> "{{formatNewValue(prop.left_value)}}"</b
+              ></span
+            >
+            <br />
+          </p>
+
+          <table
+            border="1"
+            style="width: 100%"
+            ng-click="prop.checked = !prop.checked"
+            ng-show="item.properties == null && showDiffTables"
+          >
+            <tr>
+              <td colspan="2">
+                {{ item.pathText }}
+                <b>{{formatStatus(item.status.toUpperCase())}}</b>
+              </td>
+            </tr>
+          </table>
+
+          <div ng-repeat="prop in item.properties" ng-show="showDiffTables">
+            <table
+              border="1"
+              style="width: 100%"
+              ng-click="prop.checked = !prop.checked"
+              ng-show="!prop.checked && showDiffTables"
+            >
+              <tr>
+                <td colspan="2">
+                  {{ item.pathText }}
+                  <b>{{formatProperty(prop.name,item.status.toUpperCase())}}</b>
+                </td>
+              </tr>
+              <tr>
+                <td style="width: 160px">Source Value ({{env1}})</td>
+                <td>{{formatSourceValue(prop.left_value)}}</td>
+              </tr>
+              <tr>
+                <td style="width: 160px">Target Value ({{env2}})</td>
+                <td>{{formatTargetValue(prop.right_value)}}</td>
+              </tr>
+            </table>
+
+            <table
+              bordercolor="red"
+              border="3"
+              style="width: 100%"
+              ng-click="prop.checked = !prop.checked"
+              ng-show="prop.checked && showDiffTables"
+              style="color: red"
+            >
+              <tr>
+                <td colspan="2">
+                  {{ item.pathText }}
+                  <b>{{formatProperty(prop.name,item.status.toUpperCase())}}</b>
+                </td>
+              </tr>
+              <tr>
+                <td style="width: 160px">Old Value</td>
+                <td>{{formatOldValue(prop.right_value)}}</td>
+              </tr>
+              <tr>
+                <td style="width: 160px"><b>New Value</b></td>
+                <td><b>{{formatNewValue(prop.left_value)}}</b></td>
+              </tr>
+            </table>
+
+            <br />
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <center>
+    <button
+      id="diffApplyButtonDOMAIN"
+      class="SmartSearch-keyToggle btn"
+      ng-click="diffApply()"
+      ng-show="compareData != null"
+    >
+      Apply
+    </button>
+  </center>
+  <br />
 </div>
-</li>
-</ul>
+
+<div
+  ng-show="diffView==='SOACONFIG' && compareData != null"
+  class="DashboardGraphs"
+>
+  <div>
+    <ul
+      ng-repeat="x in compareData.SOACONFIG.data track by $index"
+      ng-hide="(x.diff === null || x.diff === 'incompatible') && showDiffOnly"
+    >
+      <hr />
+      <li>
+        <h5><b>{{ x.config }}</b></h5>
+        <br />
+
+        <p ng-show="x.diff === 'incompatible'" style="color: red">
+          INCOMPATIBLE
+        </p>
+
+        <div ng-repeat="item in x.diff">
+          <span ng-show="item.properties == null && !showDiffTables"
+            >{{ item.pathText }}
+            <b> {{formatStatus(item.status.toUpperCase())}}</b></span
+          >
+          <br /><br />
+
+          <p ng-repeat="prop in item.properties" ng-show="!showDiffTables">
+            <input type="checkbox" ng-model="prop.checked" />
+            <span ng-show="!prop.checked"
+              >{{ item.pathText }}
+              <b
+                >{{formatProperty(prop.name,item.status.toUpperCase())}}</b
+              ></span
+            >
+            <span ng-show="prop.checked" style="color: red"
+              >{{ item.pathText }}
+              <b
+                >{{formatProperty(prop.name,item.status.toUpperCase())}}</b
+              ></span
+            >
+            <br />
+
+            <span ng-show="!prop.checked"
+              ><u>Source Value({{env1}}):</u>
+              "{{formatSourceValue(prop.left_value)}}"</span
+            >
+            <span ng-show="prop.checked" style="color: red"
+              ><u>Old Value:</u> "{{formatOldValue(prop.right_value)}}"</span
+            >
+            <br />
+            <span ng-show="!prop.checked"
+              ><u>Target Value({{env2}}):</u>
+              "{{formatTargetValue(prop.right_value)}}"</span
+            >
+            <span ng-show="prop.checked" style="color: red"
+              ><b
+                ><u>New Value:</u> "{{formatNewValue(prop.left_value)}}"</b
+              ></span
+            >
+            <br />
+          </p>
+
+          <table
+            border="1"
+            style="width: 100%"
+            ng-show="item.properties == null && showDiffTables"
+          >
+            <tr>
+              <td colspan="2">
+                {{ item.pathText }}
+                <b>{{formatStatus(item.status.toUpperCase())}}</b>
+              </td>
+            </tr>
+          </table>
+
+          <div ng-repeat="prop in item.properties" ng-show="showDiffTables">
+            <table
+              border="1"
+              style="width: 100%"
+              ng-click="prop.checked = !prop.checked"
+              ng-show="!prop.checked && showDiffTables"
+            >
+              <tr>
+                <td colspan="2">
+                  {{ item.pathText }}
+                  <b>{{formatProperty(prop.name,item.status.toUpperCase())}}</b>
+                </td>
+              </tr>
+              <tr>
+                <td style="width: 160px">Source Value ({{env1}})</td>
+                <td>{{formatSourceValue(prop.left_value)}}</td>
+              </tr>
+              <tr>
+                <td style="width: 160px">Target Value ({{env2}})</td>
+                <td>{{formatTargetValue(prop.right_value)}}</td>
+              </tr>
+            </table>
+
+            <table
+              bordercolor="red"
+              border="3"
+              style="width: 100%"
+              ng-click="prop.checked = !prop.checked"
+              ng-show="prop.checked && showDiffTables"
+              style="color: red"
+            >
+              <tr>
+                <td colspan="2">
+                  {{ item.pathText }}
+                  <b>{{formatProperty(prop.name,item.status.toUpperCase())}}</b>
+                </td>
+              </tr>
+              <tr>
+                <td style="width: 160px">Old Value</td>
+                <td>{{formatOldValue(prop.right_value)}}</td>
+              </tr>
+              <tr>
+                <td style="width: 160px"><b>New Value</b></td>
+                <td><b>{{formatNewValue(prop.left_value)}}</b></td>
+              </tr>
+            </table>
+
+            <br />
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <center>
+    <button
+      id="diffApplyButtonSOA"
+      class="SmartSearch-keyToggle btn"
+      ng-click="diffApply()"
+      ng-show="compareData != null"
+    >
+      Apply
+    </button>
+  </center>
+  <br />
 </div>
-<!-- <center><button id="diffApplyButtonAPP" class="SmartSearch-keyToggle btn" ng-click="diffApply()" ng-show="compareData != null">Apply</button></center> -->
-<br>
-</div>
 
-<div ng-show="diffView==='DOMAIN_CFG' && compareData != null" class="DashboardGraphs">
-
-<div>
-<ul ng-repeat="x in compareData.DOMAIN_CFG.data track by $index" ng-hide="(x.diff === null || x.diff === 'incompatible') && showDiffOnly">
-<hr>
-<li>
-<h5><b>{{ x.config }}</b></h5>
-<br>
-
-<p ng-show="x.diff === 'incompatible'" style="color: red">INCOMPATIBLE</p>
-
-<div ng-repeat="item in x.diff">
-
-<span ng-show="item.properties == null && !showDiffTables">{{ item.pathText }} <b> ({{formatStatus(item.status.toUpperCase())}})</b></span>
-<br><br>
-
-
-<p ng-repeat="prop in item.properties" ng-show="!showDiffTables">
-<input type="checkbox" ng-model="prop.checked">
-<span ng-show="!prop.checked">{{ item.pathText }} <b>{{formatProperty(prop.name,item.status.toUpperCase())}}</b></span>
-<span ng-show="prop.checked" style="color: red">{{ item.pathText }} <b>{{formatProperty(prop.name,item.status.toUpperCase())}}</b></span>
-<br>
-
-<span ng-show="!prop.checked"><u>Source Value ({{env1}}):</u> "{{formatSourceValue(prop.left_value)}}"</span>
-<span ng-show="prop.checked" style="color: red"><u>Old Value:</u> "{{formatOldValue(prop.right_value)}}"</span>
-<br>
-<span ng-show="!prop.checked"><u>Target Value ({{env2}}):</u> "{{formatTargetValue(prop.right_value)}}"</span>
-<span ng-show="prop.checked" style="color: red"><b><u>New Value:</u> "{{formatNewValue(prop.left_value)}}"</b></span>
-<br>
-</p>
-
-<table border="1" style="width: 100%" ng-click="prop.checked = !prop.checked" ng-show="item.properties == null && showDiffTables">
-<tr>
-<td colspan="2">{{ item.pathText }} <b>{{formatStatus(item.status.toUpperCase())}}</b></td>
-</tr>
-</table>
-
-<div ng-repeat="prop in item.properties" ng-show="showDiffTables">
-<table border="1" style="width: 100%" ng-click="prop.checked = !prop.checked" ng-show="!prop.checked && showDiffTables">
-<tr>
-<td colspan="2">{{ item.pathText }} <b>{{formatProperty(prop.name,item.status.toUpperCase())}}</b></td>
-</tr>
-<tr>
-<td style="width: 160px">Source Value ({{env1}})</td><td>{{formatSourceValue(prop.left_value)}}</td>
-</tr>
-<tr>
-<td style="width: 160px">Target Value ({{env2}})</td><td>{{formatTargetValue(prop.right_value)}}</td>
-</tr>
-</table>
-<table bordercolor="red" border="3" style="width: 100%" ng-click="prop.checked = !prop.checked" ng-show="prop.checked && showDiffTables" style="color: red">
-<tr>
-<td colspan="2">{{ item.pathText }} <b>{{formatProperty(prop.name,item.status.toUpperCase())}}</b></td>
-</tr>
-<tr>
-<td style="width: 160px">Old Value</td><td>{{formatOldValue(prop.right_value)}}</td>
-</tr>
-<tr>
-<td style="width: 160px"><b>New Value</b></td><td><b>{{formatNewValue(prop.left_value)}}</b></td>
-</tr>
-</table>
-<br>
-</div>
-
-</div>
-</li>
-</ul>
-</div>
-<center><button id="diffApplyButtonDOMAIN" class="SmartSearch-keyToggle btn" ng-click="diffApply()" ng-show="compareData != null">Apply</button></center>
-<br>
-</div>
-
-<div ng-show="diffView==='SOACONFIG' && compareData != null" class="DashboardGraphs">
-
-<div>
-<ul ng-repeat="x in compareData.SOACONFIG.data track by $index" ng-hide="(x.diff === null || x.diff === 'incompatible') && showDiffOnly">
-<hr>
-<li>
-<h5><b>{{ x.config }}</b></h5>
-<br>
-
-<p ng-show="x.diff === 'incompatible'" style="color: red">INCOMPATIBLE</p>
-
-<div ng-repeat="item in x.diff">
-
-<span ng-show="item.properties == null && !showDiffTables">{{ item.pathText }} <b> {{formatStatus(item.status.toUpperCase())}}</b></span>
-<br><br>
-
-<p ng-repeat="prop in item.properties" ng-show="!showDiffTables">
-
-<input type="checkbox" ng-model="prop.checked">
-<span ng-show="!prop.checked">{{ item.pathText }} <b>{{formatProperty(prop.name,item.status.toUpperCase())}}</b></span>
-<span ng-show="prop.checked" style="color: red">{{ item.pathText }} <b>{{formatProperty(prop.name,item.status.toUpperCase())}}</b></span>
-<br>
-
-<span ng-show="!prop.checked"><u>Source Value({{env1}}):</u> "{{formatSourceValue(prop.left_value)}}"</span>
-<span ng-show="prop.checked" style="color: red"><u>Old Value:</u> "{{formatOldValue(prop.right_value)}}"</span>
-<br>
-<span ng-show="!prop.checked"><u>Target Value({{env2}}):</u> "{{formatTargetValue(prop.right_value)}}"</span>
-<span ng-show="prop.checked" style="color: red"><b><u>New Value:</u> "{{formatNewValue(prop.left_value)}}"</b></span>
-<br>
-</p>
-
-<table border="1" style="width: 100%" ng-show="item.properties == null && showDiffTables">
-<tr>
-<td colspan="2">{{ item.pathText }} <b>{{formatStatus(item.status.toUpperCase())}}</b></td>
-</tr>
-</table>
-
-<div ng-repeat="prop in item.properties" ng-show="showDiffTables">
-<table border="1" style="width: 100%" ng-click="prop.checked = !prop.checked" ng-show="!prop.checked && showDiffTables">
-<tr>
-<td colspan="2">{{ item.pathText }} <b>{{formatProperty(prop.name,item.status.toUpperCase())}}</b></td>
-</tr>
-<tr>
-<td style="width: 160px">Source Value ({{env1}})</td><td>{{formatSourceValue(prop.left_value)}}</td>
-</tr>
-<tr>
-<td style="width: 160px">Target Value ({{env2}})</td><td>{{formatTargetValue(prop.right_value)}}</td>
-</tr>
-</table>
-<table bordercolor="red" border="3" style="width: 100%" ng-click="prop.checked = !prop.checked" ng-show="prop.checked && showDiffTables" style="color: red">
-<tr>
-<td colspan="2">{{ item.pathText }} <b>{{formatProperty(prop.name,item.status.toUpperCase())}}</b></td>
-</tr>
-<tr>
-<td style="width: 160px">Old Value</td><td>{{formatOldValue(prop.right_value)}}</td>
-</tr>
-<tr>
-<td style="width: 160px"><b>New Value</b></td><td><b>{{formatNewValue(prop.left_value)}}</b></td>
-</tr>
-</table>
-<br>
-</div>
-
-</div>
-</li>
-</ul>
-</div>
-<center><button id="diffApplyButtonSOA" class="SmartSearch-keyToggle btn" ng-click="diffApply()" ng-show="compareData != null">Apply</button></center>
-<br>
-</div>        
-
-<div ng-show="diffView==='FMW_PATCH' && compareData != null" class="DashboardGraphs">
-<div>
-Description:
-<pre style="background-color: #FCFCFC; width:100%">
+<div
+  ng-show="diffView==='FMW_PATCH' && compareData != null"
+  class="DashboardGraphs"
+>
+  <div>
+    Description:
+    <pre style="background-color: #FCFCFC; width:100%">
 <!-- <div style="width:100%; border: 1px black" > -->
 <span style="background-color:red; color: white; width: 100%; ">Value</span><span style="background-color:#FCFCFC" > - Removed Line</span>
 <span style="background-color:green; color: white" >Value</span><span style="background-color:#FCFCFC" > - Added Line</span>
 <span style="background-color:#FCFCFC" >Value - Same Line</span>
 <!-- </div> -->
-</pre>                        
-</div>    
-<div ng-repeat="f in compareData.FMW_PATCH.data">
-<ul>
-<hr>
-<li><h5><b>{{ f.file }}</b></h5>
-<br>
-<span ng-show="f.left_content === null && f.right_content === null">Различий нет</span>
-<pre ng-show="f.left_content != null || f.right_content != null" style="background-color: #FCFCFC; width:100%"><div style="width:100%" ng-repeat="line in f.diff_lines"><span style="background-color:red; color: white; width: 100%" ng-if="line.removed">{{line.value}}</span><span style="background-color:green; color: white" ng-if="line.added">{{line.value}}</span><span style="background-color:#FCFCFC" ng-if="!line.added && !line.removed">{{line.value}}</span></div></pre>
-</li>
-</ul>
-</div>
-<pre id="diffResult"></pre>
+</pre>
+  </div>
+  <div ng-repeat="f in compareData.FMW_PATCH.data">
+    <ul>
+      <hr />
+      <li>
+        <h5><b>{{ f.file }}</b></h5>
+        <br />
+        <span ng-show="f.left_content === null && f.right_content === null"
+          >Различий нет</span
+        >
+        <pre
+          ng-show="f.left_content != null || f.right_content != null"
+          style="background-color: #FCFCFC; width:100%"
+        ><div style="width:100%" ng-repeat="line in f.diff_lines"><span style="background-color:red; color: white; width: 100%" ng-if="line.removed">{{line.value}}</span><span style="background-color:green; color: white" ng-if="line.added">{{line.value}}</span><span style="background-color:#FCFCFC" ng-if="!line.added && !line.removed">{{line.value}}</span></div></pre>
+      </li>
+    </ul>
+  </div>
+  <pre id="diffResult"></pre>
 </div>
 
-<div ng-show="diffView==='DATABASE_CFG' && compareData != null" class="DashboardGraphs">
-<div>
-Description:
-<pre style="background-color: #FCFCFC; width:100%">
+<div
+  ng-show="diffView==='DATABASE_CFG' && compareData != null"
+  class="DashboardGraphs"
+>
+  <div>
+    Description:
+    <pre style="background-color: #FCFCFC; width:100%">
 <!-- <div style="width:100%; border: 1px black" > -->
 <span style="background-color:red; color: white; width: 100%; ">Value</span><span style="background-color:#FCFCFC" > - Removed Line</span>
 <span style="background-color:green; color: white" >Value</span><span style="background-color:#FCFCFC" > - Added Line</span>
 <span style="background-color:#FCFCFC" >Value - Same Line</span>
 <!-- </div> -->
-</pre>                        
-</div>    
+</pre>
+  </div>
 
-<div ng-repeat="f in compareData.DATABASE_CFG.data">
-<ul>
-<hr>
-<li><h5><b>{{ f.file }}</b></h5>
-<br>
-<span ng-show="f.left_content === null && f.right_content === null">Различий нет</span>
-<pre ng-show="f.left_content != null || f.right_content != null" style="background-color: #FCFCFC; width:100%"><div style="width:100%" ng-repeat="line in f.diff_lines"><span style="background-color:red; color: white; width: 100%" ng-if="line.removed">{{line.value}}</span><span style="background-color:green; color: white; " ng-if="line.added">{{line.value}}</span><span style="background-color:#FCFCFC" ng-if="!line.added && !line.removed">{{line.value}}</span></div></pre>
-</li>
-</ul>
-</div>
-<pre id="diffResult"></pre>
+  <div ng-repeat="f in compareData.DATABASE_CFG.data">
+    <ul>
+      <hr />
+      <li>
+        <h5><b>{{ f.file }}</b></h5>
+        <br />
+        <span ng-show="f.left_content === null && f.right_content === null"
+          >Различий нет</span
+        >
+        <pre
+          ng-show="f.left_content != null || f.right_content != null"
+          style="background-color: #FCFCFC; width:100%"
+        ><div style="width:100%" ng-repeat="line in f.diff_lines"><span style="background-color:red; color: white; width: 100%" ng-if="line.removed">{{line.value}}</span><span style="background-color:green; color: white; " ng-if="line.added">{{line.value}}</span><span style="background-color:#FCFCFC" ng-if="!line.added && !line.removed">{{line.value}}</span></div></pre>
+      </li>
+    </ul>
+  </div>
+  <pre id="diffResult"></pre>
 </div>
 
-<div ng-show="diffView==='OS_CFG' && compareData != null" class="DashboardGraphs">
-<div>
-Description:
-<pre style="background-color: #FCFCFC; width:100%">
+<div
+  ng-show="diffView==='OS_CFG' && compareData != null"
+  class="DashboardGraphs"
+>
+  <div>
+    Description:
+    <pre style="background-color: #FCFCFC; width:100%">
 <!-- <div style="width:100%; border: 1px black" > -->
 <span style="background-color:red; color: white; width: 100%; ">Value</span><span style="background-color:#FCFCFC" > - Removed Line</span>
 <span style="background-color:green; color: white" >Value</span><span style="background-color:#FCFCFC" > - Added Line</span>
 <span style="background-color:#FCFCFC" >Value - Same Line</span>
 <!-- </div> -->
-</pre>                        
-</div>    
+</pre>
+  </div>
 
-<h4 ng-show="compareData != null">Source Environment</h4>
-<div ng-repeat="f1 in compareData.OS_CFG.left">
-<ul>
-<hr>
-<li><h5><b>{{ f1.host }}</b></h5>
-<br>
+  <h4 ng-show="compareData != null">Source Environment</h4>
+  <div ng-repeat="f1 in compareData.OS_CFG.left">
+    <ul>
+      <hr />
+      <li>
+        <h5><b>{{ f1.host }}</b></h5>
+        <br />
 
-<div ng-repeat="data1 in f1.diff.data">
-<b><u><h6>{{data1.file}}:</h6></u></b>
-<div><span ng-show="data1.left_content === null && data1.right_content === null">Различий нет</span></div>
-<pre ng-show="data1.left_content != null || data1.right_content != null" style="background-color: #FCFCFC; width:100%"><div style="width:100%" ng-repeat="line in data1.diff_lines"><span style="background-color:red; color: white; width: 100%" ng-if="line.removed">{{line.value}}</span><span style="background-color:green; color: white" ng-if="line.added">{{line.value}}</span><span style="background-color:#FCFCFC" ng-if="!line.added && !line.removed">{{line.value}}</span></div></pre>
-<br>
-</div>
-
-</li>
-</ul>
-</div>
-<h4 ng-show="compareData != null">Target Environment</h4>
-<div ng-repeat="f2 in compareData.OS_CFG.right">
-<ul>
-<hr>
-<li><h5><b>{{ f2.host }}</b></h5>
-<br>
-<div ng-repeat="data2 in f2.diff.data">
-<b><u><h6>{{data2.file}}:</h6></u></b>
-<div><span ng-show="data2.left_content === null && data2.right_content === null">Различий нет</span></div>
-<pre ng-show="data2.left_content != null || data2.right_content != null" style="background-color: #FCFCFC; width:100%"><div style="width:100%" ng-repeat="line in data2.diff_lines"><span style="background-color:red; color: white; width: 100%" ng-if="line.removed">{{line.value}}</span><span style="background-color:green; color: white" ng-if="line.added">{{line.value}}</span><span style="background-color:#FCFCFC" ng-if="!line.added && !line.removed">{{line.value}}</span></div></pre>
-<br>
-</div>
-
-</li>
-</ul>
-</div>
+        <div ng-repeat="data1 in f1.diff.data">
+          <b
+            ><u><h6>{{data1.file}}:</h6></u></b
+          >
+          <div>
+            <span
+              ng-show="data1.left_content === null && data1.right_content === null"
+              >Различий нет</span
+            >
+          </div>
+          <pre
+            ng-show="data1.left_content != null || data1.right_content != null"
+            style="background-color: #FCFCFC; width:100%"
+          ><div style="width:100%" ng-repeat="line in data1.diff_lines"><span style="background-color:red; color: white; width: 100%" ng-if="line.removed">{{line.value}}</span><span style="background-color:green; color: white" ng-if="line.added">{{line.value}}</span><span style="background-color:#FCFCFC" ng-if="!line.added && !line.removed">{{line.value}}</span></div></pre>
+          <br />
+        </div>
+      </li>
+    </ul>
+  </div>
+  <h4 ng-show="compareData != null">Target Environment</h4>
+  <div ng-repeat="f2 in compareData.OS_CFG.right">
+    <ul>
+      <hr />
+      <li>
+        <h5><b>{{ f2.host }}</b></h5>
+        <br />
+        <div ng-repeat="data2 in f2.diff.data">
+          <b
+            ><u><h6>{{data2.file}}:</h6></u></b
+          >
+          <div>
+            <span
+              ng-show="data2.left_content === null && data2.right_content === null"
+              >Различий нет</span
+            >
+          </div>
+          <pre
+            ng-show="data2.left_content != null || data2.right_content != null"
+            style="background-color: #FCFCFC; width:100%"
+          ><div style="width:100%" ng-repeat="line in data2.diff_lines"><span style="background-color:red; color: white; width: 100%" ng-if="line.removed">{{line.value}}</span><span style="background-color:green; color: white" ng-if="line.added">{{line.value}}</span><span style="background-color:#FCFCFC" ng-if="!line.added && !line.removed">{{line.value}}</span></div></pre>
+          <br />
+        </div>
+      </li>
+    </ul>
+  </div>
 </div>

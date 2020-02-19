@@ -42,7 +42,7 @@ class DiffView(View):
 
     def get(self, request, *args, **kwargs):
         path = AWX_API_PATH           
-        if request.GET['isnode'] != 'development':
+        if request.GET['isnode'] == 'production':
             path = 'http://localhost'
         jobLaunchResponse = requests.post(path + '/api/v2/job_templates/10/launch/', json={
             'extra_vars': {
