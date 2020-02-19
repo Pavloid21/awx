@@ -142,7 +142,7 @@ $scope.compareData = response.data.compare.results.find((res, index) => {
     if (res.task === 'compare v_one and v_two' && res.event_data.res) return JSON.parse(res.event_data.res.stdout);
 });
 $scope.final = JSON.parse($scope.compareData.event_data.res.stdout)
-console.log($scope.final)
+
 // $scope.diffErrorMessage = null;
 // $scope.disabledEnvironments = $scope.compareData.rw_environments;
 // $scope.compareData.APP_CFG.data.forEach(element => {

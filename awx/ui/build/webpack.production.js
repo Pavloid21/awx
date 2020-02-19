@@ -17,12 +17,7 @@ const production = {
             compress: true,
             mangle: false
         }),
-        new webpack.DefinePlugin({
-            'process.env': {
-                NODE_ENV: JSON.stringify('production')
-            }
-        })
     ]
 };
 
-module.exports = merge(base, production);
+module.exports = (env) => merge(base(env), production);

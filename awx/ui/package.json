@@ -28,9 +28,9 @@
     "headless-e2e": "./test/e2e/runner.js --config ./test/e2e/nightwatch.conf.js --env headless --suiteRetries=2",
     "unit": "karma start test/unit/karma.unit.js",
     "lint": "eslint .",
-    "dev": "webpack --config build/webpack.development.js --progress",
-    "watch": "webpack-dev-server --config build/webpack.watch.js --progress --https",
-    "production": "webpack --config build/webpack.production.js",
+    "dev": "NODE_ENV=development webpack --config build/webpack.development.js --env.NODE_ENV=development --progress",
+    "watch": "NODE_ENV=development webpack-dev-server --config build/webpack.watch.js --env.NODE_ENV=development --progress --https",
+    "production": "NODE_ENV=production webpack --config build/webpack.production.js --env.NODE_ENV=production",
     "grab-licenses": "./utils/get_licenses.js",
     "pre-check": "npm run lint && npm run jshint && npm run unit && npm run test"
   },

@@ -6,4 +6,6 @@ const development = {
     devtool: 'source-map'
 };
 
-module.exports = merge(base, development);
+module.exports = (env) => {
+    return merge(base(env), development);
+}
