@@ -12,7 +12,7 @@ export default [
     $("#diffCompareButton").css("cursor", "not-allowed");
 
     $scope.diffView = "APP_CFG";
-    console.log(process.env.NODE_ENV);
+    // console.log(process.env.NODE_ENV);
 
     //$http({method: 'GET', url: '/environments.j
     $http({ method: "GET", url: "/diff/environments/" }).then(

@@ -21,7 +21,7 @@ from django.core.exceptions import PermissionDenied
 
 
 REPO_PATH = 'http://172.19.19.31/api/v4/projects'
-AWX_API_PATH = 'http://172.19.19.231'
+AWX_API_PATH = 'http://localhost'
 
 
 class EnvironmentList(View):
