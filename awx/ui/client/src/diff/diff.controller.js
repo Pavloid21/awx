@@ -90,15 +90,15 @@ export default [
             Wait("stop");
           }
         );
-        if ($scope.isDisabledEnvironment($scope.env2)) {
-          $("#diffApplyButtonAPP").css("cursor", "not-allowed");
-          $("#diffApplyButtonDOMAIN").css("cursor", "not-allowed");
-          $("#diffApplyButtonSOA").css("cursor", "not-allowed");
-        } else {
-          $("#diffApplyButtonAPP").css("cursor", "pointer");
-          $("#diffApplyButtonDOMAIN").css("cursor", "pointer");
-          $("#diffApplyButtonSOA").css("cursor", "pointer");
-        }
+        // if ($scope.isDisabledEnvironment($scope.env2)) {
+        //   $("#diffApplyButtonAPP").css("cursor", "not-allowed");
+        //   $("#diffApplyButtonDOMAIN").css("cursor", "not-allowed");
+        //   $("#diffApplyButtonSOA").css("cursor", "not-allowed");
+        // } else {
+        //   $("#diffApplyButtonAPP").css("cursor", "pointer");
+        //   $("#diffApplyButtonDOMAIN").css("cursor", "pointer");
+        //   $("#diffApplyButtonSOA").css("cursor", "pointer");
+        // }
       }
     };
 
@@ -534,16 +534,16 @@ export default [
       }
     };
 
-    $scope.isDisabledEnvironment = function(env) {
-      var disabledEnvironments = $scope.disabledEnvironments;
-      var testDisabledEnv2 = false;
-      disabledEnvironments.forEach(element => {
-        if (env === element) {
-          testDisabledEnv2 = true;
-        }
-      });
-      return testDisabledEnv2;
-    };
+    // $scope.isDisabledEnvironment = function(env) {
+    //   var disabledEnvironments = $scope.disabledEnvironments;
+    //   var testDisabledEnv2 = false;
+    //   disabledEnvironments.forEach(element => {
+    //     if (env === element) {
+    //       testDisabledEnv2 = true;
+    //     }
+    //   });
+    //   return testDisabledEnv2;
+    // };
 
     //     var msgToSend = {};
     //     msgToSend.commit_id = $scope.env2Version;
