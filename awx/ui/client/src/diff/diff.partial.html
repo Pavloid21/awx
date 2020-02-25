@@ -30,7 +30,7 @@
     ng-model="env1VersionChoosen"
     ng-change="setVersionEnv1()"
   >
-    <option ng-repeat="env1version in env1Versions track by $index"
+    <option ng-repeat="env1version in env1Versions track by $index" ng-hide="env1version.name === env2Version.name"
       >{{env1version.name}}</option
     >
   </select>
@@ -51,7 +51,7 @@
     ng-model="env2VersionChoosen"
     ng-change="setVersionEnv2()"
   >
-    <option ng-repeat="env2version in env2Versions track by $index"
+    <option ng-repeat="env2version in env2Versions track by $index" ng-hide="env2version.name === env1Version.name"
       >{{env2version.name}}</option
     >
   </select>
