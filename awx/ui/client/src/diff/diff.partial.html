@@ -6,69 +6,124 @@
 </div> -->
 
 <div class="DashboardGraphs">
-  <!-- <div class="btn-group" style="position: absolute; right: 35px;">
-<button id="diffAppButton" class="btn btn-xs btn-primary" ng-click="diffSwitchView('APP_CFG')">APP</button>
-<button id="diffDomainButton" class="btn btn-xs Button-primary--hollow" ng-click="diffSwitchView('DOMAIN_CFG')">DOMAIN</button>
-<button id="diffSoaConfigButton" class="btn btn-xs Button-primary--hollow" ng-click="diffSwitchView('SOACONFIG')">SOA</button>
-<button id="diffFmwButton" class="btn btn-xs Button-primary--hollow" ng-click="diffSwitchView('FMW_PATCH')">FMW Patches</button>
-<button id="diffDatabaseButton" class="btn btn-xs Button-primary--hollow" ng-click="diffSwitchView('DATABASE_CFG')">DATABASE</button>
-<button id="diffOSButton" class="btn btn-xs Button-primary--hollow" ng-click="diffSwitchView('OS_CFG')">OS</button>
-</div> -->
+  <div class="box">
+    <div>
+      <p>Source Environment:</p>
+      <select style="width: 170px" ng-model="env1" ng-change="getDataEnv1()">
+        <option
+          ng-repeat="env1option in diffEnvironments.versions"
+          ng-value="env1option.id"
+          >{{env1option.name}}</option
+        >
+      </select>
+      <!-- {{env1}} -->
+  
+      <!-- <select
+        style="width: 170px"
+        ng-model="env1VersionChoosen"
+        ng-change="setVersionEnv1()"
+      >
+        <option ng-repeat="env1version in env1Versions track by $index" ng-hide="env1version.name === env2Version.name"
+          >{{env1version.name}}</option
+        >
+      </select> -->
+    </div>
+    <div>
+      <p>Target Environment:</p>
+      <select style="width: 170px" ng-model="env2" ng-change="getDataEnv2()">
+        <option
+          ng-repeat="env2option in diffEnvironments.versions"
+          ng-value="env2option.id"
+          >{{env2option.name}}</option
+        >
+      </select>
+      <!-- {{env2}} -->
 
-  Source Environment
-  <select style="width: 70px" ng-model="env1" ng-change="getDataEnv1()">
-    <option
-      ng-repeat="env1option in diffEnvironments.versions"
-      ng-value="env1option.id"
-      >{{env1option.name}}</option
-    >
-  </select>
-  <!-- {{env1}} -->
+      <!-- <select
+        style="width: 170px"
+        ng-model="env2VersionChoosen"
+        ng-change="setVersionEnv2()"
+      >
+        <option ng-repeat="env2version in env2Versions track by $index" ng-hide="env2version.name === env1Version.name"
+          >{{env2version.name}}</option
+        >
+      </select> -->
+    </div>
 
-  <select
-    style="width: 170px"
-    ng-model="env1VersionChoosen"
-    ng-change="setVersionEnv1()"
-  >
-    <option ng-repeat="env1version in env1Versions track by $index" ng-hide="env1version.name === env2Version.name"
-      >{{env1version.name}}</option
-    >
-  </select>
-  <br />
-  <!-- <br>{{env1VersionChoosen}}<br>{{env1Version}}<br> -->
-  Target Environment
-  <select style="width: 70px" ng-model="env2" ng-change="getDataEnv2()">
-    <option
-      ng-repeat="env2option in diffEnvironments.versions"
-      ng-value="env2option.id"
-      >{{env2option.name}}</option
-    >
-  </select>
-  <!-- {{env2}} -->
-
-  <select
-    style="width: 170px"
-    ng-model="env2VersionChoosen"
-    ng-change="setVersionEnv2()"
-  >
-    <option ng-repeat="env2version in env2Versions track by $index" ng-hide="env2version.name === env1Version.name"
-      >{{env2version.name}}</option
-    >
-  </select>
+    <!-- <br>{{env1VersionChoosen}}<br>{{env1Version}}<br> -->
+  </div>
   <!-- <br>{{env2VersionChoosen}}<br>{{env2Version}}<br> -->
 
-  <button
-    id="diffCompareButton"
-    class="SmartSearch-keyToggle btn"
-    ng-click="compare()"
-  >
-    Compare
-  </button>
-  <br />
+  <div>
+
+  </div>
+
+  <div class="box">
+    <button
+      id="diffCompareButton"
+      class="SmartSearch-keyToggle btn"
+      ng-click="compare()"
+    >
+      Compare
+    </button>
+  </div>
+
+  <div class="box" ng-hide="diffView==='APP_CFG' && compareData != null">
+    <div>
+      <div ng-repeat="env1version in env1Versions track by $index" ng-hide="env1version.name === env2Version.name">
+        <input type="radio" ng-value="env1version.name" name="env1" ng-model="$parent.env1VersionChoosen" ng-change="setVersionEnv1()"/>
+        <label for="env1version.name">{{env1version.name}}</label>
+        <div>
+          <p class="commit_date" ng-bind="env1version.commit.committed_date | date:'dd-MM-yyyy HH:mm'"></p>
+          <div class="commit_info">
+            <p>{{env1version.target}}</p>
+            <p><i class="fa fa-user"></i> {{env1version.commit.committer_name}}</p>
+            <p><i class="fa fa-envelope"></i> {{env1version.commit.committer_email}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <form ng-model="env2VersionChoosen" ng-change="setVersionEnv2()">
+        <div ng-repeat="env2version in env2Versions track by $index" ng-hide="env2version.name === env1Version.name">
+          <input type="radio" ng-value="env2version.name" name="env2" ng-model="$parent.env2VersionChoosen" ng-change="setVersionEnv2()"/>
+          <label for="env1version.name">{{env2version.name}}</label>
+          <div>
+            <p class="commit_date" ng-bind="env2version.commit.committed_date | date:'dd-MM-yyyy HH:mm'"></p>
+            <div class="commit_info">
+              <p>{{env2version.target}}</p>
+              <p><i class="fa fa-user"></i> {{env2version.commit.committer_name}}</p>
+              <p><i class="fa fa-envelope"></i> {{env2version.commit.committer_email}}</p>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="box" ng-show="diffView==='APP_CFG' && compareData != null">
+    <div>
+      <p><strong>{{env1Version.name}}</strong></p>
+      <p class="commit_date" ng-bind="env1Version.commit.committed_date | date:'dd-MM-yyyy HH:mm'"></p>
+      <div class="commit_info">
+        <p>{{env1Version.target}}</p>
+        <p><i class="fa fa-user"></i> {{env1Version.commit.committer_name}}</p>
+        <p><i class="fa fa-envelope"></i> {{env1Version.commit.committer_email}}</p>
+      </div>
+    </div>
+    <div>
+      <p><strong>{{env2Version.name}}</strong></p>
+      <p class="commit_date" ng-bind="env2Version.commit.committed_date | date:'dd-MM-yyyy HH:mm'"></p>
+      <div class="commit_info">
+        <p>{{env2Version.target}}</p>
+        <p><i class="fa fa-user"></i> {{env2Version.commit.committer_name}}</p>
+        <p><i class="fa fa-envelope"></i> {{env2Version.commit.committer_email}}</p>
+      </div>
+    </div>
+  </div>
 
   <!-- {{env1Data}}
 {{env2Data}} -->
-  <br />
 
   <!-- <p><b>Filter</b>
 <input type="text" size="40" ng-model="diffFilter">
@@ -129,8 +184,8 @@
                 <tr>
                   <td class="td_anchor"><strong>anchor</strong></td>
                   <td><strong>parameter</strong></td>
-                  <td><strong>first_diff_value</strong></td>
-                  <td><strong>second_diff_value</strong></td>
+                  <td><strong ng-bind-template="{{uiEnv1}} ({{env1Version.name}})"></strong></td>
+                  <td><strong ng-bind-template="{{uiEnv2}} ({{env2Version.name}})"></strong></td>
                 </tr>
                 <tr ng-repeat="item in final[key][k][k1]">
                   <td class="td_anchor">{{item.anchor}}</td>

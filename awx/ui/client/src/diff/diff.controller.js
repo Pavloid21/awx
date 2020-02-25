@@ -139,9 +139,11 @@ export default [
           let env1 = $scope.diffEnvironments.versions.filter(version => {
             if (version.id === $scope.env1) return version;
           });
+          $scope.uiEnv1 = env1[0].name;
           let env2 = $scope.diffEnvironments.versions.filter(version => {
             if (version.id === $scope.env2) return version;
           });
+          $scope.uiEnv2 = env2[0].name;
           var url = `/diff/compare/${$scope.env1Version.target}/${$scope.env2Version.target}/?env1=${env1[0].name}&env2=${env2[0].name}&v1=${$scope.env1Version.name}&v2=${$scope.env2Version.name}&isnode=undefined`;
           //  url = 'compare.js';
           $http({ method: "GET", url: url }).then(
