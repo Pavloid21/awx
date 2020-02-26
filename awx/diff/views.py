@@ -8,6 +8,7 @@ import sys
 import requests
 import time
 import json
+import logging
 from requests.auth import HTTPBasicAuth
 
 # Django
@@ -40,6 +41,12 @@ class VersionList(View):
 
 class DiffView(View):
 
+    def getJob(self, obj):
+        getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + str(obj['job']), auth=('admin', 'password'))
+        temp = json.dumps(getResponse.json())
+        result = json.loads(temp)
+        return result
+
     def get(self, request, *args, **kwargs):
         path = AWX_API_PATH           
         if request.GET['isnode'] == 'production':
@@ -56,9 +63,19 @@ class DiffView(View):
         jsonObj = jobLaunchResponse.json()
         jsonDump = json.dumps(jsonObj)
         obj = json.loads(jsonDump)
-        time.sleep(60)
-        response = requests.get(path + '/api/v2/jobs/' + str(obj['job']) + '/job_events/?page=2', auth=('admin', 'password'))
-        return JsonResponse({'compare': response.json()})
+        job = self.getJob(obj)
+        response = ''
+        while str(job['status']) == 'running':
+            time.sleep(10)
+            logging.info(str(job['status']))
+            job = self.getJob(obj)
+        else:
+            if str(job['status']) == 'failed':
+                response = { 'status': 'failed', 'job': str(job['id'])}
+                return JsonResponse(response)
+            else:
+                response = requests.get(path + '/api/v2/jobs/' + str(obj['job']) + '/job_events/?page=2', auth=('admin', 'password'))
+                return JsonResponse({'compare': response.json(), 'status': str(job['status']), 'job': str(obj['job'])})
 
 
 # Create view functions for all of the class-based views to simplify inclusion

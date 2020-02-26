@@ -145,8 +145,13 @@
 <br><br> -->
 </div>
 
+<div ng-show="diffView==='APP_CFG' && compareData != null && final['status'] === 'failed'" class="DashboardGraphs error" style="background-color: #FFBABA;
+border: 1px solid red; padding-bottom: 20px;">
+  <i class="fa fa-warning"></i> Something went wrong. See log <a ng-href="#/jobs/playbook/{{final['job']}}">here...</a>
+</div>
+
 <div
-  ng-show="diffView==='APP_CFG' && compareData != null"
+  ng-show="diffView==='APP_CFG' && compareData != null && final['status'] !== 'failed'"
   class="DashboardGraphs"
 >
   <table

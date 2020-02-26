@@ -149,16 +149,21 @@ export default [
           $http({ method: "GET", url: url }).then(
             function success(response) {
               $scope.compareData = {};
-              $scope.compareData = response.data.compare.results.find(res => {
-                if (
-                  res.task === "compare v_one and v_two" &&
-                  res.event_data.res
-                )
-                  return JSON.parse(res.event_data.res.stdout);
-              });
-              $scope.final = JSON.parse(
-                $scope.compareData.event_data.res.stdout
-              );
+              if (response.data.status === 'failed') {
+                $scope.final = { status: 'failed', job: response.data.job };
+                $scope.compareData = response.data;
+              } else {
+                $scope.compareData = response.data.compare.results.find(res => {
+                  if (
+                    res.task === "compare v_one and v_two" &&
+                    res.event_data.res
+                  )
+                    return JSON.parse(res.event_data.res.stdout);
+                });
+                $scope.final = JSON.parse(
+                  $scope.compareData.event_data.res.stdout
+                );
+              }
 
               // $scope.diffErrorMessage = null;
               // $scope.disabledEnvironments = $scope.compareData.rw_environments;
