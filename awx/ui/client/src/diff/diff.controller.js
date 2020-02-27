@@ -38,6 +38,7 @@ export default [
 
     $scope.env1Versions = null;
     $scope.env2Versions = null;
+    $scope.version_commit = 'v0.1 27.02.2020'
 
     $scope.getDataEnv1 = function() {
       if ($scope.env1 !== null) {

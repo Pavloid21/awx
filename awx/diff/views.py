@@ -23,6 +23,7 @@ from django.core.exceptions import PermissionDenied
 
 REPO_PATH = 'http://172.19.19.31/api/v4/projects'
 AWX_API_PATH = 'http://127.0.0.1:8052'
+# AWX_API_PATH = 'http://172.19.19.231'
 
 
 class EnvironmentList(View):
@@ -64,11 +65,13 @@ class DiffView(View):
         jsonDump = json.dumps(jsonObj)
         obj = json.loads(jsonDump)
         job = self.getJob(obj)
+        status = str(job['status'])
         response = ''
-        while str(job['status']) == 'running':
+        while status != 'failed' and status != 'successful':
             time.sleep(10)
             logging.info(str(job['status']))
             job = self.getJob(obj)
+            status = str(job['status'])
         else:
             if str(job['status']) == 'failed':
                 response = { 'status': 'failed', 'job': str(job['id'])}
