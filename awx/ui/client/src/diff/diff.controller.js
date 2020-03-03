@@ -1,3 +1,7 @@
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+window.html2canvas = html2canvas;
+
 export default [
   "$rootScope",
   "$scope",
@@ -38,7 +42,12 @@ export default [
 
     $scope.env1Versions = null;
     $scope.env2Versions = null;
-    $scope.version_commit = 'v0.1 27.02.2020'
+    $scope.version_commit = 'v_0.3 03.03.2020'
+
+    $scope.isCollapse = {
+      changes: false,
+      new_values: false,
+    }
 
     $scope.getDataEnv1 = function() {
       if ($scope.env1 !== null) {
@@ -164,6 +173,8 @@ export default [
                 $scope.final = JSON.parse(
                   $scope.compareData.event_data.res.stdout
                 );
+                console.log($scope.final)
+
               }
 
               // $scope.diffErrorMessage = null;
@@ -264,6 +275,27 @@ export default [
         $("html, body").animate({ scrollTop: 0 }, "slow");
       }
     };
+
+    $scope.collapseView = function(chapter) {
+      $scope.isCollapse[chapter] = !$scope.isCollapse[chapter]
+    }
+
+    $scope.exportPDF = function() {
+      Wait('start');
+      let quotes = document.getElementById('printContainer');
+      let pdf = new jsPDF('p', 'pt', 'letter');
+      pdf.html(quotes, {
+        html2canvas: {
+          width: 500,
+          windowWidth: 500,
+          scale: .62,
+        },
+        callback: () => {
+          pdf.save()
+          Wait('stop')
+        }
+      })
+    }
 
     $scope.diffSwitchView = function(view) {
       $scope.diffView = view;
