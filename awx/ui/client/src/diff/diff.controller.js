@@ -42,7 +42,7 @@ export default [
 
     $scope.env1Versions = null;
     $scope.env2Versions = null;
-    $scope.version_commit = 'v_0.4 05.03.2020'
+    $scope.version_commit = 'v_0.4.1 05.03.2020'
 
     $scope.isCollapse = {
       changes: false,
@@ -145,6 +145,7 @@ export default [
     $scope.compare = function() {
       $scope.compareData = null;
       $scope.diffErrorMessage = null;
+      $scope.final = null;
       if ($scope.env1Version !== null) {
         if ($scope.env2Version !== null) {
           Wait("start");
@@ -156,7 +157,7 @@ export default [
             if (version.id === $scope.env2) return version;
           });
           $scope.uiEnv2 = env2[0].name;
-          var url = `/diff/compare/${$scope.env1Version.target}/${$scope.env2Version.target}/?env1=${env1[0].name}&env2=${env2[0].name}&v1=${$scope.env1Version.name}&v2=${$scope.env2Version.name}&isnode=undefined$repeater=${repeater}`;
+          var url = `/diff/compare/${$scope.env1Version.target}/${$scope.env2Version.target}/?env1=${env1[0].name}&env2=${env2[0].name}&v1=${$scope.env1Version.name}&v2=${$scope.env2Version.name}&isnode=undefined`;
           //  url = 'compare.js';
           $http({ method: "GET", url: url, timeout: 60 * 1000 }).then(
             function success(response) {
