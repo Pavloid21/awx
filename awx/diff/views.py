@@ -37,28 +37,45 @@ class VersionList(View):
 
     def get(self, request, *args, **kwargs):
         response = requests.get(REPO_PATH + '/' + kwargs['environment_name'] + '/repository/tags', headers={'Private-Token': 'znhhCk-fnMpdBZB-snuy'})
-        return JsonResponse({'versions': response.json()})
+        master = requests.get(REPO_PATH + '/' + kwargs['environment_name'] + '/repository/branches/master', headers={'Private-Token': 'znhhCk-fnMpdBZB-snuy'})
+        masterJSON = json.loads(master.text)
+        masterJSON['target'] = masterJSON['commit']['id']
+        envJSON = json.loads(response.text)
+        envJSON.insert(0, masterJSON)
+        # result = json.dumps(envJSON)
+        return JsonResponse({'versions': envJSON})
 
 
 class DiffView(View):
-
     def getJob(self, obj):
         getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + str(obj['job']), auth=('admin', 'password'))
         temp = json.dumps(getResponse.json())
         result = json.loads(temp)
+        global JOB_LAUNCHED
+        JOB_LAUNCHED = str(result['id'])
+        print('GET JOB FUNC: ' + JOB_LAUNCHED)
         return result
 
     def get(self, request, *args, **kwargs):
-        path = AWX_API_PATH           
+        path = AWX_API_PATH
+        invId = 3
+        inventoryList = requests.get(AWX_API_PATH + '/api/v2/inventories', auth=('admin', 'password'))
+        if request.GET['env1'] == request.GET['env2']:
+            inventories = json.loads(inventoryList.text)
+            for inventory in inventories['results']:
+                if inventory['name'] == request.GET['env1']:
+                    invId = inventory['id']
         if request.GET['isnode'] == 'production':
             path = 'http://localhost'
-        jobLaunchResponse = requests.post(path + '/api/v2/job_templates/10/launch/', json={
+        
+        jobLaunchResponse = requests.post(path + '/api/v2/job_templates/13/launch/', json={
             'extra_vars': {
                 'compare_domain_one': request.GET['env1'],
                 'compare_domain_two': request.GET['env2'],
                 'compare_version_one': request.GET['v1'],
                 'compare_version_two': request.GET['v2']
-            }
+            },
+            'inventory': invId
         },
         auth=('admin', 'password'))
         jsonObj = jobLaunchResponse.json()
@@ -67,20 +84,31 @@ class DiffView(View):
         job = self.getJob(obj)
         status = str(job['status'])
         response = ''
-        while status != 'failed' and status != 'successful':
-            time.sleep(10)
-            logging.info(str(job['status']))
-            job = self.getJob(obj)
-            status = str(job['status'])
-        else:
-            if str(job['status']) == 'failed':
-                response = { 'status': 'failed', 'job': str(job['id'])}
-                return JsonResponse(response)
-            else:
-                response = requests.get(path + '/api/v2/jobs/' + str(obj['job']) + '/job_events/?page=2', auth=('admin', 'password'))
-                return JsonResponse({'compare': response.json(), 'status': str(job['status']), 'job': str(obj['job'])})
+        return JsonResponse(job)
+        # while status != 'failed' and status != 'successful':
+        #     time.sleep(10)
+        #     logging.info(str(job['status']))
+        #     job = self.getJob(obj)
+        #     status = str(job['status'])
+        # else:
+        #     if str(job['status']) == 'failed':
+        #         response = { 'status': 'failed', 'job': str(job['id'])}
+        #         return JsonResponse(response)
+        #     else:
+        #         response = requests.get(path + '/api/v2/jobs/' + str(obj['job']) + '/job_events/?page=2', auth=('admin', 'password'))
+        #         return JsonResponse({'compare': response.json(), 'status': str(job['status']), 'job': str(obj['job'])})
+        
+class DiffResultView(View):
+    def get(self, request, *args, **kwargs):
+        getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + request.GET['job'], auth=('admin', 'password'))
+        temp = json.dumps(getResponse.json())
+        result = json.loads(temp)
+        return JsonResponse(result)
 
-
+class DiffFinalView(View):
+    def get(self, request, *args, **kwargs):
+        response = requests.get(AWX_API_PATH + '/api/v2/jobs/' + request.GET['job'] + '/job_events/?page=2', auth=('admin', 'password'))
+        return JsonResponse({'compare': response.json(), 'status': request.GET['status'], 'job': request.GET['job']})
 # Create view functions for all of the class-based views to simplify inclusion
 # in URL patterns and reverse URL lookups, converting CamelCase names to
 # lowercase_with_underscore (e.g. MyView.as_view() becomes my_view).

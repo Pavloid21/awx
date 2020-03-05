@@ -42,7 +42,7 @@ export default [
 
     $scope.env1Versions = null;
     $scope.env2Versions = null;
-    $scope.version_commit = 'v_0.3 03.03.2020'
+    $scope.version_commit = 'v_0.4 05.03.2020'
 
     $scope.isCollapse = {
       changes: false,
@@ -131,6 +131,8 @@ export default [
       $scope.env2Versions.forEach(element => {
         if (element.name === $scope.env2VersionChoosen) {
           $scope.env2Version = element;
+        } else if ($scope.env2VersionChoosen === 'current') {
+          $scope.env2Version = { name: 'current' };
         }
       });
       if ($scope.env1Version !== null && $scope.env2Version !== null) {
@@ -154,107 +156,50 @@ export default [
             if (version.id === $scope.env2) return version;
           });
           $scope.uiEnv2 = env2[0].name;
-          var url = `/diff/compare/${$scope.env1Version.target}/${$scope.env2Version.target}/?env1=${env1[0].name}&env2=${env2[0].name}&v1=${$scope.env1Version.name}&v2=${$scope.env2Version.name}&isnode=undefined`;
+          var url = `/diff/compare/${$scope.env1Version.target}/${$scope.env2Version.target}/?env1=${env1[0].name}&env2=${env2[0].name}&v1=${$scope.env1Version.name}&v2=${$scope.env2Version.name}&isnode=undefined$repeater=${repeater}`;
           //  url = 'compare.js';
-          $http({ method: "GET", url: url }).then(
+          $http({ method: "GET", url: url, timeout: 60 * 1000 }).then(
             function success(response) {
               $scope.compareData = {};
               if (response.data.status === 'failed') {
                 $scope.final = { status: 'failed', job: response.data.job };
                 $scope.compareData = response.data;
               } else {
-                $scope.compareData = response.data.compare.results.find(res => {
-                  if (
-                    res.task === "compare v_one and v_two" &&
-                    res.event_data.res
+                $scope.job = response.data
+                // console.log($scope.job)
+                let requestJob = () => {
+                  $http({ method: 'GET', url: `/diff/results/?job=${$scope.job.id}`}).then(
+                    function success(response) {
+                      if (response.data.status !== 'successful' && response.data.status !== 'failed') {
+                        setTimeout(() => requestJob(), 30 * 1000)
+                      } else if(response.data.status === 'failed') {
+                        $scope.final = {
+                          status: 'failed',
+                          job: $scope.job.id
+                        };
+                        Wait("stop");
+                      } else {
+                        $http({ method: 'GET', url: `/diff/final/?job=${$scope.job.id}&status=successful`}).then(
+                          function success(response) {
+                            $scope.compareData = response.data.compare.results.find(res => {
+                              if (
+                                res.task === "compare v_one and v_two" &&
+                                res.event_data.res
+                              )
+                                return JSON.parse(res.event_data.res.stdout);
+                            });
+                            $scope.final = JSON.parse(
+                              $scope.compareData.event_data.res.stdout
+                            );
+                            Wait("stop");
+                          }
+                        )
+                      }
+                    }
                   )
-                    return JSON.parse(res.event_data.res.stdout);
-                });
-                $scope.final = JSON.parse(
-                  $scope.compareData.event_data.res.stdout
-                );
-                console.log($scope.final)
-
+                }
+                requestJob();
               }
-
-              // $scope.diffErrorMessage = null;
-              // $scope.disabledEnvironments = $scope.compareData.rw_environments;
-              // $scope.compareData.APP_CFG.data.forEach(element => {
-
-              // if (element.diff != null && element.diff != 'incompatible') {
-              // element.diff.forEach(element2 => {
-              // element2.pathText = "";
-              // element2.path.forEach(element3 => {
-              // element2.pathText = element2.pathText.concat(element3.element)
-              // .concat("(").concat(element3.name_attribute).concat(")> ")
-              // })
-              // element2.pathText = element2.pathText.concat(element2.param.element)
-              // .concat("(").concat(element2.param.name_attribute).concat(")> ");
-              // });
-              // // console.log(element);
-              // }
-              // });
-              // $scope.compareData.DOMAIN_CFG.data.forEach(element => {
-
-              // if (element.diff != null && element.diff != 'incompatible') {
-              // element.diff.forEach(element2 => {
-              // element2.pathText = "";
-              // element2.path.forEach(element3 => {
-              // element2.pathText = element2.pathText.concat(element3.element)
-              // .concat("(").concat(element3.name_attribute).concat(")> ")
-              // })
-              // element2.pathText = element2.pathText.concat(element2.param.element)
-              // .concat("(").concat(element2.param.name_attribute).concat(")> ");
-              // });
-              // // console.log(element);
-              // }
-              // });
-              // $scope.compareData.SOACONFIG.data.forEach(element => {
-
-              // if (element.diff != null && element.diff != 'incompatible') {
-              // element.diff.forEach(element2 => {
-              // element2.pathText = "";
-              // element2.path.forEach(element3 => {
-              // element2.pathText = element2.pathText.concat(element3.element)
-              // .concat("(").concat(element3.name_attribute).concat(")> ")
-              // })
-              // element2.pathText = element2.pathText.concat(element2.param.element)
-              // .concat("(").concat(element2.param.name_attribute).concat(")> ");
-              // });
-              // // console.log(element);
-              // }
-              // });
-              // $scope.compareData.FMW_PATCH.data.forEach(element => {
-              // element.left_content_decoded = $scope.diffBase64Decode(element.left_content);
-              // element.right_content_decoded = $scope.diffBase64Decode(element.right_content);
-              // element.diff_lines = $scope.JsDiff.diffLines(element.left_content_decoded, element.right_content_decoded);
-              // });
-              // $scope.compareData.DATABASE_CFG.data.forEach(element => {
-              // element.left_content_decoded = $scope.diffBase64Decode(element.left_content);
-              // element.right_content_decoded = $scope.diffBase64Decode(element.right_content);
-              // element.diff_lines = $scope.JsDiff.diffLines(element.left_content_decoded, element.right_content_decoded);
-              // });
-
-              // if ($scope.compareData.OS_CFG.left != null) {
-              // $scope.compareData.OS_CFG.left.forEach(element => {
-              // element.diff.data.forEach(element2 => {
-              // element2.left_content_decoded = $scope.diffBase64Decode(element2.left_content);
-              // element2.right_content_decoded = $scope.diffBase64Decode(element2.right_content);
-              // element2.diff_lines = $scope.JsDiff.diffLines(element2.left_content_decoded, element2.right_content_decoded);
-              // })
-              // });
-              // }
-              // if ($scope.compareData.OS_CFG.right != null) {
-              // $scope.compareData.OS_CFG.right.forEach(element => {
-              // element.diff.data.forEach(element2 => {
-              // element2.left_content_decoded = $scope.diffBase64Decode(element2.left_content);
-              // element2.right_content_decoded = $scope.diffBase64Decode(element2.right_content);
-              // element2.diff_lines = $scope.JsDiff.diffLines(element2.left_content_decoded, element2.right_content_decoded);
-              // })
-              // });
-              // }
-
-              Wait("stop");
             },
             function error(response) {
               $scope.diffErrorMessage = "Error at "
@@ -262,7 +207,9 @@ export default [
                 .concat(" : ")
                 .concat(response.statusText);
               $scope.compareData = null;
-              $("html, body").animate({ scrollTop: 0 }, "slow");
+              console.log($scope.diffErrorMessage)
+              // $scope.compare('repeat')
+              // $("html, body").animate({ scrollTop: 0 }, "slow");
               Wait("stop");
             }
           );
@@ -296,6 +243,25 @@ export default [
         }
       })
     }
+
+    $scope.PrintDiv = () => {
+      var data = document.getElementById('printContainer').innerHTML;
+      let head = document.getElementsByTagName('head')[0].innerHTML;
+      var myWindow = window.open('', 'my div', 'height=800,width=600');
+      myWindow.document.write('<html>');
+      myWindow.document.write('<head>' + head);
+      myWindow.document.write('</head><body onload="window.print(); window.close();">');
+      myWindow.document.write(data);
+      myWindow.document.write('</body></html>');
+      myWindow.document.close(); // necessary for IE >= 10
+
+      myWindow.onload = function(){ // necessary if the div contain images
+
+          myWindow.focus(); // necessary for IE >= 10
+          myWindow.print();
+          myWindow.close();
+      };
+  }
 
     $scope.diffSwitchView = function(view) {
       $scope.diffView = view;

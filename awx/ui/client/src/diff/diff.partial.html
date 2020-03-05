@@ -73,9 +73,10 @@
 
   <div class="box" ng-hide="diffView==='APP_CFG' && compareData != null">
     <div>
-      <div class="card_radio" ng-repeat="env1version in env1Versions track by $index" ng-hide="env1version.name === env2Version.name">
+      <div class="card_radio" ng-class="{green_box: env1version.name === 'master'}" ng-repeat="env1version in env1Versions track by $index" ng-hide="env1version.target === env2Version.target">
         <input type="radio" ng-value="env1version.name" name="env1" ng-model="$parent.env1VersionChoosen" ng-change="setVersionEnv1()"/>
-        <label for="env1version.name">{{env1version.name}}</label>
+        <label for="env1version.name" ng-show="env1version.name !== 'master'">{{env1version.name}}</label>
+        <label for="env1version.name" ng-show="env1version.name === 'master'">Actual</label>
         <span class="commit_date" ng-bind="env1version.commit.committed_date | date:'dd-MM-yyyy HH:mm'"></span>
         <div>
           <div class="commit_info">
@@ -88,9 +89,14 @@
     </div>
     <div>
       <form ng-model="env2VersionChoosen" ng-change="setVersionEnv2()">
-        <div class="card_radio" ng-repeat="env2version in env2Versions track by $index" ng-hide="env2version.name === env1Version.name">
+        <div class="card_radio blue_box" ng-show="env1 === env2 && !!env2">
+          <input type="radio" ng-value="'current'" name="env2" ng-model="$parent.env2VersionChoosen" ng-change="setVersionEnv2()"/>
+          <label for="'current'">Current</label>
+        </div>
+        <div class="card_radio" ng-class="{green_box: env2version.name === 'master'}" ng-repeat="env2version in env2Versions track by $index" ng-hide="env2version.target === env1Version.target">
           <input type="radio" ng-value="env2version.name" name="env2" ng-model="$parent.env2VersionChoosen" ng-change="setVersionEnv2()"/>
-          <label for="env1version.name">{{env2version.name}}</label>
+          <label for="env1version.name" ng-show="env2version.name !== 'master'">{{env2version.name}}</label>
+          <label for="env1version.name" ng-show="env2version.name === 'master'">Actual</label>
           <span class="commit_date" ng-bind="env2version.commit.committed_date | date:'dd-MM-yyyy HH:mm'"></span>
           <div>
             <div class="commit_info">
@@ -162,6 +168,7 @@ border: 1px solid red; padding-bottom: 20px;">
   class="DashboardGraphs"
 >
   <button class="btn btn-primary" ng-click="exportPDF()">Export to PDF</button>
+  <button class="btn btn-primary" ng-click="PrintDiv()">Print to PDF</button>
   <br /> <br />
   <div id="printContainer">
     <table
