@@ -53,7 +53,7 @@
     </button>
   </div>
 
-  <div class="box" ng-hide="diffView==='APP_CFG' && compareData != null">
+  <div class="box" ng-hide="diffView==='APP_CFG' && final != null">
     <div>
       <div class="card_radio" ng-class="{green_box: env1version.name === 'master'}" ng-repeat="env1version in env1Versions track by $index" ng-hide="env1version.target === env2Version.target">
         <input type="radio" ng-value="env1version.name" name="env1" ng-model="$parent.env1VersionChoosen" ng-change="setVersionEnv1()"/>
@@ -92,10 +92,11 @@
     </div>
   </div>
 
-  <div class="box" ng-show="diffView==='APP_CFG' && compareData != null">
-    <div class="card_radio">
+  <div class="box" ng-show="diffView==='APP_CFG' && final != null">
+    <div class="card_radio" ng-class="{green_box: env1Version.name === 'master'}">
       <div class="card_head">
-        <p><strong>{{env1Version.name}}</strong></p>
+        <p ng-show="env1Version.name !== 'master' && env1Version !== 'current'"><strong>{{env1Version.name}}</strong></p>
+        <p ng-show="env1Version.name === 'master'"><strong>Actual</strong></p>
         <span class="commit_date" ng-bind="env1Version.commit.committed_date | date:'dd-MM-yyyy HH:mm'"></span>
       </div>
       <div class="commit_info">
@@ -104,9 +105,10 @@
         <p><i class="fa fa-envelope"></i> {{env1Version.commit.committer_email}}</p>
       </div>
     </div>
-    <div class="card_radio">
+    <div class="card_radio" ng-class="{green_box: env2Version.name === 'master', blue_box: env2Version === 'current'}">
       <div class="card_head">
-        <p><strong>{{env2Version.name}}</strong></p>
+        <p ng-show="env2Version.name !== 'master' && env2Version !== 'current'"><strong>{{env2Version.name}}</strong></p>
+        <p ng-show="env2Version.name === 'master'"><strong>Actual</strong></p>
         <span class="commit_date" ng-bind="env2Version.commit.committed_date | date:'dd-MM-yyyy HH:mm'"></span>
       </div>
       <div class="commit_info">
@@ -140,13 +142,13 @@
 <br><br> -->
 </div>
 
-<div ng-show="diffView==='APP_CFG' && compareData != null && final['status'] === 'failed'" class="DashboardGraphs error" style="background-color: #FFBABA;
-border: 1px solid red; padding-bottom: 20px;">
+<div ng-show="diffView==='APP_CFG' && final != null && final['status'] === 'failed'" class="DashboardGraphs error" style="background-color: #f8d7da;
+border: 1px solid #f5c6cb; padding-bottom: 20px;">
   <i class="fa fa-warning"></i> Something went wrong. See log <a ng-href="#/jobs/playbook/{{final['job']}}">here...</a>
 </div>
 
 <div
-  ng-show="diffView==='APP_CFG' && compareData != null && final['status'] !== 'failed'"
+  ng-show="diffView==='APP_CFG' && final != null && final['status'] !== 'failed'"
   class="DashboardGraphs"
 >
   <button class="btn btn-primary" ng-click="exportPDF()">Export to PDF</button>

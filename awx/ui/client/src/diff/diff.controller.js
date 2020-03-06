@@ -42,7 +42,7 @@ export default [
 
     $scope.env1Versions = null;
     $scope.env2Versions = null;
-    $scope.version_commit = 'v_0.4.1 05.03.2020'
+    $scope.version_commit = 'v_0.5 06.03.2020'
 
     $scope.isCollapse = {
       changes: false,
@@ -59,6 +59,7 @@ export default [
             $scope.env1Version = null;
             $scope.diffErrorMessage = null;
             $scope.compareData = null;
+            $scope.final = null;
             Wait("stop");
           },
           function error(response) {
@@ -69,6 +70,7 @@ export default [
             $scope.env1Versions = null;
             $scope.env1Version = null;
             $scope.compareData = null;
+            $scope.final = null;
             $("html, body").animate({ scrollTop: 0 }, "slow");
             Wait("stop");
           }
@@ -86,6 +88,7 @@ export default [
             $scope.env2Version = null;
             $scope.diffErrorMessage = null;
             $scope.compareData = null;
+            $scope.final = null;
             Wait("stop");
           },
           function error(response) {
@@ -96,6 +99,7 @@ export default [
             $scope.env2Versions = null;
             $scope.env2Version = null;
             $scope.compareData = null;
+            $scope.final = null;
             $("html, body").animate({ scrollTop: 0 }, "slow");
             Wait("stop");
           }
@@ -114,6 +118,7 @@ export default [
 
     $scope.setVersionEnv1 = function() {
       $scope.compareData = null;
+      $scope.final = null;
       $scope.env1Versions.forEach(element => {
         if (element.name === $scope.env1VersionChoosen) {
           $scope.env1Version = element;
@@ -128,6 +133,7 @@ export default [
 
     $scope.setVersionEnv2 = function() {
       $scope.compareData = null;
+      $scope.final = null;
       $scope.env2Versions.forEach(element => {
         if (element.name === $scope.env2VersionChoosen) {
           $scope.env2Version = element;
