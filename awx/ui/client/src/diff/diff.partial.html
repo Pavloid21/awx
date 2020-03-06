@@ -211,7 +211,7 @@ border: 1px solid #f5c6cb; padding-bottom: 20px;">
                     <td class="td_parameter" ng-if="$first" rowspan="{{final[key][k][k1].length}}">{{item.url_to_edit}}</td>
                     <td class="td_parameter">
                       <div>
-                        <p ng-repeat="(iKey, iValue) in item" ng-bind-template="'{{iKey}}': '{{iValue}}'"></p>
+                        <p ng-repeat="(iKey, iValue) in item" ng-if="iKey !== 'url_to_edit'" ng-bind-template="'{{iKey}}': '{{iValue}}'"></p>
                       </div>
                     </td>
                   </tr>

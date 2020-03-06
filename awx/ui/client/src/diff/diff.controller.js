@@ -42,7 +42,7 @@ export default [
 
     $scope.env1Versions = null;
     $scope.env2Versions = null;
-    $scope.version_commit = 'v_0.5 06.03.2020'
+    $scope.version_commit = 'v_0.5.1 06.03.2020'
 
     $scope.isCollapse = {
       changes: false,
@@ -60,6 +60,11 @@ export default [
             $scope.diffErrorMessage = null;
             $scope.compareData = null;
             $scope.final = null;
+            if ($scope.env1 !== $scope.env2 && $scope.env2Versions && $scope.env2Versions[0].name === 'current') {
+              $scope.env2Versions.shift();
+            } else if ($scope.env1 === $scope.env2 && $scope.env2Versions && $scope.env2Versions[0].name !== 'current') {
+              $scope.env2Versions.unshift({name: 'current', target: null})
+            }
             Wait("stop");
           },
           function error(response) {
