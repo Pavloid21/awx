@@ -71,20 +71,17 @@
     </div>
     <div>
       <form ng-model="env2VersionChoosen" ng-change="setVersionEnv2()">
-        <div class="card_radio blue_box" ng-show="env1 === env2 && !!env2">
-          <input type="radio" ng-value="'current'" name="env2" ng-model="$parent.env2VersionChoosen" ng-change="setVersionEnv2()"/>
-          <label for="'current'">Current</label>
-        </div>
-        <div class="card_radio" ng-class="{green_box: env2version.name === 'master'}" ng-repeat="env2version in env2Versions track by $index" ng-hide="env2version.target === env1Version.target">
+        <div class="card_radio" ng-class="{green_box: env2version.name === 'master', blue_box: env2version.name === 'current'}" ng-repeat="env2version in env2Versions track by $index" ng-hide="env2version.target === env1Version.target">
           <input type="radio" ng-value="env2version.name" name="env2" ng-model="$parent.env2VersionChoosen" ng-change="setVersionEnv2()"/>
-          <label for="env1version.name" ng-show="env2version.name !== 'master'">{{env2version.name}}</label>
-          <label for="env1version.name" ng-show="env2version.name === 'master'">Actual</label>
+          <label for="env2version.name" ng-show="env2version.name !== 'master' && env2version.name !== 'current'">{{env2version.name}}</label>
+          <label for="env2version.name" ng-show="env2version.name === 'master'">Actual</label>
+          <label for="env2version.name" ng-show="env2version.name === 'current'">Current</label>
           <span class="commit_date" ng-bind="env2version.commit.committed_date | date:'dd-MM-yyyy HH:mm'"></span>
           <div>
             <div class="commit_info">
               <p>{{env2version.target}}</p>
-              <p><i class="fa fa-user"></i> {{env2version.commit.committer_name}}</p>
-              <p><i class="fa fa-envelope"></i> {{env2version.commit.committer_email}}</p>
+              <p><i class="fa fa-user" ng-hide="env2version.name === 'current'"></i> {{env2version.commit.committer_name}}</p>
+              <p><i class="fa fa-envelope" ng-hide="env2version.name === 'current'"></i> {{env2version.commit.committer_email}}</p>
             </div>
           </div>
         </div>
@@ -163,7 +160,12 @@ border: 1px solid #f5c6cb; padding-bottom: 20px;">
       id="diff_table"
     >
       <tr ng-click="collapseView(key)" class="clps">
-        <td>{{key}}</td>
+        <td ng-if="key === 'new_value'">New values</td>
+        <td ng-if="key === 'deleted_from_second'" ng-bind-template="Deleted from {{uiEnv2}} ({{env2Version.name}})"></td>
+        <td ng-if="key === 'added_in_second'" ng-bind-template="Added to {{uiEnv2}} ({{env2Version.name}})"></td>
+        <td ng-if="key === 'changes'">Changes</td>
+        <td ng-if="key === 'object_deleted_from_second'" ng-bind-template="Objects deleted from {{uiEnv2}} ({{env2Version.name}})"></td>
+        <td ng-if="key === 'object_added_in_second'" ng-bind-template="Objects added to {{uiEnv2}} ({{env2Version.name}})"></td>
       </tr>
       <tr ng_class="hide_{{key}}" ng-hide="isCollapse['{{key}}'] === true">
         <td>
@@ -184,56 +186,46 @@ border: 1px solid #f5c6cb; padding-bottom: 20px;">
                   ng-if="key != 'deleted_from_second' && key != 'added_in_second'"
                 >
                   <tr>
-                    <td class="td_anchor" ng-if="key === 'changes' || key === 'new_value'">{{k1}}</td>
-                    <td ng-if="key != 'changes' && key != 'new_value' && key != 'added_in_second' && key != 'deleted_from_second'">{{k1}}</td>
+                    <td ng-if="key === 'changes' || key === 'new_value'"><strong>{{k1}}</strong></td>
+                    <td ng-if="key != 'changes' && key != 'new_value' && key != 'added_in_second' && key != 'deleted_from_second'"><strong>{{k1}}</strong></td>
                     <td ng-if="key != 'added_in_second' && key != 'deleted_from_second'"></td>
-                    <td ng-if="key != 'added_in_second' && key != 'deleted_from_second'"></td>
-                    <td ng-if="key != 'added_in_second' && key != 'deleted_from_second'"></td>
+                    <td ng-if="key === 'changes' || key === 'new_value'"></td>
                   </tr>
                   <!-- CHANGES & NEW VALUES -->
                   <tr ng-if="key === 'changes' || key === 'new_value'">
-                    <td class="td_anchor"><strong>Path to parameter</strong>
-                    </td>
                     <td><strong>parameter</strong></td>
                     <td><strong ng-bind-template="{{uiEnv1}} ({{env1Version.name}})"></strong></td>
                     <td><strong ng-bind-template="{{uiEnv2}} ({{env2Version.name}})"></strong></td>
                   </tr>
                   <tr ng-repeat="item in final[key][k][k1]" ng-if="key === 'changes' || key === 'new_value'">
-                    <td class="td_anchor">{{item.path_to_parameter}}</td>
                     <td class="td_parameter">{{item.parameter}}</td>
-                    <td class="td_difference">{{item.first_diff_value}}</td>
-                    <td class="td_difference">{{item.second_diff_value}}</td>
+                    <td class="td_parameter">{{item.first_diff_value}}</td>
+                    <td class="td_parameter">{{item.second_diff_value}}</td>
                   </tr>
                   <!-- DELETED AND ADDED OBJECTS -->
                   <tr ng-if="key === 'object_deleted_from_second' || key === 'object_added_in_second'">
-                    <td><strong>Name</strong></td>
-                    <td><strong>Internal Name</strong></td>
-                    <td><strong>Resource type</strong></td>
                     <td><strong>URL to edit</strong></td>
+                    <td><strong>Values</strong></td>
                   </tr>
                   <tr ng-repeat="item in final[key][k][k1]" ng-if="key === 'object_deleted_from_second' || key === 'object_added_in_second'">
-                    <td class="td_parameter">{{item.displayName}}{{item.name}}</td>
-                    <td class="td_parameter">{{item.internalName}}</td>
-                    <td class="td_parameter">{{item.resourceType}}{{item.type}}</td>
-                    <td class="td_parameter">{{item.url_to_edit}}</td>
+                    <td class="td_parameter" ng-if="$first" rowspan="{{final[key][k][k1].length}}">{{item.url_to_edit}}</td>
+                    <td class="td_parameter">
+                      <div>
+                        <p ng-repeat="(iKey, iValue) in item" ng-bind-template="'{{iKey}}': '{{iValue}}'"></p>
+                      </div>
+                    </td>
                   </tr>
                 </table>
                 <table border="1" class="diff_green_table" ng-if="key === 'added_in_second'">
                   <!-- ADDED PARAMS -->
                   <tr ng-if="key === 'added_in_second'">
-                    <td class="td_parameter"><strong>Name</strong></td>
-                    <td class="td_parameter"><strong>Path to get configs</strong></td>
                   </tr>
                   <tr ng-repeat="item in final[key][k]" ng-if="key === 'deleted_from_second' || key === 'added_in_second'">
-                    <td class="td_parameter">{{item.name}}</td>
-                    <td class="td_parameter">{{item.ylm_path_to_get_configs}}</td>
+                    <td>{{item.name}}</td>
                   </tr>
                 </table>
                 <table border="1" class="diff_red_table" ng-if="key === 'deleted_from_second'">
                   <!-- DELETED PARAMS -->
-                  <tr ng-if="key === 'deleted_from_second'">
-                    <td><strong>Value</strong></td>
-                  </tr>
                   <tr ng-repeat="item in final[key][k]" ng-if="key === 'deleted_from_second' || key === 'added_in_second'">
                     <td>{{item}}</td>
                   </tr>

@@ -7,7 +7,7 @@ export default {
   route: "/diff",
   controller: controller,
   ncyBreadcrumb: {
-    label: N_("DIFF")
+    label: N_("COMPARE YAML TEMPLATES")
   },
   resolve: {
     lastPath: function($location) {

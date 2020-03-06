@@ -85,6 +85,9 @@ export default [
         $http({ method: "GET", url: url }).then(
           function success(response) {
             $scope.env2Versions = response.data.versions;
+            if ($scope.env1 === $scope.env2) {
+              $scope.env2Versions.unshift({name: 'current', target: null})
+            }
             $scope.env2Version = null;
             $scope.diffErrorMessage = null;
             $scope.compareData = null;
@@ -104,15 +107,6 @@ export default [
             Wait("stop");
           }
         );
-        // if ($scope.isDisabledEnvironment($scope.env2)) {
-        //   $("#diffApplyButtonAPP").css("cursor", "not-allowed");
-        //   $("#diffApplyButtonDOMAIN").css("cursor", "not-allowed");
-        //   $("#diffApplyButtonSOA").css("cursor", "not-allowed");
-        // } else {
-        //   $("#diffApplyButtonAPP").css("cursor", "pointer");
-        //   $("#diffApplyButtonDOMAIN").css("cursor", "pointer");
-        //   $("#diffApplyButtonSOA").css("cursor", "pointer");
-        // }
       }
     };
 
@@ -137,8 +131,6 @@ export default [
       $scope.env2Versions.forEach(element => {
         if (element.name === $scope.env2VersionChoosen) {
           $scope.env2Version = element;
-        } else if ($scope.env2VersionChoosen === 'current') {
-          $scope.env2Version = { name: 'current' };
         }
       });
       if ($scope.env1Version !== null && $scope.env2Version !== null) {
