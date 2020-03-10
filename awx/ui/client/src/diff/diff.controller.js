@@ -16,7 +16,7 @@ export default [
     $("#diffCompareButton").css("cursor", "not-allowed");
 
     $scope.diffView = "APP_CFG";
-
+    
     //$http({method: 'GET', url: '/environments.j
     $http({ method: "GET", url: "/diff/environments/" }).then(
       function success(response) {
@@ -42,7 +42,7 @@ export default [
 
     $scope.env1Versions = null;
     $scope.env2Versions = null;
-    $scope.version_commit = 'v_0.5.1 06.03.2020'
+    $scope.version_commit = 'v_0.6 10.03.2020'
 
     $scope.isCollapse = {
       changes: false,
@@ -195,6 +195,7 @@ export default [
                             $scope.final = JSON.parse(
                               $scope.compareData.event_data.res.stdout
                             );
+                            $scope.isEmpty = Object.keys($scope.final)[0] === undefined;
                             Wait("stop");
                           }
                         )
