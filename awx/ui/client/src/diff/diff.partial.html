@@ -140,18 +140,18 @@
 <br><br> -->
 </div>
 
-<div ng-show="diffView==='APP_CFG' && final != null && final['status'] === 'failed'" class="DashboardGraphs error" style="background-color: #f8d7da;
+<div ng-if="diffView==='APP_CFG' && final != null && final['status'] === 'failed'" class="DashboardGraphs error" style="background-color: #f8d7da;
 border: 1px solid #f5c6cb; padding-bottom: 20px;">
   <i class="fa fa-warning"></i> Something went wrong. See log <a ng-href="#/jobs/playbook/{{final['job']}}">here...</a>
 </div>
 
-<div ng-if="diffView==='APP_CFG' && isEmpty" class="DashboardGraphs success_mess" style="background-color: #d4edda;
+<div ng-if="diffView==='APP_CFG' && !!compareData && isEmpty" class="DashboardGraphs success_mess" style="background-color: #d4edda;
 border: 1px solid #c3e6cb; padding-bottom: 20px;">
   <i class="fa fa-check"></i> Changes not found.</a>
 </div>
 
 <div
-  ng-show="diffView==='APP_CFG' && final != null && final['status'] !== 'failed' && Object.keys(final).length > 0"
+  ng-if="diffView==='APP_CFG' && final != null && final['status'] !== 'failed' && !isEmpty"
   class="DashboardGraphs"
 >
   <button class="btn btn-primary" ng-click="exportPDF()">Export to PDF</button>
