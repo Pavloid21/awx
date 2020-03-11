@@ -42,7 +42,7 @@ export default [
 
     $scope.env1Versions = null;
     $scope.env2Versions = null;
-    $scope.version_commit = 'v_0.6 10.03.2020'
+    $scope.version_commit = 'v_0.7 11.03.2020'
 
     $scope.isCollapse = {
       changes: false,
@@ -90,9 +90,9 @@ export default [
         $http({ method: "GET", url: url }).then(
           function success(response) {
             $scope.env2Versions = response.data.versions;
-            if ($scope.env1 === $scope.env2) {
-              $scope.env2Versions.unshift({name: 'current', target: null})
-            }
+            // if ($scope.env1 === $scope.env2) {
+            //   $scope.env2Versions.unshift({name: 'current', target: null})
+            // }
             $scope.env2Version = null;
             $scope.diffErrorMessage = null;
             $scope.compareData = null;
@@ -230,6 +230,11 @@ export default [
 
     $scope.collapseView = function(chapter) {
       $scope.isCollapse[chapter] = !$scope.isCollapse[chapter]
+    }
+
+    $scope.setCompareComposite = function() {
+      console.log('CHECKBOX', $scope.confirmed);
+
     }
 
     $scope.exportPDF = function() {

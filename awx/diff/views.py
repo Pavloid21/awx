@@ -59,12 +59,12 @@ class DiffView(View):
     def get(self, request, *args, **kwargs):
         path = AWX_API_PATH
         invId = 3
-        inventoryList = requests.get(AWX_API_PATH + '/api/v2/inventories', auth=('admin', 'password'))
-        if request.GET['env1'] == request.GET['env2']:
-            inventories = json.loads(inventoryList.text)
-            for inventory in inventories['results']:
-                if inventory['name'] == request.GET['env1']:
-                    invId = inventory['id']
+        # inventoryList = requests.get(AWX_API_PATH + '/api/v2/inventories', auth=('admin', 'password'))
+        # if request.GET['env1'] == request.GET['env2']:
+        #     inventories = json.loads(inventoryList.text)
+        #     for inventory in inventories['results']:
+        #         if inventory['name'] == request.GET['env1']:
+        #             invId = inventory['id']
         if request.GET['isnode'] == 'production':
             path = 'http://localhost'
         

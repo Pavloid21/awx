@@ -52,13 +52,20 @@
       Compare
     </button>
   </div>
+  <div class="box">
+    <div class="sub-option">
+      <input type="checkbox" name="composites" id="composites" ng-model="confirmed" ng-change="setCompareComposite()"/>
+      <label for="composites"> Compare composite configurations</label>
+    </div>
+  </div>
 
   <div class="box" ng-hide="diffView==='APP_CFG' && final != null">
     <div>
-      <div class="card_radio" ng-class="{green_box: env1version.name === 'master'}" ng-repeat="env1version in env1Versions track by $index" ng-hide="env1version.target === env2Version.target">
-        <input type="radio" ng-value="env1version.name" name="env1" ng-model="$parent.env1VersionChoosen" ng-change="setVersionEnv1()"/>
-        <label for="env1version.name" ng-show="env1version.name !== 'master'">{{env1version.name}}</label>
-        <label for="env1version.name" ng-show="env1version.name === 'master'">Actual</label>
+      <div class="card_radio" ng-class="{green_box: env1version.name === 'master', blue_box: env1version.name === 'current'}" ng-repeat="env1version in env1Versions track by $index" ng-hide="env1version.target === env2Version.target">
+        <input type="radio" ng-value="env1version.name" name="env1" id="{{env1version.target}}1" ng-model="$parent.env1VersionChoosen" ng-change="setVersionEnv1()"/>
+        <label for="{{env1version.target}}1" ng-show="env1version.name !== 'master' && env1version.name !== 'current'"">{{env1version.name}}</label>
+        <label for="{{env1version.target}}1" ng-show="env1version.name === 'master'">Actual</label>
+        <label for="{{env1version.target}}1" ng-show="env1version.name === 'current'">Current</label>
         <span class="commit_date" ng-bind="env1version.commit.committed_date | date:'dd-MM-yyyy HH:mm'"></span>
         <div>
           <div class="commit_info">
@@ -72,16 +79,16 @@
     <div>
       <form ng-model="env2VersionChoosen" ng-change="setVersionEnv2()">
         <div class="card_radio" ng-class="{green_box: env2version.name === 'master', blue_box: env2version.name === 'current'}" ng-repeat="env2version in env2Versions track by $index" ng-hide="env2version.target === env1Version.target">
-          <input type="radio" ng-value="env2version.name" name="env2" ng-model="$parent.env2VersionChoosen" ng-change="setVersionEnv2()"/>
-          <label for="env2version.name" ng-show="env2version.name !== 'master' && env2version.name !== 'current'">{{env2version.name}}</label>
-          <label for="env2version.name" ng-show="env2version.name === 'master'">Actual</label>
-          <label for="env2version.name" ng-show="env2version.name === 'current'">Current</label>
+          <input type="radio" ng-value="env2version.name" name="env2" id="{{env2version.target}}2" ng-model="$parent.env2VersionChoosen" ng-change="setVersionEnv2()"/>
+          <label for="{{env2version.target}}2" ng-show="env2version.name !== 'master' && env2version.name !== 'current'">{{env2version.name}}</label>
+          <label for="{{env2version.target}}2" ng-show="env2version.name === 'master'">Actual</label>
+          <label for="{{env2version.target}}2" ng-show="env2version.name === 'current'">Current</label>
           <span class="commit_date" ng-bind="env2version.commit.committed_date | date:'dd-MM-yyyy HH:mm'"></span>
           <div>
             <div class="commit_info">
               <p>{{env2version.target}}</p>
-              <p><i class="fa fa-user" ng-hide="env2version.name === 'current'"></i> {{env2version.commit.committer_name}}</p>
-              <p><i class="fa fa-envelope" ng-hide="env2version.name === 'current'"></i> {{env2version.commit.committer_email}}</p>
+              <p><i class="fa fa-user"></i> {{env2version.commit.committer_name}}</p>
+              <p><i class="fa fa-envelope"></i> {{env2version.commit.committer_email}}</p>
             </div>
           </div>
         </div>
@@ -90,11 +97,11 @@
   </div>
 
   <div class="box" ng-show="diffView==='APP_CFG' && final != null">
-    <div class="card_radio" ng-class="{green_box: env1Version.name === 'master', blue_box: env2Version === 'current'}">
+    <div class="card_radio" ng-class="{green_box: env1Version.name === 'master', blue_box: env1Version.name === 'current'}">
       <div class="card_head">
-        <p ng-show="env1Version.name !== 'master' && env1Version !== 'current'"><strong>{{env1Version.name}}</strong></p>
+        <p ng-show="env1Version.name !== 'master' && env1Version.name !== 'current'"><strong>{{env1Version.name}}</strong></p>
         <p ng-show="env1Version.name === 'master'"><strong>Actual</strong></p>
-        <p ng-show="env2Version.name === 'current'"><strong>Current</strong></p>
+        <p ng-show="env1Version.name === 'current'"><strong>Current</strong></p>
         <span class="commit_date" ng-bind="env1Version.commit.committed_date | date:'dd-MM-yyyy HH:mm'"></span>
       </div>
       <div class="commit_info">
@@ -105,8 +112,9 @@
     </div>
     <div class="card_radio" ng-class="{green_box: env2Version.name === 'master', blue_box: env2Version.name === 'current'}">
       <div class="card_head">
-        <p ng-show="env2Version.name !== 'master' && env2Version !== 'current'"><strong>{{env2Version.name}}</strong></p>
+        <p ng-show="env2Version.name !== 'master' && env2Version.name !== 'current'"><strong>{{env2Version.name}}</strong></p>
         <p ng-show="env2Version.name === 'master'"><strong>Actual</strong></p>
+        <p ng-show="env2Version.name === 'current'"><strong>Current</strong></p>
         <span class="commit_date" ng-bind="env2Version.commit.committed_date | date:'dd-MM-yyyy HH:mm'"></span>
       </div>
       <div class="commit_info">
