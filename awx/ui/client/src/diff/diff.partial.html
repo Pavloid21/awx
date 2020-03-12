@@ -66,12 +66,12 @@
         <label for="{{env1version.target}}1" ng-show="env1version.name !== 'master' && env1version.name !== 'current'"">{{env1version.name}}</label>
         <label for="{{env1version.target}}1" ng-show="env1version.name === 'master'">Actual</label>
         <label for="{{env1version.target}}1" ng-show="env1version.name === 'current'">Current</label>
-        <span class="commit_date" ng-bind="env1version.commit.committed_date | date:'dd-MM-yyyy HH:mm'"></span>
         <div>
           <div class="commit_info">
-            <p>{{env1version.target}}</p>
+            <p ng-bind="env1version.commit.committed_date | date:'dd-MM-yyyy HH:mm'"></p>
             <p><i class="fa fa-user"></i> {{env1version.commit.committer_name}}</p>
             <p><i class="fa fa-envelope"></i> {{env1version.commit.committer_email}}</p>
+            <p>{{env1version.target}}</p>
           </div>
         </div>
       </div>
@@ -83,12 +83,12 @@
           <label for="{{env2version.target}}2" ng-show="env2version.name !== 'master' && env2version.name !== 'current'">{{env2version.name}}</label>
           <label for="{{env2version.target}}2" ng-show="env2version.name === 'master'">Actual</label>
           <label for="{{env2version.target}}2" ng-show="env2version.name === 'current'">Current</label>
-          <span class="commit_date" ng-bind="env2version.commit.committed_date | date:'dd-MM-yyyy HH:mm'"></span>
           <div>
             <div class="commit_info">
-              <p>{{env2version.target}}</p>
+              <p ng-bind="env2version.commit.committed_date | date:'dd-MM-yyyy HH:mm'"></p>
               <p><i class="fa fa-user"></i> {{env2version.commit.committer_name}}</p>
               <p><i class="fa fa-envelope"></i> {{env2version.commit.committer_email}}</p>
+              <p>{{env2version.target}}</p>
             </div>
           </div>
         </div>
@@ -102,12 +102,12 @@
         <p ng-show="env1Version.name !== 'master' && env1Version.name !== 'current'"><strong>{{env1Version.name}}</strong></p>
         <p ng-show="env1Version.name === 'master'"><strong>Actual</strong></p>
         <p ng-show="env1Version.name === 'current'"><strong>Current</strong></p>
-        <span class="commit_date" ng-bind="env1Version.commit.committed_date | date:'dd-MM-yyyy HH:mm'"></span>
       </div>
       <div class="commit_info">
-        <p>{{env1Version.target}}</p>
+        <p ng-bind="env1Version.commit.committed_date | date:'dd-MM-yyyy HH:mm'"></p>
         <p><i class="fa fa-user"></i> {{env1Version.commit.committer_name}}</p>
         <p><i class="fa fa-envelope"></i> {{env1Version.commit.committer_email}}</p>
+        <p>{{env1Version.target}}</p>
       </div>
     </div>
     <div class="card_radio" ng-class="{green_box: env2Version.name === 'master', blue_box: env2Version.name === 'current'}">
@@ -115,12 +115,12 @@
         <p ng-show="env2Version.name !== 'master' && env2Version.name !== 'current'"><strong>{{env2Version.name}}</strong></p>
         <p ng-show="env2Version.name === 'master'"><strong>Actual</strong></p>
         <p ng-show="env2Version.name === 'current'"><strong>Current</strong></p>
-        <span class="commit_date" ng-bind="env2Version.commit.committed_date | date:'dd-MM-yyyy HH:mm'"></span>
       </div>
       <div class="commit_info">
-        <p>{{env2Version.target}}</p>
+        <p ng-bind="env2Version.commit.committed_date | date:'dd-MM-yyyy HH:mm'"></p>
         <p><i class="fa fa-user" ng-show="!!env2Version.commit.committer_name"></i> {{env2Version.commit.committer_name}}</p>
         <p><i class="fa fa-envelope" ng-show="!!env2Version.commit.committer_email"></i> {{env2Version.commit.committer_email}}</p>
+        <p>{{env2Version.target}}</p>
       </div>
     </div>
   </div>

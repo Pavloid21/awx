@@ -73,7 +73,8 @@ class DiffView(View):
                 'compare_domain_one': request.GET['env1'],
                 'compare_domain_two': request.GET['env2'],
                 'compare_version_one': request.GET['v1'],
-                'compare_version_two': request.GET['v2']
+                'compare_version_two': request.GET['v2'],
+                'composite': request.GET['composite']
             },
             'inventory': invId
         },

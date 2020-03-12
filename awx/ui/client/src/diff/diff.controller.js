@@ -42,7 +42,7 @@ export default [
 
     $scope.env1Versions = null;
     $scope.env2Versions = null;
-    $scope.version_commit = 'v_0.7 11.03.2020'
+    $scope.version_commit = 'v_0.8 12.03.2020'
 
     $scope.isCollapse = {
       changes: false,
@@ -60,11 +60,11 @@ export default [
             $scope.diffErrorMessage = null;
             $scope.compareData = null;
             $scope.final = null;
-            if ($scope.env1 !== $scope.env2 && $scope.env2Versions && $scope.env2Versions[0].name === 'current') {
-              $scope.env2Versions.shift();
-            } else if ($scope.env1 === $scope.env2 && $scope.env2Versions && $scope.env2Versions[0].name !== 'current') {
-              $scope.env2Versions.unshift({name: 'current', target: null})
-            }
+            // if ($scope.env1 !== $scope.env2 && $scope.env2Versions && $scope.env2Versions[0].name === 'current') {
+            //   $scope.env2Versions.shift();
+            // } else if ($scope.env1 === $scope.env2 && $scope.env2Versions && $scope.env2Versions[0].name !== 'current') {
+            //   $scope.env2Versions.unshift({name: 'current', target: null})
+            // }
             Wait("stop");
           },
           function error(response) {
@@ -160,7 +160,7 @@ export default [
             if (version.id === $scope.env2) return version;
           });
           $scope.uiEnv2 = env2[0].name;
-          var url = `/diff/compare/${$scope.env1Version.target}/${$scope.env2Version.target}/?env1=${env1[0].name}&env2=${env2[0].name}&v1=${$scope.env1Version.name}&v2=${$scope.env2Version.name}&isnode=undefined`;
+          var url = `/diff/compare/${$scope.env1Version.target}/${$scope.env2Version.target}/?env1=${env1[0].name}&env2=${env2[0].name}&v1=${$scope.env1Version.name}&v2=${$scope.env2Version.name}&composite=${!!$scope.confirmed}&isnode=undefined`;
           //  url = 'compare.js';
           $http({ method: "GET", url: url, timeout: 60 * 1000 }).then(
             function success(response) {
@@ -187,10 +187,12 @@ export default [
                           function success(response) {
                             $scope.compareData = response.data.compare.results.find(res => {
                               if (
-                                res.task === "compare v_one and v_two" &&
-                                res.event_data.res
-                              )
-                                return JSON.parse(res.event_data.res.stdout);
+                                res.task.indexOf('сompare v_one and v_two') >= 0 &&
+                                !!res.event_data.res
+                              ) {
+                                return true;
+                              }
+                              return false;
                             });
                             $scope.final = JSON.parse(
                               $scope.compareData.event_data.res.stdout
