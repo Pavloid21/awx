@@ -29,20 +29,19 @@ AWX_API_PATH = 'http://127.0.0.1:8052'
 class EnvironmentList(View):
 
     def get(self, request, *args, **kwargs):
-        response = requests.get(REPO_PATH, headers={'Private-Token': 'znhhCk-fnMpdBZB-snuy'})
+        response = requests.get(REPO_PATH, headers={'Private-Token': '8s7Ryzi621Yhzf8hvRhP'})
         return JsonResponse({'versions': response.json()})
 
 
 class VersionList(View):
 
     def get(self, request, *args, **kwargs):
-        response = requests.get(REPO_PATH + '/' + kwargs['environment_name'] + '/repository/tags', headers={'Private-Token': 'znhhCk-fnMpdBZB-snuy'})
-        master = requests.get(REPO_PATH + '/' + kwargs['environment_name'] + '/repository/branches/master', headers={'Private-Token': 'znhhCk-fnMpdBZB-snuy'})
+        response = requests.get(REPO_PATH + '/' + kwargs['environment_name'] + '/repository/tags', headers={'Private-Token': '8s7Ryzi621Yhzf8hvRhP'})
+        master = requests.get(REPO_PATH + '/' + kwargs['environment_name'] + '/repository/branches/master', headers={'Private-Token': '8s7Ryzi621Yhzf8hvRhP'})
         masterJSON = json.loads(master.text)
         masterJSON['target'] = masterJSON['commit']['id']
         envJSON = json.loads(response.text)
         envJSON.insert(0, masterJSON)
-        # result = json.dumps(envJSON)
         return JsonResponse({'versions': envJSON})
 
 
@@ -59,12 +58,6 @@ class DiffView(View):
     def get(self, request, *args, **kwargs):
         path = AWX_API_PATH
         invId = 3
-        # inventoryList = requests.get(AWX_API_PATH + '/api/v2/inventories', auth=('admin', 'password'))
-        # if request.GET['env1'] == request.GET['env2']:
-        #     inventories = json.loads(inventoryList.text)
-        #     for inventory in inventories['results']:
-        #         if inventory['name'] == request.GET['env1']:
-        #             invId = inventory['id']
         if request.GET['isnode'] == 'production':
             path = 'http://localhost'
         
@@ -86,18 +79,6 @@ class DiffView(View):
         status = str(job['status'])
         response = ''
         return JsonResponse(job)
-        # while status != 'failed' and status != 'successful':
-        #     time.sleep(10)
-        #     logging.info(str(job['status']))
-        #     job = self.getJob(obj)
-        #     status = str(job['status'])
-        # else:
-        #     if str(job['status']) == 'failed':
-        #         response = { 'status': 'failed', 'job': str(job['id'])}
-        #         return JsonResponse(response)
-        #     else:
-        #         response = requests.get(path + '/api/v2/jobs/' + str(obj['job']) + '/job_events/?page=2', auth=('admin', 'password'))
-        #         return JsonResponse({'compare': response.json(), 'status': str(job['status']), 'job': str(obj['job'])})
         
 class DiffResultView(View):
     def get(self, request, *args, **kwargs):

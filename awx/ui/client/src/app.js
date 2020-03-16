@@ -12,6 +12,7 @@ if ($basePath) {
 }
 
 import diff from './diff/main';
+import deploy from './deploy/main';
 
 import start from './app.start';
 import inventoriesHosts from './inventories-hosts/main';
@@ -91,6 +92,7 @@ angular
         projects.name,
         scheduler.name,
         diff.name,
+        deploy.name,
 
         'Utilities',
         'templates',

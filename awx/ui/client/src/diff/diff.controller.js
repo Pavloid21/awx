@@ -1,5 +1,5 @@
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 window.html2canvas = html2canvas;
 
 export default [
@@ -16,8 +16,7 @@ export default [
     $("#diffCompareButton").css("cursor", "not-allowed");
 
     $scope.diffView = "APP_CFG";
-    
-    //$http({method: 'GET', url: '/environments.j
+
     $http({ method: "GET", url: "/diff/environments/" }).then(
       function success(response) {
         $scope.URL = "/diff/environments/";
@@ -42,12 +41,12 @@ export default [
 
     $scope.env1Versions = null;
     $scope.env2Versions = null;
-    $scope.version_commit = 'v_0.8 12.03.2020'
+    $scope.version_commit = "v_0.8 12.03.2020";
 
     $scope.isCollapse = {
       changes: false,
-      new_values: false,
-    }
+      new_values: false
+    };
 
     $scope.getDataEnv1 = function() {
       if ($scope.env1 !== null) {
@@ -60,11 +59,6 @@ export default [
             $scope.diffErrorMessage = null;
             $scope.compareData = null;
             $scope.final = null;
-            // if ($scope.env1 !== $scope.env2 && $scope.env2Versions && $scope.env2Versions[0].name === 'current') {
-            //   $scope.env2Versions.shift();
-            // } else if ($scope.env1 === $scope.env2 && $scope.env2Versions && $scope.env2Versions[0].name !== 'current') {
-            //   $scope.env2Versions.unshift({name: 'current', target: null})
-            // }
             Wait("stop");
           },
           function error(response) {
@@ -85,14 +79,10 @@ export default [
     $scope.getDataEnv2 = function() {
       if ($scope.env2 !== null) {
         Wait("start");
-        // var url = '/'.concat($scope.env2).concat('.js');
         var url = `/diff/environments/${$scope.env2}/`;
         $http({ method: "GET", url: url }).then(
           function success(response) {
             $scope.env2Versions = response.data.versions;
-            // if ($scope.env1 === $scope.env2) {
-            //   $scope.env2Versions.unshift({name: 'current', target: null})
-            // }
             $scope.env2Version = null;
             $scope.diffErrorMessage = null;
             $scope.compareData = null;
@@ -160,51 +150,64 @@ export default [
             if (version.id === $scope.env2) return version;
           });
           $scope.uiEnv2 = env2[0].name;
-          var url = `/diff/compare/${$scope.env1Version.target}/${$scope.env2Version.target}/?env1=${env1[0].name}&env2=${env2[0].name}&v1=${$scope.env1Version.name}&v2=${$scope.env2Version.name}&composite=${!!$scope.confirmed}&isnode=undefined`;
-          //  url = 'compare.js';
+          var url = `/diff/compare/${$scope.env1Version.target}/${
+            $scope.env2Version.target
+          }/?env1=${env1[0].name}&env2=${env2[0].name}&v1=${
+            $scope.env1Version.name
+          }&v2=${
+            $scope.env2Version.name
+          }&composite=${!!$scope.confirmed}&isnode=undefined`;
           $http({ method: "GET", url: url, timeout: 60 * 1000 }).then(
             function success(response) {
               $scope.compareData = {};
-              if (response.data.status === 'failed') {
-                $scope.final = { status: 'failed', job: response.data.job };
+              if (response.data.status === "failed") {
+                $scope.final = { status: "failed", job: response.data.job };
                 $scope.compareData = response.data;
               } else {
-                $scope.job = response.data
-                // console.log($scope.job)
+                $scope.job = response.data;
                 let requestJob = () => {
-                  $http({ method: 'GET', url: `/diff/results/?job=${$scope.job.id}`}).then(
-                    function success(response) {
-                      if (response.data.status !== 'successful' && response.data.status !== 'failed') {
-                        setTimeout(() => requestJob(), 30 * 1000)
-                      } else if(response.data.status === 'failed') {
-                        $scope.final = {
-                          status: 'failed',
-                          job: $scope.job.id
-                        };
-                        Wait("stop");
-                      } else {
-                        $http({ method: 'GET', url: `/diff/final/?job=${$scope.job.id}&status=successful`}).then(
-                          function success(response) {
-                            $scope.compareData = response.data.compare.results.find(res => {
-                              if (
-                                res.task.indexOf('сompare v_one and v_two') >= 0 &&
-                                !!res.event_data.res
-                              ) {
-                                return true;
-                              }
-                              return false;
-                            });
-                            $scope.final = JSON.parse(
-                              $scope.compareData.event_data.res.stdout
-                            );
-                            $scope.isEmpty = Object.keys($scope.final)[0] === undefined;
-                            Wait("stop");
+                  $http({
+                    method: "GET",
+                    url: `/diff/results/?job=${$scope.job.id}`
+                  }).then(function success(response) {
+                    if (
+                      response.data.status !== "successful" &&
+                      response.data.status !== "failed"
+                    ) {
+                      setTimeout(() => requestJob(), 30 * 1000);
+                    } else if (response.data.status === "failed") {
+                      $scope.final = {
+                        status: "failed",
+                        job: $scope.job.id
+                      };
+                      Wait("stop");
+                    } else {
+                      $http({
+                        method: "GET",
+                        url: `/diff/final/?job=${$scope.job.id}&status=successful`
+                      }).then(function success(response) {
+                        $scope.compareData = response.data.compare.results.find(
+                          res => {
+                            if (
+                              res.task.indexOf("сompare v_one and v_two") >=
+                                0 &&
+                              !!res.event_data.res
+                            ) {
+                              return true;
+                            }
+                            return false;
                           }
-                        )
-                      }
+                        );
+                        $scope.final = JSON.parse(
+                          $scope.compareData.event_data.res.stdout
+                        );
+                        $scope.isEmpty =
+                          Object.keys($scope.final)[0] === undefined;
+                        Wait("stop");
+                      });
                     }
-                  )
-                }
+                  });
+                };
                 requestJob();
               }
             },
@@ -214,9 +217,7 @@ export default [
                 .concat(" : ")
                 .concat(response.statusText);
               $scope.compareData = null;
-              console.log($scope.diffErrorMessage)
-              // $scope.compare('repeat')
-              // $("html, body").animate({ scrollTop: 0 }, "slow");
+              console.log($scope.diffErrorMessage);
               Wait("stop");
             }
           );
@@ -231,49 +232,51 @@ export default [
     };
 
     $scope.collapseView = function(chapter) {
-      $scope.isCollapse[chapter] = !$scope.isCollapse[chapter]
-    }
+      $scope.isCollapse[chapter] = !$scope.isCollapse[chapter];
+    };
 
     $scope.setCompareComposite = function() {
-      console.log('CHECKBOX', $scope.confirmed);
-
-    }
+      console.log("CHECKBOX", $scope.confirmed);
+    };
 
     $scope.exportPDF = function() {
-      Wait('start');
-      let quotes = document.getElementById('printContainer');
-      let pdf = new jsPDF('p', 'pt', 'letter');
+      Wait("start");
+      let quotes = document.getElementById("printContainer");
+      let pdf = new jsPDF("p", "pt", "letter");
       pdf.html(quotes, {
         html2canvas: {
           width: 500,
           windowWidth: 500,
-          scale: .62,
+          scale: 0.62
         },
         callback: () => {
-          pdf.save()
-          Wait('stop')
+          pdf.save();
+          Wait("stop");
         }
-      })
-    }
+      });
+    };
 
     $scope.PrintDiv = () => {
-      var data = document.getElementById('printContainer').innerHTML;
-      let head = document.getElementsByTagName('head')[0].innerHTML;
-      var myWindow = window.open('', 'my div', 'height=800,width=600');
-      myWindow.document.write('<html>');
-      myWindow.document.write('<head>' + head);
-      myWindow.document.write('</head><body onload="window.print(); window.close();">');
+      var data = document.getElementById("printContainer").innerHTML;
+      let head = document.getElementsByTagName("head")[0].innerHTML;
+      var myWindow = window.open("", "my div", "height=800,width=600");
+      myWindow.document.write("<html>");
+      myWindow.document.write("<head>" + head);
+      myWindow.document.write(
+        '</head><body onload="window.print(); window.close();">'
+      );
       myWindow.document.write(data);
-      myWindow.document.write('</body></html>');
+      myWindow.document.write("</body></html>");
       myWindow.document.close(); // necessary for IE >= 10
 
-      myWindow.onload = function(){ // necessary if the div contain images
+      myWindow.onload = function() {
+        // necessary if the div contain images
 
-          myWindow.focus(); // necessary for IE >= 10
-          myWindow.print();
-          myWindow.close();
+        myWindow.focus(); // necessary for IE >= 10
+        myWindow.print();
+        myWindow.close();
       };
-  }
+    };
 
     $scope.diffSwitchView = function(view) {
       $scope.diffView = view;
