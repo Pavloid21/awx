@@ -41,7 +41,7 @@ export default [
 
     $scope.env1Versions = null;
     $scope.env2Versions = null;
-    $scope.version_commit = "v_0.8 12.03.2020";
+    $scope.version_commit = "v_0.9 16.03.2020";
 
     $scope.isCollapse = {
       changes: false,
