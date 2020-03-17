@@ -3,20 +3,12 @@
 
 
 from django.conf.urls import url
-from awx.diff.views import (
-    EnvironmentList,
-    VersionList,
-    DiffView,
-    DiffResultView,
-    DiffFinalView
+from awx.deploy.views import (
+    UploadFile
 )
 
-app_name = 'deploy'
+app_name = 'deploy_cnf'
 urlpatterns = [
-    url(r'^environments/$', EnvironmentList.as_view(), name='environment_list'),
-    url(r'^environments/(?P<environment_name>[0-9_-]+)/$', VersionList.as_view(), name='version_list'),
-    url(r'^compare/(?P<left_version_id>[a-z0-9-]+)/(?P<right_version_id>[a-z0-9-]+)/$', DiffView.as_view(), name='diff'),
-    url(r'^results/$', DiffResultView.as_view(), name='res'),
-    url(r'^final/$', DiffFinalView.as_view(), name='fin')
+    url(r'^uploads/$', UploadFile.as_view(), name='uploads')
 ]
 
