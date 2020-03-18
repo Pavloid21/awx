@@ -74,8 +74,42 @@
 
 .popup-body {
   padding: 20px;
+  text-align: center;
   textarea {
-      width: 100%;
-      resize: vertical;
+    width: 100%;
+    overflow: auto;
+    line-height: 13px;
+    font-size: 13px;
+    min-height: 250px;
+    max-height: 320px;
+    border: 1px solid #999;
+    padding: 10px;
+    font-family: monospace;
+    margin: 0;
+    display: block;
+    outline: none;
   }
+  .line-nums {
+    overflow: hidden;
+    font-size: 13px;
+    line-height: 13px;
+    padding: 10px 4px;
+    font-family: monospace;
+    background: #eee;
+    width: 50px;
+    left: -19px;
+    bottom: 0;
+    top: 0;
+    text-align: right;
+    border: 1px solid #999;
+    border-right: none;
+  }
+}
+
+.text-view {
+	position: relative;
+  display: flex;
+  overflow: hidden;
+  max-height: 320px;
+  margin-bottom: 15px;
 }

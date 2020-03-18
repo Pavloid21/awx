@@ -1,26 +1,41 @@
-
 <div class="DashboardGraphs" style="padding-bottom: 20px;">
-    <div style="margin-bottom: 10px;">
-        <span>Choose domain:</span>
-        <select style="width: 170px" ng-model="domain" ng-change="setDomain()">
-            <option>Domain 1</option>
-            <option>Domain 2</option>
-            <option>Domain 3</option>
-          </select>
-    </div>
-    <form method="post" enctype="multipart/form-data">
-        <input name="cnf" type="file" ng-disabled="!domain" ng-model="config" file-change="setConfig">
-    </form>
+  <div style="margin-bottom: 10px;">
+    <span>Choose domain:</span>
+    <select style="width: 170px" ng-model="domain" ng-change="setDomain()">
+      <option>Domain 1</option>
+      <option>Domain 2</option>
+      <option>Domain 3</option>
+    </select>
+  </div>
+  <form method="post" enctype="multipart/form-data">
+    <input
+      name="cnf"
+      type="file"
+      id="cnf"
+      ng-disabled="!domain"
+      ng-model="config"
+      file-change="setConfig"
+    />
+  </form>
 
-    <div class="popup" ng-show="!!domain && showPopup">
-        <div class="popup-content">
-            <div class="popup-header">
-                <span class="close" ng-click="closePopup()">&times;</span>
-                <h4>Upcoming changes</h4>
-            </div>
-            <div class="popup-body">
-                <textarea></textarea>
-            </div>
+  <div class="popup" ng-show="!!domain && showPopup">
+    <div class="popup-content">
+      <div class="popup-header">
+        <span class="close" ng-click="closePopup()">&times;</span>
+        <h4>Upcoming changes</h4>
+      </div>
+      <div class="popup-body">
+        <div class="text-view">
+          <div class="line-nums" id="nums">
+            <div ng-repeat="num in lineNumbers track by $index">{{num}}</div>
+          </div>
+          <textarea id="listing" readonly>{{fileText}}</textarea>
         </div>
+        <button class="btn btn-primary" ng-click="uploadConfig()">
+            <i class="fa fa-play-circle"></i>
+             Apply
+        </button>
+      </div>
     </div>
+  </div>
 </div>
