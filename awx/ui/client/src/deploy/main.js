@@ -6,6 +6,8 @@
 
 import controller from "./deploy.controller";
 import route from "./deploy.route";
+import deployCardController from './components/deploycard.controller';
+import deployCardTemplate from './components/deploycard.view.html';
 
 export default angular
   .module("deploy", [])
@@ -47,6 +49,13 @@ export default angular
           })
         })
       },
+    }
+  })
+  .component('deployCard', {
+    templateUrl: deployCardTemplate,
+    controller: deployCardController,
+    bindings: {
+      step: '@'
     }
   })
   .controller("deploy", controller)

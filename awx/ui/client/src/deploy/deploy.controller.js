@@ -19,6 +19,7 @@ export default [
   ) => {
     $scope.fileText = "";
     $scope.lineNumbers = [];
+    $rootScope.isConfigUploaded = [];
 
     let handleFiles = file => {
       const reader = new FileReader();
@@ -44,10 +45,6 @@ export default [
       reader.readAsText(file);
     };
 
-    $scope.setDomain = () => {
-      console.log("fired", $scope.domain);
-    };
-
     $scope.setConfig = files => {
       $scope.fileObj = files[0];
       handleFiles(files[0]);
@@ -60,6 +57,9 @@ export default [
         function(r) {
           // success
           $scope.showPopup = false;
+          $rootScope.isConfigUploaded.push(1);
+          console.log(JSON.parse(r.response))
+          $rootScope.configFileName = JSON.parse(r.response)
           Wait("stop");
         },
         function(r) {

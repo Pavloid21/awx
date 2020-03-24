@@ -1,24 +1,16 @@
 <div class="DashboardGraphs" style="padding-bottom: 20px;">
-  <div style="margin-bottom: 10px;">
-    <span>Choose domain:</span>
-    <select style="width: 170px" ng-model="domain" ng-change="setDomain()">
-      <option>Domain 1</option>
-      <option>Domain 2</option>
-      <option>Domain 3</option>
-    </select>
-  </div>
   <form method="post" enctype="multipart/form-data">
+    <label for="cnf">Upload configuration file: </label>
     <input
       name="cnf"
       type="file"
       id="cnf"
-      ng-disabled="!domain"
       ng-model="config"
       file-change="setConfig"
     />
   </form>
 
-  <div class="popup" ng-show="!!domain && showPopup">
+  <div class="popup" ng-show="showPopup">
     <div class="popup-content">
       <div class="popup-header">
         <span class="close" ng-click="closePopup()">&times;</span>
@@ -37,5 +29,10 @@
         </button>
       </div>
     </div>
+  </div>
+  <div class="pipeline">
+    <deploy-card ng-repeat="(key, value) in $root.isConfigUploaded track by $index" step="{{key + 1}}">
+      
+    </deploy-card>
   </div>
 </div>
