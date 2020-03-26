@@ -74,6 +74,7 @@ from .oauth2 import urls as oauth2_urls
 from .oauth2_root import urls as oauth2_root_urls
 from .workflow_approval_template import urls as workflow_approval_template_urls
 from .workflow_approval import urls as workflow_approval_urls
+from .deployhistory import urls as deployhistory
 
 
 v2_urls = [
@@ -137,6 +138,7 @@ v2_urls = [
     url(r'^activity_stream/', include(activity_stream_urls)),
     url(r'^workflow_approval_templates/', include(workflow_approval_template_urls)),
     url(r'^workflow_approvals/', include(workflow_approval_urls)),
+    url(r'^deploy_history/', include(deployhistory)),
 ]
 
 

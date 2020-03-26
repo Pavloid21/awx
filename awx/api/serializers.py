@@ -48,6 +48,7 @@ from awx.main.constants import (
     ACTIVE_STATES,
     CENSOR_VALUE,
 )
+from awx.main.models import DeployHistory
 from awx.main.models import (
     ActivityStream, AdHocCommand, AdHocCommandEvent, Credential, CredentialInputSource,
     CredentialType, CustomInventoryScript, Group, Host, Instance,
@@ -1233,6 +1234,17 @@ class OAuth2ApplicationSerializer(BaseSerializer):
         ret['tokens'] = self._summary_field_tokens(obj)
         return ret
 
+class DeployHistorySerializer(BaseSerializer):
+    status = serializers.CharField(max_length=256)
+    # user = models.ForeignKey('auth.User', related_name='+', blank=False, null=False, on_delete=models.CASCADE)
+    date = serializers.DateTimeField()
+    config = serializers.CharField(max_length=256)
+    domain = serializers.CharField(max_length=256)
+    prev_step_id = serializers.IntegerField()
+
+    class Meta:
+        model = DeployHistory
+        fields = ('__all__')
 
 class OrganizationSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete']
