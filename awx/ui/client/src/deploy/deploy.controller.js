@@ -20,6 +20,8 @@ export default [
     $scope.fileText = "";
     $scope.lineNumbers = [];
     $rootScope.isConfigUploaded = [];
+    $scope.displayView = 'history';
+    $scope.deployHistoryRows = [];
 
     let handleFiles = file => {
       const reader = new FileReader();
@@ -44,6 +46,29 @@ export default [
 
       reader.readAsText(file);
     };
+    Wait('start')
+    let getDeployHistory = () => {
+      $http({
+        method: 'GET',
+        url: '/deploy/rows/'
+      }).then(
+        function success(response) {
+          $scope.deployHistoryRows = response.data.results.filter((value, index, array) => {
+            if (!value.prev_step_id) {
+              return value
+            }
+          });
+          console.log($scope.deployHistoryRows)
+          Wait('stop');
+        },
+
+        function error(response) {
+          console.warn(response)
+          Wait('stop')
+        }
+      )
+    }
+    getDeployHistory();
 
     $scope.setConfig = files => {
       $scope.fileObj = files[0];
@@ -58,7 +83,6 @@ export default [
           // success
           $scope.showPopup = false;
           $rootScope.isConfigUploaded.push(1);
-          console.log(JSON.parse(r.response))
           $rootScope.configFileName = JSON.parse(r.response)
           Wait("stop");
         },
@@ -75,5 +99,14 @@ export default [
       $scope.lineNumbers.length = 0;
       $scope.showPopup = false;
     };
+
+    $scope.historyClick = () => {
+      $scope.displayView = 'history';
+      getDeployHistory();
+    }
+
+    $scope.pipelineClick = () => {
+      $scope.displayView = 'pipeline';
+    }
   }
 ];

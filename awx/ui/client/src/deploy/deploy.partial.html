@@ -1,14 +1,62 @@
 <div class="DashboardGraphs" style="padding-bottom: 20px;">
-  <form method="post" enctype="multipart/form-data">
-    <label for="cnf">Upload configuration file: </label>
-    <input
-      name="cnf"
-      type="file"
-      id="cnf"
-      ng-model="config"
-      file-change="setConfig"
-    />
-  </form>
+  <div class="btn-group">
+    <button
+      class="btn btn-xs"
+      ng-class="{'btn-primary': displayView === 'history', 'Button-primary--hollow': displayView === 'pipeline'}"
+      ng-click="historyClick()"
+    >
+      Deploy history
+    </button>
+    <button
+      class="btn btn-xs"
+      ng-class="{'btn-primary': displayView === 'pipeline', 'Button-primary--hollow': displayView === 'history'}"
+      ng-click="pipelineClick()"
+    >
+      Pipeline
+    </button>
+  </div>
+  <hr/>
+
+  <!-- PIPLINE VIEW -->
+  <div ng-if="displayView === 'pipeline'">
+    <form method="post" enctype="multipart/form-data">
+      <label for="cnf">Upload configuration file: </label>
+      <input
+        name="cnf"
+        type="file"
+        id="cnf"
+        ng-model="config"
+        file-change="setConfig"
+      />
+    </form>
+    <div class="pipeline">
+      <deploy-card
+        ng-repeat="(key, value) in $root.isConfigUploaded track by $index"
+        step="{{key + 1}}"
+      >
+      </deploy-card>
+    </div>
+  </div>
+
+  <!-- HISTORY VIEW -->
+  <div ng-if="displayView === 'history'">
+    <table>
+      <thead>
+        <tr class="table-head">
+          <th>ID</th>
+          <th>DATE</th>
+          <th>USER</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="item in deployHistoryRows" class="table-row">
+          <td>{{item.id}}</td>
+          <td ng-bind="item.created | date:'MM/dd/yyyy HH:mm:ss'" style="width: 200px;"></td>
+          <td>{{item.summary_fields.created_by.username}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <div class="popup" ng-show="showPopup">
     <div class="popup-content">
@@ -24,15 +72,10 @@
           <textarea id="listing" readonly>{{fileText}}</textarea>
         </div>
         <button class="btn btn-primary" ng-click="uploadConfig()">
-            <i class="fa fa-play-circle"></i>
-             Apply
+          <i class="fa fa-play-circle"></i>
+          Apply
         </button>
       </div>
     </div>
-  </div>
-  <div class="pipeline">
-    <deploy-card ng-repeat="(key, value) in $root.isConfigUploaded track by $index" step="{{key + 1}}">
-      
-    </deploy-card>
   </div>
 </div>

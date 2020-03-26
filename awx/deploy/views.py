@@ -1,6 +1,7 @@
 from django.views import View
 from django.core.files.storage import FileSystemStorage
 from django.http import Http404, JsonResponse
+import datetime
 # Python
 import collections
 import sys
@@ -8,6 +9,8 @@ import requests
 import time
 import json
 import logging
+import random
+import string
 from requests.auth import HTTPBasicAuth
 
 # AWX_API_PATH = 'http://172.19.19.231'
@@ -40,7 +43,6 @@ class RunDeploy(View):
 
         for inventory in inventories['results']:
             if inventory['name'] == request.GET['inventory']:
-                print(str(inventory['name']))
                 launch = requests.post(AWX_API_PATH + '/api/v2/job_templates/11/launch/', json={
                     'extra_vars': {
                         'deploy_file': request.GET['file'],
@@ -48,11 +50,27 @@ class RunDeploy(View):
                     'inventory': inventory['id'],
                 },
                 auth=('admin', 'password'))
+                test = requests.post('https://127.0.0.1:8043/api/v2/deploy_history/', json={
+                    'status': 'pending',
+                    'name': ''.join(random.choice(string.ascii_letters) for _ in range(12)),
+                    "description": "",
+                    'config': request.GET['file'],
+                    'domain': request.GET['domain'],
+                    'prev_step_id': None
+                }, 
+                auth=('admin', 'password'),
+                verify=False)
+                testJson = json.loads(json.dumps(test.json()))
                 jsonObj = launch.json()
                 jsonDump = json.dumps(jsonObj)
                 obj = json.loads(jsonDump)
                 job = self.getJob(obj)
-                print(str(job['status']))
+                print(str(testJson))
                 return JsonResponse(job)
         return JsonResponse({'status': 'failed', 'description': 'inventory not exists'})
 
+class DeployHistoryRows(View):
+    def get(self, request, *args, **kwargs):
+        response = requests.get('https://127.0.0.1:8043' + '/api/v2/deploy_history/', auth=('admin', 'password'), verify=False)
+        rows = json.loads(response.text)
+        return JsonResponse(rows)

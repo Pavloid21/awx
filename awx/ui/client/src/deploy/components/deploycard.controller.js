@@ -1,6 +1,5 @@
 export default ($rootScope, $scope, $element, Wait, $http) => {
   $scope.domainsList = ["ulbs11_sales_domain", "ulbs13_sales_domain"];
-  console.log($scope.step)
   $scope.stepNumber = $element.attr('step')
 
   $scope.setDomain = () => {
@@ -9,12 +8,12 @@ export default ($rootScope, $scope, $element, Wait, $http) => {
 
   $scope.deployConfig = () => {
     $scope.final = null;
-    Wait("start");
+    // Wait("start");
     $http({
       method: "GET",
       url: `/deploy/launch/?inventory=${
         $scope.domain
-      }&file=${$rootScope.configFileName.url.replace("/media/", "")}`
+      }&file=${$rootScope.configFileName.url.replace("/media/", "")}&domain=${$scope.domain}`
     }).then(function success(response) {
       if (response.data.status === "failed") {
         $scope.final = { status: "failed", job: response.data.job };

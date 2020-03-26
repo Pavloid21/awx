@@ -1235,12 +1235,12 @@ class OAuth2ApplicationSerializer(BaseSerializer):
         return ret
 
 class DeployHistorySerializer(BaseSerializer):
-    status = serializers.CharField(max_length=256)
+    # show_capabilities = ['edit', 'delete']
+    # status = serializers.CharField(max_length=256)
     # user = models.ForeignKey('auth.User', related_name='+', blank=False, null=False, on_delete=models.CASCADE)
-    date = serializers.DateTimeField()
-    config = serializers.CharField(max_length=256)
-    domain = serializers.CharField(max_length=256)
-    prev_step_id = serializers.IntegerField()
+    # config = serializers.CharField(max_length=256)
+    # domain = serializers.CharField(max_length=256)
+    # prev_step_id = serializers.IntegerField(allow_null=True)
 
     class Meta:
         model = DeployHistory
