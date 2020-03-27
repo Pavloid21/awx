@@ -40,6 +40,9 @@ class RunDeploy(View):
     def get(self, request, *args, **kwargs):
         response = requests.get(AWX_API_PATH + '/api/v2/inventories/', auth=('admin', 'password'))
         inventories = json.loads(response.text)
+        prevStep = None
+        if request.GET['prevstep'].isnumeric():
+            prevStep = request.GET['prevstep']
 
         for inventory in inventories['results']:
             if inventory['name'] == request.GET['inventory']:
@@ -50,13 +53,13 @@ class RunDeploy(View):
                     'inventory': inventory['id'],
                 },
                 auth=('admin', 'password'))
-                test = requests.post('https://127.0.0.1:8043/api/v2/deploy_history/', json={
+                test = requests.post(AWX_API_PATH + '/api/v2/deploy_history/', json={
                     'status': 'pending',
                     'name': ''.join(random.choice(string.ascii_letters) for _ in range(12)),
                     "description": "",
                     'config': request.GET['file'],
                     'domain': request.GET['domain'],
-                    'prev_step_id': None
+                    'prev_step_id': prevStep
                 }, 
                 auth=('admin', 'password'),
                 verify=False)
@@ -66,11 +69,17 @@ class RunDeploy(View):
                 obj = json.loads(jsonDump)
                 job = self.getJob(obj)
                 print(str(testJson))
-                return JsonResponse(job)
+                return JsonResponse({'job': job, 'prevStep': testJson['id']})
         return JsonResponse({'status': 'failed', 'description': 'inventory not exists'})
 
 class DeployHistoryRows(View):
     def get(self, request, *args, **kwargs):
-        response = requests.get('https://127.0.0.1:8043' + '/api/v2/deploy_history/', auth=('admin', 'password'), verify=False)
+        response = requests.get(AWX_API_PATH + '/api/v2/deploy_history/', auth=('admin', 'password'), verify=False)
+        rows = json.loads(response.text)
+        return JsonResponse(rows)
+
+class DeployHistoryNextStep(View):
+    def get(self, request, *args, **kwargs):
+        response = requests.get(AWX_API_PATH + '/api/v2/deploy_history/?prev_step_id=' + request.GET['id'], auth=('admin', 'password'), verify=False)
         rows = json.loads(response.text)
         return JsonResponse(rows)

@@ -58,7 +58,6 @@ export default [
               return value
             }
           });
-          console.log($scope.deployHistoryRows)
           Wait('stop');
         },
 
@@ -82,7 +81,13 @@ export default [
         function(r) {
           // success
           $scope.showPopup = false;
-          $rootScope.isConfigUploaded.push(1);
+          $rootScope.isConfigUploaded.push({
+              description: "",
+              status: "start",
+              config: null,
+              domain: null,
+              prev_step_id: null
+          });
           $rootScope.configFileName = JSON.parse(r.response)
           Wait("stop");
         },
@@ -107,6 +112,34 @@ export default [
 
     $scope.pipelineClick = () => {
       $scope.displayView = 'pipeline';
+      $rootScope.isConfigUploaded = [];
+    }
+
+    $scope.historyRowClick = (item) => {
+      $scope.displayView = 'pipeline';
+      $rootScope.isConfigUploaded = [];
+      $rootScope.isConfigUploaded.push(item);
+      console.log(item)
+      let getNextStep = (prevStepId) => {
+        $http({
+          method: 'GET',
+          url: `/deploy/next_step/?id=${prevStepId}`
+        }).then(
+          function success(response) {
+            if (response.data.results.length) {
+              $rootScope.isConfigUploaded.push(response.data.results[0]);
+              getNextStep(response.data.results[0].id);
+            }
+            Wait('stop');
+          },
+  
+          function error(response) {
+            console.warn(response)
+            Wait('stop')
+          }
+        )
+      }
+      getNextStep(item.id)
     }
   }
 ];

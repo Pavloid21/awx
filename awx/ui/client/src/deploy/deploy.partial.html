@@ -33,6 +33,7 @@
       <deploy-card
         ng-repeat="(key, value) in $root.isConfigUploaded track by $index"
         step="{{key + 1}}"
+        index="key"
       >
       </deploy-card>
     </div>
@@ -49,7 +50,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="item in deployHistoryRows" class="table-row">
+        <tr ng-repeat="item in deployHistoryRows" class="table-row" ng-click="historyRowClick(item)">
           <td>{{item.id}}</td>
           <td ng-bind="item.created | date:'MM/dd/yyyy HH:mm:ss'" style="width: 200px;"></td>
           <td>{{item.summary_fields.created_by.username}}</td>

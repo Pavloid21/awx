@@ -9,15 +9,15 @@
     <div
       class="play-button"
       ng-class="{disabled: !domain}"
-      ng-if="final === undefined"
-      ng-click="deployConfig()"
+      ng-if="final === undefined && status === 'start'"
+      ng-click="deployConfig($ctrl.index)"
     >
       <i class="fa fa-play-circle"></i>
     </div>
-    <div class="success-button" ng-if="final.status === 'success'">
+    <div class="success-button" ng-if="status === 'successful'">
       <i class="fa fa-check-circle-o"></i>
     </div>
-    <div class="failed-button" ng-if="final.status === 'failed'">
+    <div class="failed-button" ng-if="status === 'failed'">
       <i class="fa fa-times-circle-o"></i>
     </div>
     <div
@@ -31,7 +31,7 @@
     </div>
     <div
       class="gear"
-      ng-if="final === null && final.status !== 'failed' && final.status !== 'success'"
+      ng-if="final === null && status !== 'failed' && status !== 'successful' || status === 'pending'"
     ></div>
   </div>
 </div>

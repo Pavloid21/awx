@@ -55,8 +55,13 @@ export default angular
     templateUrl: deployCardTemplate,
     controller: deployCardController,
     bindings: {
-      step: '@'
-    }
+      step: '@',
+      index: '='
+    },
+    // scope: {
+    //   step: '@',
+    //   index: '@'
+    // }
   })
   .controller("deploy", controller)
   .run([
