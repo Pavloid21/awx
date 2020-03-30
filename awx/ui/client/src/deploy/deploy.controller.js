@@ -3,7 +3,7 @@ export default [
   "$scope",
   "$location",
   "ConfigService",
-  "lastPath",
+  "Dataset",
   "$http",
   "Wait",
   "Uploader",
@@ -12,7 +12,7 @@ export default [
     $scope,
     $location,
     ConfigService,
-    lastPath,
+    Dataset,
     $http,
     Wait,
     Uploader
@@ -22,6 +22,14 @@ export default [
     $rootScope.isConfigUploaded = [];
     $scope.displayView = 'history';
     $scope.deployHistoryRows = [];
+    $scope.dataset = Dataset.data;
+    $scope.deployHistoryRows = Dataset.data.results;
+
+    $scope.$on('updateDataset', (e, dataset, queryset) => {
+      $scope.dataset = dataset;
+      $scope.deployHistoryRows = dataset.results;
+      // paginateQuerySet = queryset;
+  });
 
     let handleFiles = file => {
       const reader = new FileReader();
@@ -46,18 +54,15 @@ export default [
 
       reader.readAsText(file);
     };
-    Wait('start')
+    // Wait('start')
     let getDeployHistory = () => {
       $http({
         method: 'GET',
         url: '/deploy/rows/'
       }).then(
         function success(response) {
-          $scope.deployHistoryRows = response.data.results.filter((value, index, array) => {
-            if (!value.prev_step_id) {
-              return value
-            }
-          });
+          // vm.dataset = response.data;
+          $scope.deployHistoryRows = response.data.results;
           Wait('stop');
         },
 
@@ -67,7 +72,7 @@ export default [
         }
       )
     }
-    getDeployHistory();
+    // getDeployHistory();
 
     $scope.setConfig = files => {
       $scope.fileObj = files[0];
@@ -129,6 +134,16 @@ export default [
             if (response.data.results.length) {
               $rootScope.isConfigUploaded.push(response.data.results[0]);
               getNextStep(response.data.results[0].id);
+            } else if($rootScope.isConfigUploaded[$rootScope.isConfigUploaded.length - 1].status !== 'pending' &&
+              $rootScope.isConfigUploaded[$rootScope.isConfigUploaded.length - 1].status !== 'start'
+              ) {
+                $rootScope.isConfigUploaded.push({
+                      description: "",
+                      status: "start",
+                      config: null,
+                      domain: null,
+                      prev_step_id: null
+                    })
             }
             Wait('stop');
           },

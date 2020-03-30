@@ -32,9 +32,6 @@ class RunDeploy(View):
         getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + str(obj['job']), auth=('admin', 'password'))
         temp = json.dumps(getResponse.json())
         result = json.loads(temp)
-        global JOB_LAUNCHED
-        JOB_LAUNCHED = str(result['id'])
-        print('GET JOB FUNC: ' + JOB_LAUNCHED)
         return result
 
     def get(self, request, *args, **kwargs):
@@ -74,7 +71,7 @@ class RunDeploy(View):
 
 class DeployHistoryRows(View):
     def get(self, request, *args, **kwargs):
-        response = requests.get(AWX_API_PATH + '/api/v2/deploy_history/', auth=('admin', 'password'), verify=False)
+        response = requests.get(AWX_API_PATH + '/api/v2/deploy_history/?prev_step_id__isnull=true', auth=('admin', 'password'), verify=False)
         rows = json.loads(response.text)
         return JsonResponse(rows)
 

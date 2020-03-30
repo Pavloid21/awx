@@ -58,10 +58,6 @@ export default angular
       step: '@',
       index: '='
     },
-    // scope: {
-    //   step: '@',
-    //   index: '@'
-    // }
   })
   .controller("deploy", controller)
   .run([

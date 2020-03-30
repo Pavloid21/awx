@@ -9,16 +9,9 @@ export default function($rootScope, $scope, $element, Wait, $http) {
       $scope.domain = $rootScope.isConfigUploaded[this.index].domain;
       $scope.status = $rootScope.isConfigUploaded[this.index].status;
       if (
-        $rootScope.isConfigUploaded.length < $scope.domainsList.length &&
-        $scope.status !== "pending" && $scope.status !== "start"
+        $rootScope.isConfigUploaded.length > $scope.domainsList.length
       ) {
-        $rootScope.isConfigUploaded.push({
-          description: "",
-          status: "start",
-          config: null,
-          domain: null,
-          prev_step_id: null
-        });
+        $rootScope.isConfigUploaded.pop();
       }
       if (this.index > 0) {
         $scope.parentIndex = $rootScope.isConfigUploaded[this.index - 1].id;
