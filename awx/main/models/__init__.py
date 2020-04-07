@@ -74,6 +74,7 @@ from awx.main.access import (  # noqa
 )
 
 from awx.main.models.deployhistory import DeployHistory
+from awx.main.models.deploytemplate import DeployTemplate
 
 
 User.add_to_class('get_queryset', get_user_queryset)
@@ -210,6 +211,7 @@ activity_stream_registrar.connect(WorkflowApprovalTemplate)
 activity_stream_registrar.connect(OAuth2Application)
 activity_stream_registrar.connect(OAuth2AccessToken)
 activity_stream_registrar.connect(DeployHistory)
+activity_stream_registrar.connect(DeployTemplate)
 
 # prevent API filtering on certain Django-supplied sensitive fields
 prevent_search(User._meta.get_field('password'))

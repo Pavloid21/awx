@@ -24,6 +24,7 @@ export default [
     $scope.deployHistoryRows = [];
     $scope.dataset = Dataset.data;
     $scope.deployHistoryRows = Dataset.data.results;
+    $scope.isAllowRun = true;
 
     $scope.$on('updateDataset', (e, dataset, queryset) => {
       $scope.dataset = dataset;

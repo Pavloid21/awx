@@ -1,15 +1,17 @@
 export default function($rootScope, $scope, $element, Wait, $http) {
   this.index = null;
+  this.allowRun = null;
   $scope.domainsList = ["ulbs11_sales_domain", "ulbs13_sales_domain"];
   $scope.status = "start";
   this.$onInit = function() {
     // Init from history if exists
     $scope.index = this.index;
+    $scope.allowRun = this.allowrun;
     if ($rootScope.isConfigUploaded.length) {
       $scope.domain = $rootScope.isConfigUploaded[this.index].domain;
       $scope.status = $rootScope.isConfigUploaded[this.index].status;
       if (
-        $rootScope.isConfigUploaded.length > $scope.domainsList.length
+        $rootScope.isConfigUploaded.length > $scope.domainsList.length && this.allowRun
       ) {
         $rootScope.isConfigUploaded.pop();
       }
@@ -20,8 +22,13 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   };
 
   $scope.setDomain = () => {
-    console.log("fired", $scope.domain);
+    console.log("fired", $scope.domain, $scope.index);
+    $rootScope.isConfigUploaded[$scope.index].domain = $scope.domain;
   };
+
+  $scope.handleDeleteCard = () => {
+    $rootScope.isConfigUploaded.splice($scope.index, 1);
+  }
 
   $scope.deployConfig = index => {
     $scope.final = null;

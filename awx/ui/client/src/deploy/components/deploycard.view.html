@@ -1,5 +1,8 @@
 <div class="card-deploy">
-  <h3>Step {{$ctrl.step}}</h3>
+  <div class="card_header">
+    <h3>Step {{$ctrl.step}}</h3>
+    <i class="fa fa-trash-o" ng-show="!allowRun" ng-click="handleDeleteCard()"/>
+  </div>
   <hr/>
   <div style="margin-bottom: 10px;">
     <span>Choose domain:</span>
@@ -9,7 +12,7 @@
     <div
       class="play-button"
       ng-class="{disabled: !domain}"
-      ng-if="final === undefined && status === 'start'"
+      ng-if="final === undefined && status === 'start' && allowRun"
       ng-click="deployConfig($ctrl.index)"
     >
       <i class="fa fa-play-circle"></i>

@@ -1,0 +1,205 @@
+<div class="DashboardGraphs">
+  <div class="btn-group">
+    <button
+      class="btn btn-xs"
+      ng-class="{'btn-primary': displayView === 'templates', 'Button-primary--hollow': displayView !== 'templates'}"
+      ng-click="templatesClick()"
+    >
+      Templates
+    </button>
+    <button
+      class="btn btn-xs"
+      ng-class="{'btn-primary': displayView === 'pipeline', 'Button-primary--hollow': displayView !== 'pipeline'}"
+      ng-click="pipelineClick()"
+    >
+      Pipeline
+    </button>
+    <button
+      class="btn btn-xs"
+      ng-class="{'btn-primary': displayView === 'history', 'Button-primary--hollow': displayView !== 'history'}"
+      ng-click="historyClick()"
+    >
+      History
+    </button>
+  </div>
+
+  <!-- ADD TEMPLATE -->
+  <div
+    class="DashboardGraphs"
+    style="padding: 20px 20px"
+    ng-show="!!isAdding && displayView === 'templates'"
+  >
+    <label for="template_name">Name of template: </label>
+    <input
+      type="text"
+      id="template_name"
+      ng-model="templateName"
+      ng-change="templateNameInputChange()"
+    />
+    <form method="post" enctype="multipart/form-data">
+      <label for="cnf">Upload configuration file: </label>
+      <input
+        name="cnf"
+        type="file"
+        id="cnf"
+        ng-model="config"
+        file-change="setConfig"
+      />
+    </form>
+    <div class="pipeline">
+      <deploy-card
+        ng-repeat="(key, value) in $root.isConfigUploaded track by $index"
+        step="{{key + 1}}"
+        index="key"
+        allowrun="isAllowRun"
+      >
+      </deploy-card>
+      <div class="add_card" ng-click="handleAddCard()">
+        <i class="fa fa-plus-circle"></i>
+      </div>
+    </div>
+    <div class="pipeline" style="padding-top: 20px;">
+      <button class="btn btn-success" ng-click="handleSave()">Save</button>
+      <button class="btn" ng-click="handleCancel()">Cancel</button>
+    </div>
+    <div
+      class="DashboardGraphs error"
+      ng-show="errors !== null"
+      style="background-color: #f8d7da;
+            border: 1px solid #f5c6cb; padding-bottom: 20px;"
+    >
+      <i class="fa fa-warning"></i> Error: {{errors.details}}
+    </div>
+  </div>
+
+  <!-- VIEW TEMPLATES-->
+  <div style="padding: 20px 0px" ng-show="displayView === 'templates'">
+    <at-panel-body>
+      <div class="at-List-toolbarAction">
+        <button
+          type="button"
+          ng-show="!isAdding"
+          class="at-Button--add"
+          id="button-add"
+          data-placement="top"
+          aria-haspopup="false"
+          aria-expanded="false"
+          style="line-height: 20px;"
+          ng-click="handleAddTemplate()"
+        >
+          Add new template
+        </button>
+      </div>
+      <at-list results="storedTemplates">
+        <at-row
+          ng-repeat="project in storedTemplates"
+          ng-class="{'at-Row--active': (project.id === vm.activeId), 'at-Row--collapsed': vm.isCollapsed}"
+          id="row-{{ project.id }}"
+        >
+          <div class="at-Row-items">
+            <div class="at-Row-container">
+              <at-row-item
+                status="{{ project.statusIcon }}"
+                status-tip="{{ project.statusTip }}"
+                status-click="vm.showSCMStatus(project.id)"
+                header-value="{{ project.name }}"
+                header-state="projects.edit({project_id:{{project.id}}})"
+                header-tag="{{ vm.projectTypes[project.scm_type] }}"
+              >
+              </at-row-item>
+              <div class="at-Row-actions">
+                <div
+                  aw-tool-tip="{{ project.scm_update_tooltip }}"
+                  data-tip-watch="project.scm_update_tooltip"
+                  data-placement="top"
+                >
+                  <div
+                    class="at-RowAction"
+                    ng-class="{'at-RowAction--disabled': project.scm_update_disabled }"
+                    ng-click="vm.SCMUpdate(project.id, $event)"
+                    ng-show="project.summary_fields.user_capabilities.start"
+                  >
+                    <i class="fa fa-refresh"></i>
+                  </div>
+                </div>
+                <at-row-action
+                  icon="fa-copy"
+                  ng-click="vm.copyProject(project)"
+                  ng-show="project.summary_fields.user_capabilities.copy"
+                >
+                </at-row-action>
+                <at-row-action
+                  icon="fa-trash"
+                  ng-click="vm.deleteProject(project.id, project.name)"
+                >
+                </at-row-action>
+                <at-row-action
+                  icon="fa-minus-circle"
+                  ng-click="vm.cancelUpdate(project)"
+                  ng-show="(project.status == 'updating'
+                          || project.status == 'running'
+                          || project.status == 'pending'
+                          || project.status == 'waiting')
+                          && project.summary_fields.user_capabilities.start"
+                >
+                </at-row-action>
+              </div>
+            </div>
+            <div class="at-Row-container--wrapped">
+              <div class="at-RowItem" ng-if="project.scm_revision">
+                <div class="at-RowItem-label">
+                  {{ :: vm.strings.get('list.ROW_ITEM_LABEL_REVISION') }}
+                </div>
+                <at-truncate
+                  string="{{ project.scm_revision }}"
+                  maxLength="7"
+                ></at-truncate>
+              </div>
+              <at-row-item
+                label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_DESCRIPTION')}}"
+                value="{{ project.description | sanitize }}"
+              >
+              </at-row-item>
+              <at-row-item
+                label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_ORGANIZATION')}}"
+                value="{{ project.summary_fields.organization.name }}"
+                value-link="/#/organizations/{{ project.organization }}"
+              >
+              </at-row-item>
+              <at-row-item
+                label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_MODIFIED') }}"
+                value-bind-html="{{ vm.getLastModified(project) }}"
+              >
+              </at-row-item>
+              <at-row-item
+                label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_USED') }}"
+                value-bind-html="{{ vm.getLastUsed(project) }}"
+              >
+              </at-row-item>
+            </div>
+          </div>
+        </at-row>
+      </at-list>
+    </at-panel-body>
+  </div>
+  <div class="popup" ng-show="showPopup">
+    <div class="popup-content">
+      <div class="popup-header">
+        <span class="close" ng-click="closePopup()">&times;</span>
+        <h4>Upcoming changes</h4>
+      </div>
+      <div class="popup-body">
+        <div class="text-view">
+          <div class="line-nums" id="nums_data">
+            <div ng-repeat="num in lineNumbers track by $index">{{num}}</div>
+          </div>
+          <textarea id="listing_data" readonly>{{fileText}}</textarea>
+        </div>
+        <button class="btn btn-primary" ng-click="uploadConfig()">
+          <i class="fa fa-play-circle"></i>
+          Apply
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

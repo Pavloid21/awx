@@ -1,23 +1,21 @@
 import { templateUrl } from "../shared/template-url/template-url.factory";
-import controller from "./deploy.controller";
+import controller from "./deploytemplate.controller";
 import { N_ } from "../i18n";
 
 export default {
-  searchPrefix: "deploy",
-  name: "deploy",
-  route: "/deploy",
+  searchPrefix: "deploytemplate",
+  name: "deploytemplate",
+  route: "/deploytemplate",
   controller: controller,
   ncyBreadcrumb: {
-    label: N_("DEPLOY CONFIGURATION")
+    label: N_("DEPLOY TEMPLATES")
   },
   params: {
     deploy_search: {
       dynamic: true,
       value: {
         page_size: 10,
-        order_by: '-created',
-        prev_step_id__isnull: true,
-        not__status: 'start'
+        order_by: '-created'
       }
     }
   },
@@ -29,7 +27,7 @@ export default {
       "QuerySet",
       ($stateParams, Wait, GetBasePath, qs) => {
         const searchParam = $stateParams.deploy_search;
-        const searchPath = GetBasePath("deploy_history") || 'api/v2/deploy_history';
+        const searchPath = GetBasePath("deploy_history") || 'api/v2/deploy_template';
         Wait("start");
         return qs.search(searchPath, searchParam).finally(() => Wait("stop"));
       }
@@ -40,5 +38,5 @@ export default {
     $(".modal-backdrop").remove();
     $("body").removeClass("modal-open");
   },
-  templateUrl: templateUrl("deploy/deploy")
+  templateUrl: templateUrl("deploytemplate/deploytemplate")
 };

@@ -3,17 +3,12 @@ from rest_framework import serializers
 from django.utils.translation import ugettext_lazy as _
 from awx.main.models.mixins import ResourceMixin
 from awx.main.models.base import CommonModel
+from django.contrib.postgres.fields import ArrayField
 
-class DeployHistory(CommonModel, ResourceMixin):
+class DeployTemplate(CommonModel, ResourceMixin):
     class Meta:
         app_label: 'main'
         ordering = ('pk',)
 
-    status = models.CharField(
-        max_length=256,
-        blank=True,
-        help_text=_('Job task status')
-    )
     config = models.CharField(max_length=256)
-    domain = models.CharField(max_length=256)
-    prev_step_id = models.IntegerField(blank=True, null=True)
+    deployHistoryIds = ArrayField(models.IntegerField())

@@ -51,6 +51,7 @@ class ActivityStream(models.Model):
 
     user = models.ManyToManyField("auth.User", blank=True)
     deploy_history = models.ManyToManyField("DeployHistory", blank=True)
+    deploy_template = models.ManyToManyField("DeployTemplate", blank=True)
     organization = models.ManyToManyField("Organization", blank=True)
     inventory = models.ManyToManyField("Inventory", blank=True)
     host = models.ManyToManyField("Host", blank=True)

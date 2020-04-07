@@ -4,13 +4,11 @@
  * All Rights Reserved
  *************************************************/
 
-import controller from "./deploy.controller";
-import route from "./deploy.route";
-import deployCardController from './components/deploycard.controller';
-import deployCardTemplate from './components/deploycard.view.html';
+import controller from "./deploytemplate.controller";
+import route from "./deploytemplate.route";
 
 export default angular
-  .module("deploy", [])
+  .module("deploytemplate", [])
   .factory('Uploader', function($q, $rootScope, $cookies) {
     this.upload = function(url, file) {
       var deferred = $q.defer(),
@@ -51,16 +49,7 @@ export default angular
       },
     }
   })
-  .component('deployCard', {
-    templateUrl: deployCardTemplate,
-    controller: deployCardController,
-    bindings: {
-      step: '@',
-      index: '=',
-      allowrun: '='
-    },
-  })
-  .controller("deploy", controller)
+  .controller("deploytemplate", controller)
   .run([
     "$stateExtender",
     function($stateExtender) {

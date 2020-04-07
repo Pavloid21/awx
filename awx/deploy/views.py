@@ -71,7 +71,7 @@ class RunDeploy(View):
 
 class DeployHistoryRows(View):
     def get(self, request, *args, **kwargs):
-        response = requests.get(AWX_API_PATH + '/api/v2/deploy_history/?prev_step_id__isnull=true', auth=('admin', 'password'), verify=False)
+        response = requests.get(AWX_API_PATH + '/api/v2/deploy_history/?prev_step_id__isnull=true&not__status=start', auth=('admin', 'password'), verify=False)
         rows = json.loads(response.text)
         return JsonResponse(rows)
 
