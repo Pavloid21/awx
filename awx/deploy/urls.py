@@ -7,7 +7,8 @@ from awx.deploy.views import (
     UploadFile,
     RunDeploy,
     DeployHistoryRows,
-    DeployHistoryNextStep
+    DeployHistoryNextStep,
+    GetCard
 )
 
 app_name = 'deploy_cnf'
@@ -16,5 +17,6 @@ urlpatterns = [
     url(r'^launch/$', RunDeploy.as_view(), name='run-deploy'),
     url(r'^rows/$', DeployHistoryRows.as_view(), name='deploy-history-rows'),
     url(r'^next_step/$', DeployHistoryNextStep.as_view(), name='deploy-next-step'),
+    url(r'^step/$', GetCard.as_view(), name="deploy-card")
 ]
 

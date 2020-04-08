@@ -15,7 +15,7 @@ from django.views import View
 from django.core.exceptions import PermissionDenied
 
 REPO_PATH = 'http://172.19.19.31/api/v4/projects'
-AWX_API_PATH = 'https://127.0.0.1:8043'
+AWX_API_PATH = 'https://127.0.0.1:8052'
 # AWX_API_PATH = 'http://172.19.19.231'
 
 class SaveTemplate(View):
@@ -40,9 +40,15 @@ class SaveTemplate(View):
             ids.append(prevStep)
         requests.post(AWX_API_PATH + '/api/v2/deploy_template/', json={
             'name': dataList['name'],
-            'config': dataList['config'],
             'deployHistoryIds': ids
         },
         auth=('admin', 'password'),
         verify=False)
         return JsonResponse({'data': json.loads(request.body)})
+
+class GetTemplates(View):
+    def get(self, request, *args, **kwargs):
+        templatesList = requests.get(AWX_API_PATH + '/api/v2/deploy_template/?order=-created',
+        auth=('admin', 'password'),
+        verify=False)
+        return JsonResponse(json.loads(templatesList.text))

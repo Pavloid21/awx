@@ -11,7 +11,7 @@
     </select>
     <div
       class="play-button"
-      ng-class="{disabled: !domain}"
+      ng-class="{disabled: !domain || !$root.configFileName}"
       ng-if="final === undefined && status === 'start' && allowRun"
       ng-click="deployConfig($ctrl.index)"
     >

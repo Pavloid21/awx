@@ -22,7 +22,6 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   };
 
   $scope.setDomain = () => {
-    console.log("fired", $scope.domain, $scope.index);
     $rootScope.isConfigUploaded[$scope.index].domain = $scope.domain;
   };
 

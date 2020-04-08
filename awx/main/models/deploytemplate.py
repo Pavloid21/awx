@@ -10,5 +10,4 @@ class DeployTemplate(CommonModel, ResourceMixin):
         app_label: 'main'
         ordering = ('pk',)
 
-    config = models.CharField(max_length=256)
     deployHistoryIds = ArrayField(models.IntegerField())

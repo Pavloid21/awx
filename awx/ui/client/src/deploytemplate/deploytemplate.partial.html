@@ -36,16 +36,6 @@
       ng-model="templateName"
       ng-change="templateNameInputChange()"
     />
-    <form method="post" enctype="multipart/form-data">
-      <label for="cnf">Upload configuration file: </label>
-      <input
-        name="cnf"
-        type="file"
-        id="cnf"
-        ng-model="config"
-        file-change="setConfig"
-      />
-    </form>
     <div class="pipeline">
       <deploy-card
         ng-repeat="(key, value) in $root.isConfigUploaded track by $index"
@@ -90,6 +80,8 @@
           Add new template
         </button>
       </div>
+      <h3>Available templates</h3>
+      <hr/>
       <at-list results="storedTemplates">
         <at-row
           ng-repeat="project in storedTemplates"
@@ -103,7 +95,6 @@
                 status-tip="{{ project.statusTip }}"
                 status-click="vm.showSCMStatus(project.id)"
                 header-value="{{ project.name }}"
-                header-state="projects.edit({project_id:{{project.id}}})"
                 header-tag="{{ vm.projectTypes[project.scm_type] }}"
               >
               </at-row-item>
@@ -123,24 +114,13 @@
                   </div>
                 </div>
                 <at-row-action
-                  icon="fa-copy"
+                  icon="fa-pencil"
                   ng-click="vm.copyProject(project)"
-                  ng-show="project.summary_fields.user_capabilities.copy"
                 >
                 </at-row-action>
                 <at-row-action
                   icon="fa-trash"
                   ng-click="vm.deleteProject(project.id, project.name)"
-                >
-                </at-row-action>
-                <at-row-action
-                  icon="fa-minus-circle"
-                  ng-click="vm.cancelUpdate(project)"
-                  ng-show="(project.status == 'updating'
-                          || project.status == 'running'
-                          || project.status == 'pending'
-                          || project.status == 'waiting')
-                          && project.summary_fields.user_capabilities.start"
                 >
                 </at-row-action>
               </div>
@@ -182,6 +162,78 @@
       </at-list>
     </at-panel-body>
   </div>
+  <paginate
+    ng-if="displayView === 'templates'"
+    collection="storedTemplates"
+    dataset="dataset"
+    iterator="deploytemplate"
+    base-path="api/v2/deploy_template"
+  >
+  </paginate>
+
+  <!-- VIEW HISTORY -->
+  <div style="padding: 20px 0px;" ng-if="displayView === 'history'">
+    <table>
+      <thead>
+        <tr class="table-head">
+          <th>CONFIG</th>
+          <th>DATE</th>
+          <th>USER</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          ng-repeat="item in deployHistoryRows"
+          class="table-row"
+          ng-click="historyRowClick(item)"
+        >
+          <td>{{item.config}}</td>
+          <td
+            ng-bind="item.created | date:'dd-MM-yyyy HH:mm:ss'"
+            style="width: 200px;"
+          ></td>
+          <td>{{item.summary_fields.created_by.username}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <paginate
+    ng-if="displayView === 'history'"
+    collection="deployHistoryRows"
+    dataset="history"
+    iterator="deploy"
+    base-path="api/v2/deploy_history"
+  >
+  </paginate>
+
+  <!-- VIEW PIPELINE -->
+  <div style="padding: 20px 0px;" ng-if="displayView === 'pipeline'">
+    <span style="font-weight: bold;">Choose template:</span>
+    <select style="width: 170px" ng-model="selected.item" ng-change="getSteps(item)"
+      ng-options="item as item.name for item in storedTemplates track by item.id"
+    >
+    </select>
+    <form method="post" enctype="multipart/form-data">
+      <label for="cnff">Upload configuration file: </label>
+      <input
+        name="cnff"
+        type="file"
+        id="cnff"
+        ng-model="config"
+        file-change="setConfigFile"
+      />
+    </form>
+    <div class="pipeline">
+      <deploy-card
+        ng-repeat="(key, value) in $root.isConfigUploaded track by $index"
+        step="{{key + 1}}"
+        index="key"
+        allowrun="isAllowRun"
+      >
+      </deploy-card>
+    </div>
+  </div>
+  <!-- POPUP -->
   <div class="popup" ng-show="showPopup">
     <div class="popup-content">
       <div class="popup-header">
@@ -190,10 +242,10 @@
       </div>
       <div class="popup-body">
         <div class="text-view">
-          <div class="line-nums" id="nums_data">
+          <div class="line-nums" id="nums-data">
             <div ng-repeat="num in lineNumbers track by $index">{{num}}</div>
           </div>
-          <textarea id="listing_data" readonly>{{fileText}}</textarea>
+          <textarea id="listing-data" readonly>{{fileText}}</textarea>
         </div>
         <button class="btn btn-primary" ng-click="uploadConfig()">
           <i class="fa fa-play-circle"></i>

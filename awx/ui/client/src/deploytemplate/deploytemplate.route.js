@@ -11,11 +11,19 @@ export default {
     label: N_("DEPLOY TEMPLATES")
   },
   params: {
-    deploy_search: {
+    deploytemplate_search: {
       dynamic: true,
       value: {
         page_size: 10,
         order_by: '-created'
+      }
+    },
+    deploy_search: {
+      dynamic: true,
+      value: {
+        page_size: 10,
+        order_by: '-created',
+        not__status: 'start'
       }
     }
   },
@@ -26,8 +34,20 @@ export default {
       "GetBasePath",
       "QuerySet",
       ($stateParams, Wait, GetBasePath, qs) => {
+        const searchParam = $stateParams.deploytemplate_search;
+        const searchPath = GetBasePath("deploy_history") || 'api/v2/deploy_template/';
+        Wait("start");
+        return qs.search(searchPath, searchParam).finally(() => Wait("stop"));
+      }
+    ],
+    History: [
+      "$stateParams",
+      "Wait",
+      "GetBasePath",
+      "QuerySet",
+      ($stateParams, Wait, GetBasePath, qs) => {
         const searchParam = $stateParams.deploy_search;
-        const searchPath = GetBasePath("deploy_history") || 'api/v2/deploy_template';
+        const searchPath = GetBasePath("deploy_history") || 'api/v2/deploy_history/';
         Wait("start");
         return qs.search(searchPath, searchParam).finally(() => Wait("stop"));
       }

@@ -1,190 +1,232 @@
-'use strict'
+"use strict";
 
 export default [
-    "$rootScope",
-    "$scope",
-    "$location",
-    "ConfigService",
-    "Dataset",
-    "$http",
-    "Wait",
-    "Uploader",
-    (
-      $rootScope,
-      $scope,
-      $location,
-      ConfigService,
-      Dataset,
-      $http,
-      Wait,
-      Uploader
-    ) => {
-      $scope.displayView = 'templates';
-      $scope.isAllowRun = false;
-      $scope.lineNumbers = [];
-      $rootScope.isConfigUploaded = [];
-      $scope.errors = null;
-      let handleFiles = file => {
-        const reader = new FileReader();
-        reader.onload = event => {
-          const file = event.target.result;
-          const allLines = file.split(/\r\n|\n/);
-          allLines.forEach((line, index) => {
-            $scope.fileText += `${line}\n`;
-            $scope.lineNumbers.push(index + 1);
-          });
-          $scope.showPopup = true;
-          let tArea = document.getElementById("listing_data");
-          let numBlock = document.getElementById("nums_data");
-          tArea.addEventListener("scroll", event => {
-            numBlock.scrollTop = tArea.scrollTop;
-          });
-        };
-  
-        reader.onerror = event => {
-          alert(event.target.error.name);
-        };
-  
-        reader.readAsText(file);
+  "$rootScope",
+  "$scope",
+  "$location",
+  "ConfigService",
+  "Dataset",
+  "History",
+  "$http",
+  "Wait",
+  "Uploader",
+  (
+    $rootScope,
+    $scope,
+    $location,
+    ConfigService,
+    Dataset,
+    History,
+    $http,
+    Wait,
+    Uploader
+  ) => {
+    $scope.displayView = "templates";
+    $scope.isAllowRun = false;
+    $scope.lineNumbers = [];
+    $rootScope.isConfigUploaded = [];
+    $scope.dataset = Dataset.data;
+    $scope.history = History.data;
+    $scope.errors = null;
+    $scope.selected = {};
+    $scope.$on("updateDataset", (e, dataset, queryset) => {
+      if(e.targetScope.basePath.indexOf('deploy_template') > 0) {
+        $scope.dataset = dataset;
+        $scope.storedTemplates = dataset.results;
+      } else {
+        $scope.history = dataset;
+        $scope.deployHistoryRows = dataset.results;
+      }
+    });
+    let handleFilesConfig = (file) => {
+      $scope.fileText = ''
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const file = event.target.result;
+        const allLines = file.split(/\r\n|\n/);
+        allLines.forEach((line, index) => {
+          $scope.fileText += `${line}\n`;
+          $scope.lineNumbers.push(index + 1);
+        });
+        $scope.showPopup = true;
+        console.log($scope.lineNumbers)
+        let tArea = document.getElementById("listing-data");
+        let numBlock = document.getElementById("nums-data");
+        tArea.addEventListener("scroll", (event) => {
+          numBlock.scrollTop = tArea.scrollTop;
+        });
       };
-      $scope.templatesClick = () => {
-        $scope.displayView = 'templates'
-      }
-      $scope.pipelineClick = () => {
-        $scope.displayView = 'pipeline'
-      }
-      $scope.historyClick = () => {
-        $scope.displayView = 'history'
-      }
 
-      $scope.storedTemplates = Dataset.data.results;
-      $rootScope.isConfigUploaded = [];
+      reader.onerror = (event) => {
+        alert(event.target.error.name);
+      };
+
+      reader.readAsText(file);
+    };
+    $scope.templatesClick = () => {
+      $scope.displayView = "templates";
+      $scope.isAllowRun = false;
+    };
+    $scope.pipelineClick = () => {
+      $scope.displayView = "pipeline";
+      $scope.isAllowRun = true;
+    };
+    $scope.historyClick = () => {
+      $scope.displayView = "history";
+      $scope.isAllowRun = false;
+    };
+
+    $scope.storedTemplates = Dataset.data.results;
+    $scope.deployHistoryRows = History.data.results;
+    $rootScope.isConfigUploaded = [];
+    $scope.cards = [];
+
+    $scope.handleAddTemplate = () => {
+      $scope.isAdding = true;
+      $rootScope.isConfigUploaded.push({
+        description: "",
+        status: "start",
+        config: null,
+        domain: null,
+        name: null,
+        prev_step_id: $scope.parentIndex,
+      });
+    };
+
+    $scope.setConfigFile = (files) => {
+      $scope.fileObj = files[0];
+      handleFilesConfig(files[0]);
+    };
+
+    $scope.templateNameInputChange = () => {
+      $scope.errors = null;
+    };
+
+    $scope.handleCancel = () => {
+      $scope.isAdding = false;
       $scope.cards = [];
+      $rootScope.isConfigUploaded = [];
+      $scope.templateName = null;
+      $scope.config = null;
+      $scope.errors = null;
+    };
 
-      $scope.handleAddTemplate = () => {
-        $scope.isAdding = true;
-        $rootScope.isConfigUploaded.push({
-          description: "",
-          status: "start",
-          config: null,
-          domain: null,
-          name: null,
-          prev_step_id: $scope.parentIndex
-        })
-      }
+    $scope.handleAddCard = () => {
+      $rootScope.isConfigUploaded.push({
+        description: "",
+        status: "start",
+        config: null,
+        name: null,
+        domain: null,
+        prev_step_id: $scope.parentIndex,
+      });
+    };
 
-      $scope.setConfig = files => {
-        $scope.fileObj = files[0];
-        handleFiles(files[0]);
-      }
 
-      $scope.templateNameInputChange = () => {
-        $scope.errors = null;
-        console.log($scope.templateName)
-      }
-
-      $scope.handleCancel = () => {
-        $scope.isAdding = false;
-        $scope.cards = [];
-        $rootScope.isConfigUploaded = [];
-        $scope.templateName = null;
-        $scope.config = null;
-        $scope.errors = null;
-      }
-
-      $scope.handleAddCard = () => {
-        $rootScope.isConfigUploaded.push({
-          description: "",
-          status: "start",
-          config: null,
-          name: null,
-          domain: null,
-          prev_step_id: $scope.parentIndex
-        })
-      }
-
-      // const createDeployItem = (item) => {
-      //   $http.post('/deploytemplate/', item)
-      // }
-
-      $scope.handleSave = () => {
-        // console.log('file', $rootScope.configFileName)
-        // console.log('name', $scope.templateName)
-        console.log('root', $rootScope.isConfigUploaded)
-        if (!$scope.templateName || $scope.templateName === '') {
-          $scope.errors = {
-            details: 'Template name not specified.'
+    $scope.handleSave = () => {
+      if (!$scope.templateName || $scope.templateName === "") {
+        $scope.errors = {
+          details: "Template name not specified.",
+        };
+        return;
+      } else if ($scope.isConfigUploaded.length > 0) {
+        let notValidCard = [];
+        $scope.isConfigUploaded.forEach((item, index) => {
+          if (!item.domain) {
+            notValidCard.push({ index });
           }
-          return;
-        } else if (!$rootScope.configFileName) {
+        });
+        if (notValidCard.length) {
           $scope.errors = {
-            details: 'Configuration file not specified.'
-          }
-          return;
-        } else if ($scope.isConfigUploaded.length > 0) {
-          let notValidCard = [];
-          $scope.isConfigUploaded.forEach((item, index) => {
-            if (!item.domain) {
-              notValidCard.push({index})
-            }
+            details: `Domain not specified on step ${
+              notValidCard[0].index + 1
+            }`,
+          };
+        } else {
+          Wait("start");
+          let tempArr = $rootScope.isConfigUploaded.map((item) => {
+            item.name = Math.random().toString(36).substring(7);
+            return item;
           });
-          if (notValidCard.length) {
-            $scope.errors = {
-              details: `Domain not specified on step ${notValidCard[0].index + 1}`
+          $rootScope.isConfigUploaded = tempArr;
+          $http({
+            method: "POST",
+            url: "/deploytemplate/save/",
+            data: {
+              list: $rootScope.isConfigUploaded,
+              name: $scope.templateName,
+            },
+          }).then(
+            function success() {
+              $scope.isAdding = false;
+              $http({
+                method: "GET",
+                url: "/deploytemplate/rows/",
+              }).then(
+                function success(response) {
+                  $scope.storedTemplates = response.data.results;
+                  $scope.dataset = response.data;
+                  Wait("stop");
+                },
+                function error() {
+                  alert("Somethinng went wrong.");
+                  Wait("stop");
+                }
+              );
+            },
+            function error() {
+              alert("Somethinng went wrong.");
+              Wait("stop");
             }
-          } else {
-            Wait('start');
-            let tempArr = $rootScope.isConfigUploaded.map(item => {
-              item.config = $rootScope.configFileName.url.replace('/media/', '');
-              item.name = Math.random().toString(36).substring(7);
-              return item;
-            });
-            $rootScope.isConfigUploaded = tempArr;
-            console.log('message', $rootScope.isConfigUploaded)
-            $http({
-              method: 'POST',
-              url:'/deploytemplate/save/', 
-              data: {
-                list: $rootScope.isConfigUploaded,
-                name: $scope.templateName,
-                config: $rootScope.configFileName.url.replace('/media/', '')
-              }
-            }).then(
-              function success() {
-                Wait('stop')
-              },
-              function error() {
-                alert('Somethinng went wrong.');
-                Wait('stop')
-              }
-            )
-          }
+          );
         }
       }
+    };
 
-      $scope.uploadConfig = () => {
-        Wait("start");
-        let r = Uploader.upload("/deploy/uploads/", $scope.fileObj);
-        r.then(
-          function(r) {
-            // success
-            $scope.showPopup = false;
-            $rootScope.configFileName = JSON.parse(r.response)
-            $scope.errors = null;
-            Wait("stop");
+    $scope.uploadConfig = () => {
+      Wait("start");
+      let r = Uploader.upload("/deploy/uploads/", $scope.fileObj);
+      r.then(
+        function (r) {
+          // success
+          $scope.showPopup = false;
+          $rootScope.configFileName = JSON.parse(r.response);
+          $scope.errors = null;
+          Wait("stop");
+        },
+        function (r) {
+          // failure
+          Wait("stop");
+          console.warn(r);
+        }
+      );
+    };
+
+    $scope.getSteps = () => {
+      let cardList = [];
+      Wait('start');
+      for (let item in $scope.selected.item.deployHistoryIds) {
+        let card = $http({
+          method: 'GET',
+          url: `/deploy/step/?id=${$scope.selected.item.deployHistoryIds[item]}`
+        }).then(
+          function success(response) {
+            cardList.push(response.data)
+            Wait('stop');
           },
-          function(r) {
-            // failure
-            Wait("stop");
-            console.warn(r);
+          function error(e) {
+            alert(e);
+            Wait('stop');
           }
-        );
-      };
-  
-      $scope.closePopup = () => {
-        $scope.fileText = "";
-        $scope.lineNumbers.length = 0;
-        $scope.showPopup = false;
-      };
+        )
+      }
+      $rootScope.isConfigUploaded = cardList;
     }
-]
+
+    $scope.closePopup = () => {
+      $scope.fileText = "";
+      $scope.lineNumbers.length = 0;
+      $scope.showPopup = false;
+    };
+  },
+];

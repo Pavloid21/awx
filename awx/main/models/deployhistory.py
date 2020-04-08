@@ -14,6 +14,6 @@ class DeployHistory(CommonModel, ResourceMixin):
         blank=True,
         help_text=_('Job task status')
     )
-    config = models.CharField(max_length=256)
+    config = models.CharField(max_length=256, blank=True)
     domain = models.CharField(max_length=256)
     prev_step_id = models.IntegerField(blank=True, null=True)

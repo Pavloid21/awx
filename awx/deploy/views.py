@@ -14,7 +14,7 @@ import string
 from requests.auth import HTTPBasicAuth
 
 # AWX_API_PATH = 'http://172.19.19.231'
-AWX_API_PATH = 'http://127.0.0.1:8052'
+AWX_API_PATH = 'https://127.0.0.1:8052'
 
 class UploadFile(View):
     def post(self, request, *args, **kwargs):
@@ -80,3 +80,10 @@ class DeployHistoryNextStep(View):
         response = requests.get(AWX_API_PATH + '/api/v2/deploy_history/?prev_step_id=' + request.GET['id'], auth=('admin', 'password'), verify=False)
         rows = json.loads(response.text)
         return JsonResponse(rows)
+
+class GetCard(View):
+    def get(self, request, *args, **kwargs):
+        response = requests.get(AWX_API_PATH + '/api/v2/deploy_history/' + request.GET['id'] + '/', auth=('admin', 'password'), verify=False)
+        print(response.text)
+        card = json.loads(response.text)
+        return JsonResponse(card)
