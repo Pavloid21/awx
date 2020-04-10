@@ -42,6 +42,7 @@
         step="{{key + 1}}"
         index="key"
         allowrun="isAllowRun"
+        allowdelete="isAllowDelete"
       >
       </deploy-card>
       <div class="add_card" ng-click="handleAddCard()">
@@ -99,7 +100,7 @@
               >
               </at-row-item>
               <div class="at-Row-actions">
-                <div
+                <!-- <div
                   aw-tool-tip="{{ project.scm_update_tooltip }}"
                   data-tip-watch="project.scm_update_tooltip"
                   data-placement="top"
@@ -112,15 +113,15 @@
                   >
                     <i class="fa fa-refresh"></i>
                   </div>
-                </div>
-                <at-row-action
+                </div> -->
+                <!-- <at-row-action
                   icon="fa-pencil"
                   ng-click="vm.copyProject(project)"
                 >
-                </at-row-action>
+                </at-row-action> -->
                 <at-row-action
                   icon="fa-trash"
-                  ng-click="vm.deleteProject(project.id, project.name)"
+                  ng-click="deleteTemplate(project.id)"
                 >
                 </at-row-action>
               </div>
@@ -229,6 +230,7 @@
         step="{{key + 1}}"
         index="key"
         allowrun="isAllowRun"
+        allowdelete="isAllowDelete"
       >
       </deploy-card>
     </div>

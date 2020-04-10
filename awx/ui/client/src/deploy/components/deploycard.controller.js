@@ -1,12 +1,25 @@
 export default function($rootScope, $scope, $element, Wait, $http) {
   this.index = null;
   this.allowRun = null;
+  this.allowDelete = null;
   $scope.domainsList = ["ulbs11_sales_domain", "ulbs13_sales_domain"];
   $scope.status = "start";
   this.$onInit = function() {
     // Init from history if exists
+    console.log(this.index)
+    if (this.index > 0) {
+      if ($rootScope.isConfigUploaded[this.index - 1].status !== 'start' &&
+          $rootScope.isConfigUploaded[this.index - 1].status !== 'pending') {
+            $scope.prevStepNotComplited = false;
+          } else {
+            $scope.prevStepNotComplited = true;
+          }
+    } else {
+      $scope.prevStepNotComplited = false;
+    }
     $scope.index = this.index;
     $scope.allowRun = this.allowrun;
+    $scope.allowDelete = this.allowdelete;
     if ($rootScope.isConfigUploaded.length) {
       $scope.domain = $rootScope.isConfigUploaded[this.index].domain;
       $scope.status = $rootScope.isConfigUploaded[this.index].status;

@@ -23,6 +23,7 @@ export default [
   ) => {
     $scope.displayView = "templates";
     $scope.isAllowRun = false;
+    $scope.isAllowDelete = true;
     $scope.lineNumbers = [];
     $rootScope.isConfigUploaded = [];
     $scope.dataset = Dataset.data;
@@ -39,9 +40,10 @@ export default [
       }
     });
     let handleFilesConfig = (file) => {
-      $scope.fileText = ''
       const reader = new FileReader();
       reader.onload = (event) => {
+        $scope.fileText = '';
+        $scope.lineNumbers.length = [];
         const file = event.target.result;
         const allLines = file.split(/\r\n|\n/);
         allLines.forEach((line, index) => {
@@ -49,7 +51,6 @@ export default [
           $scope.lineNumbers.push(index + 1);
         });
         $scope.showPopup = true;
-        console.log($scope.lineNumbers)
         let tArea = document.getElementById("listing-data");
         let numBlock = document.getElementById("nums-data");
         tArea.addEventListener("scroll", (event) => {
@@ -66,14 +67,17 @@ export default [
     $scope.templatesClick = () => {
       $scope.displayView = "templates";
       $scope.isAllowRun = false;
+      $scope.isAllowDelete = true;
     };
     $scope.pipelineClick = () => {
       $scope.displayView = "pipeline";
       $scope.isAllowRun = true;
+      $scope.isAllowDelete = false;
     };
     $scope.historyClick = () => {
       $scope.displayView = "history";
       $scope.isAllowRun = false;
+      $scope.isAllowDelete = false;
     };
 
     $scope.storedTemplates = Dataset.data.results;
@@ -92,6 +96,34 @@ export default [
         prev_step_id: $scope.parentIndex,
       });
     };
+
+    $scope.deleteTemplate = (id) => {
+      Wait('start')
+      $http({
+        method: 'GET',
+        url: `/deploytemplate/delete/?id=${id}`
+      }).then(
+        function success() {
+          $http({
+            method: "GET",
+            url: "/deploytemplate/rows/",
+          }).then(
+            function success(response) {
+              $scope.storedTemplates = response.data.results;
+              $scope.dataset = response.data;
+              Wait("stop");
+            },
+            function error() {
+              alert("Somethinng went wrong.");
+              Wait("stop");
+            }
+          );
+        },
+        function error() {
+          Wait('stop')
+        }
+      )
+    }
 
     $scope.setConfigFile = (files) => {
       $scope.fileObj = files[0];
@@ -221,6 +253,33 @@ export default [
         )
       }
       $rootScope.isConfigUploaded = cardList;
+    }
+
+    $scope.historyRowClick = (item) => {
+      $scope.displayView = 'pipeline';
+      $rootScope.isConfigUploaded = [];
+      $rootScope.isConfigUploaded.push(item);
+      console.log(item)
+      let getNextStep = (prevStepId) => {
+        $http({
+          method: 'GET',
+          url: `/deploy/next_step/?id=${prevStepId}`
+        }).then(
+          function success(response) {
+            if (response.data.results.length) {
+              $rootScope.isConfigUploaded.push(response.data.results[0]);
+              getNextStep(response.data.results[0].id);
+            }
+            Wait('stop');
+          },
+  
+          function error(response) {
+            console.warn(response)
+            Wait('stop')
+          }
+        )
+      }
+      getNextStep(item.id)
     }
 
     $scope.closePopup = () => {

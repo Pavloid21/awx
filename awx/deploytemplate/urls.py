@@ -8,7 +8,8 @@ from awx.deploy.views import (
 )
 from awx.deploytemplate.views import (
     SaveTemplate,
-    GetTemplates
+    GetTemplates,
+    DeleteTemplate
 )
 
 app_name = 'deploytemplate_cnf'
@@ -16,6 +17,6 @@ urlpatterns = [
     url(r'^uploads/$', UploadFile.as_view(), name='uploads'),
     url(r'^save/$', SaveTemplate.as_view(), name='save-template'),
     url(r'^rows/$', GetTemplates.as_view(), name='deploy-history-rows'),
-    # url(r'^next_step/$', DeployHistoryNextStep.as_view(), name='deploy-next-step'),
+    url(r'^delete/$', DeleteTemplate.as_view(), name='deploy-history-delete'),
 ]
 

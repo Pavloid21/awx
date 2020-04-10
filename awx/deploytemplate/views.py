@@ -52,3 +52,10 @@ class GetTemplates(View):
         auth=('admin', 'password'),
         verify=False)
         return JsonResponse(json.loads(templatesList.text))
+
+class DeleteTemplate(View):
+    def get(self, request, *args, **kwargs):
+        result = requests.delete(AWX_API_PATH + '/api/v2/deploy_template/' + request.GET['id'] + '/',
+        auth=('admin', 'password'),
+        verify=False)
+        return JsonResponse(json.loads('{}'))

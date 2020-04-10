@@ -1,7 +1,7 @@
 <div class="card-deploy">
   <div class="card_header">
     <h3>Step {{$ctrl.step}}</h3>
-    <i class="fa fa-trash-o" ng-show="!allowRun" ng-click="handleDeleteCard()"/>
+    <i class="fa fa-trash-o" ng-show="allowDelete" ng-click="handleDeleteCard()"/>
   </div>
   <hr/>
   <div style="margin-bottom: 10px;">
@@ -11,7 +11,7 @@
     </select>
     <div
       class="play-button"
-      ng-class="{disabled: !domain || !$root.configFileName}"
+      ng-class="{disabledButton: !domain || !$root.configFileName || prevStepNotComplited}"
       ng-if="final === undefined && status === 'start' && allowRun"
       ng-click="deployConfig($ctrl.index)"
     >

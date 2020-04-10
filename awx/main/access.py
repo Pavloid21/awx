@@ -40,6 +40,8 @@ from awx.main.models import (
     WorkflowApproval, WorkflowApprovalTemplate,
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
 )
+
+from awx.main.models.deploytemplate import DeployTemplate
 from awx.main.models.mixins import ResourceMixin
 
 __all__ = ['get_user_queryset', 'check_user_access', 'check_user_access_with_errors',
@@ -117,6 +119,7 @@ def check_user_access(user, model_class, action, *args, **kwargs):
     Return True if user can perform action against model_class with the
     provided parameters.
     '''
+    print(access_registry)
     access_class = access_registry[model_class]
     access_instance = access_class(user)
     access_method = getattr(access_instance, 'can_%s' % action)
@@ -507,7 +510,11 @@ class NotificationAttachMixin(BaseAccess):
             obj, sub_obj, relationship, relationship, data=data
         )
 
+class DeployTemplateAccess(BaseAccess):
+    model = DeployTemplate
 
+    def can_delete(self, obj):
+        return True
 class InstanceAccess(BaseAccess):
 
     model = Instance

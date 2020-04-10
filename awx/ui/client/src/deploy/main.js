@@ -57,7 +57,8 @@ export default angular
     bindings: {
       step: '@',
       index: '=',
-      allowrun: '='
+      allowrun: '=',
+      allowdelete: '='
     },
   })
   .controller("deploy", controller)
