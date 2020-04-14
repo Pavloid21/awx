@@ -7,15 +7,25 @@ export default [
   "$scope",
   "$location",
   "ConfigService",
+  "Dataset",
   "lastPath",
   "$http",
   "Wait",
-  ($rootScope, $scope, $location, ConfigService, lastPath, $http, Wait) => {
+  ($rootScope, $scope, $location, ConfigService, Dataset, lastPath, $http, Wait) => {
     Wait("start");
 
     $("#diffCompareButton").css("cursor", "not-allowed");
 
     $scope.diffView = "APP_CFG";
+    $scope.displayView = 'compare';
+    $scope.dataset = Dataset.data;
+    $scope.isList = true;
+    $scope.$on("updateDataset", (e, dataset, queryset) => {
+      $scope.dataset = dataset;
+      $scope.storedJobs = dataset.results;
+    });
+
+    $scope.storedJobs = Dataset.data.results;
 
     $http({ method: "GET", url: "/diff/environments/" }).then(
       function success(response) {
@@ -47,6 +57,21 @@ export default [
       changes: false,
       new_values: false
     };
+
+    $scope.switchView = () => {
+      if ($scope.displayView === 'compare') {
+        $scope.isList = true;
+        $scope.displayView = 'history';
+      } else {
+        $scope.isList = false;
+        $scope.final = null;
+        $scope.displayView = 'compare';
+      }
+    }
+    
+    $scope.parse = (source) => {
+      return JSON.parse(source)
+    }
 
     $scope.getDataEnv1 = function() {
       if ($scope.env1 !== null) {
@@ -230,6 +255,34 @@ export default [
         $("html, body").animate({ scrollTop: 0 }, "slow");
       }
     };
+
+    $scope.downloadPDFfile = (jobID) => {
+      Wait('start')
+      $http({
+        method: "GET",
+        url: `/diff/final/?job=${jobID}&status=successful`
+      }).then(function success(response) {
+        $scope.compareData = response.data.compare.results.find(
+          res => {
+            if (
+              res.task.indexOf("сompare v_one and v_two") >=
+                0 &&
+              !!res.event_data.res
+            ) {
+              return true;
+            }
+            return false;
+          }
+        );
+        $scope.final = JSON.parse(
+          $scope.compareData.event_data.res.stdout
+        );
+        $scope.isEmpty =
+          Object.keys($scope.final)[0] === undefined;
+        Wait("stop");
+        $scope.isList = false;
+      });
+    }
 
     $scope.collapseView = function(chapter) {
       $scope.isCollapse[chapter] = !$scope.isCollapse[chapter];

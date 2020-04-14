@@ -5,10 +5,22 @@
   <font color="green">{{diffSuccessMessage}}</font>
 </div> -->
 
-<div class="DashboardGraphs">
-  <div class="btn-group" style="position: absolute; right: 35px;">
-    <button id="diffAppButton" class="btn btn-xs btn-primary">{{version_commit}}</button>
+<div class="DashboardGraphs" style="padding: 20px 20px;">
+  <div class="btn-group">
+    <!-- <button id="diffAppButton" class="btn btn-xs btn-primary">{{version_commit}}</button> -->
+    <button 
+      class="btn btn-xs"
+      ng-class="{'btn-primary': displayView === 'compare', 'Button-primary--hollow': displayView !== 'compare'}"
+      ng-click="switchView()"
+    >Compare</button>
+    <button 
+      class="btn btn-xs"
+      ng-class="{'btn-primary': displayView === 'history', 'Button-primary--hollow': displayView !== 'history'}"
+      ng-click="switchView()"
+    >History</button>
   </div>
+  <!-- VIEW COMPARE -->
+  <div class="DashboardGraphs" ng-show="displayView === 'compare'">
   <div class="box">
     <div>
       <p>Source Environment:</p>
@@ -146,6 +158,87 @@
 <br>
 <button id="diffReportButton" class="SmartSearch-keyToggle btn" ng-click="generatePDF()">Report</button>    
 <br><br> -->
+  </div>
+  <!-- VIEW HISTORY -->
+  <div class="DashboardGraphs" ng-show="displayView === 'history' && !!isList">
+    <at-list results="storedJobs">
+      <at-row
+        ng-repeat="project in storedJobs"
+        ng-class="{'at-Row--active': (project.id === vm.activeId), 'at-Row--collapsed': vm.isCollapsed}"
+        id="row-{{ project.id }}"
+      >
+        <div class="at-Row-items">
+          <div class="at-Row-container">
+            <at-row-item
+              status="{{ project.statusIcon }}"
+              status-tip="{{ project.statusTip }}"
+              status-click="vm.showSCMStatus(project.id)"
+              header-value="{{ project.name }}"
+              header-tag="{{ vm.projectTypes[project.scm_type] }}"
+            >
+            </at-row-item>
+            <div class="at-Row-actions">
+              <at-row-action
+                icon="fa-file-pdf-o"
+                ng-click="downloadPDFfile(project.id)"
+              >
+              </at-row-action>
+            </div>
+          </div>
+          <div class="at-Row-container--wrapped">
+            <div class="at-RowItem" ng-if="project.scm_revision">
+              <div class="at-RowItem-label">
+                <div style="display: flex;">
+                  <div style="margin-right: 20px;">
+                    <div>{{parse(project.extra_vars).compare_domain_one}}</div>
+                    <div>{{parse(project.extra_vars).compare_domain_two}}</div>
+                  </div>
+                  <div>
+                    <div>{{parse(project.extra_vars).compare_version_one}}</div>
+                    <div>{{parse(project.extra_vars).compare_version_two}}</div>
+                  </div>
+                </div>
+                
+              </div>
+              <!-- <at-truncate
+                string="{{ project.scm_revision }}"
+                maxLength="7"
+              ></at-truncate> -->
+            </div>
+            <at-row-item
+              label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_DESCRIPTION')}}"
+              value="{{ project.description | sanitize }}"
+            >
+            </at-row-item>
+            <at-row-item
+              label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_ORGANIZATION')}}"
+              value="{{ project.summary_fields.organization.name }}"
+              value-link="/#/organizations/{{ project.organization }}"
+            >
+            </at-row-item>
+            <at-row-item
+              label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_MODIFIED') }}"
+              value-bind-html="{{ vm.getLastModified(project) }}"
+            >
+            </at-row-item>
+            <at-row-item
+              label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_USED') }}"
+              value-bind-html="{{ vm.getLastUsed(project) }}"
+            >
+            </at-row-item>
+          </div>
+        </div>
+      </at-row>
+    </at-list>
+    <paginate
+      ng-if="displayView === 'history'"
+      collection="storedJobs"
+      dataset="dataset"
+      iterator="diff"
+      base-path="diff/jobs"
+    >
+    </paginate>
+  </div>
 </div>
 
 <div ng-if="diffView==='APP_CFG' && final != null && final['status'] === 'failed'" class="DashboardGraphs error" style="background-color: #f8d7da;
