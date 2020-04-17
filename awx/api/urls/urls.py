@@ -76,6 +76,7 @@ from .workflow_approval_template import urls as workflow_approval_template_urls
 from .workflow_approval import urls as workflow_approval_urls
 from .deployhistory import urls as deployhistory
 from .deploytemplate import urls as deploytemplate
+from .action import urls as action
 
 
 v2_urls = [
@@ -141,6 +142,7 @@ v2_urls = [
     url(r'^workflow_approvals/', include(workflow_approval_urls)),
     url(r'^deploy_history/', include(deployhistory)),
     url(r'^deploy_template/', include(deploytemplate)),
+    url(r'^action/', include(action)),
 ]
 
 

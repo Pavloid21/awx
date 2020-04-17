@@ -42,6 +42,7 @@ from awx.main.models import (
 )
 
 from awx.main.models.deploytemplate import DeployTemplate
+from awx.main.models.action import Action
 from awx.main.models.mixins import ResourceMixin
 
 __all__ = ['get_user_queryset', 'check_user_access', 'check_user_access_with_errors',
@@ -512,6 +513,11 @@ class NotificationAttachMixin(BaseAccess):
 
 class DeployTemplateAccess(BaseAccess):
     model = DeployTemplate
+
+    def can_delete(self, obj):
+        return True
+class ActionAccess(BaseAccess):
+    model = Action
 
     def can_delete(self, obj):
         return True

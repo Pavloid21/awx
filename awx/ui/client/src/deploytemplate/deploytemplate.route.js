@@ -25,6 +25,13 @@ export default {
         order_by: '-created',
         not__status: 'start'
       }
+    },
+    action_search: {
+      dynamic: true,
+      value: {
+        page_size: 10,
+        order_by: '-created',
+      }
     }
   },
   resolve: {
@@ -48,6 +55,18 @@ export default {
       ($stateParams, Wait, GetBasePath, qs) => {
         const searchParam = $stateParams.deploy_search;
         const searchPath = GetBasePath("deploy_history") || 'api/v2/deploy_history/';
+        Wait("start");
+        return qs.search(searchPath, searchParam).finally(() => Wait("stop"));
+      }
+    ],
+    Actions: [
+      "$stateParams",
+      "Wait",
+      "GetBasePath",
+      "QuerySet",
+      ($stateParams, Wait, GetBasePath, qs) => {
+        const searchParam = $stateParams.action_search;
+        const searchPath = GetBasePath("deploy_history") || 'api/v2/action/';
         Wait("start");
         return qs.search(searchPath, searchParam).finally(() => Wait("stop"));
       }

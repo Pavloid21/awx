@@ -9,7 +9,11 @@ from awx.deploy.views import (
 from awx.deploytemplate.views import (
     SaveTemplate,
     GetTemplates,
-    DeleteTemplate
+    DeleteTemplate,
+    GetJobTemplates,
+    SaveAction,
+    GetActions,
+    DeleteAction
 )
 
 app_name = 'deploytemplate_cnf'
@@ -18,5 +22,9 @@ urlpatterns = [
     url(r'^save/$', SaveTemplate.as_view(), name='save-template'),
     url(r'^rows/$', GetTemplates.as_view(), name='deploy-history-rows'),
     url(r'^delete/$', DeleteTemplate.as_view(), name='deploy-history-delete'),
+    url(r'^job_templates/$', GetJobTemplates.as_view(), name='get-job-templates'),
+    url(r'^actionsave/$', SaveAction.as_view(), name='save-action'),
+    url(r'^actions/$', GetActions.as_view(), name='get-action'),
+    url(r'^deleteaction/$', DeleteAction.as_view(), name='action-delete'),
 ]
 

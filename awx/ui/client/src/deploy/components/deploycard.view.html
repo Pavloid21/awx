@@ -9,6 +9,10 @@
     <select style="width: 170px" ng-model="domain" ng-change="setDomain()">
       <option ng-repeat="(key, domain) in domainsList">{{domain}}</option>
     </select>
+    <span>Choose action:</span>
+    <select style="width: 170px" ng-model="action" ng-change="setAction()">
+      <option ng-repeat="act in actionsList" ng-value="act.id">{{act.name}}</option>
+    </select>
     <div
       class="play-button"
       ng-class="{disabledButton: !domain || !$root.configFileName || prevStepNotComplited}"

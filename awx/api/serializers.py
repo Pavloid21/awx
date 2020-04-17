@@ -49,6 +49,7 @@ from awx.main.constants import (
     CENSOR_VALUE,
 )
 from awx.main.models import DeployHistory
+from awx.main.models import Action
 from awx.main.models import DeployTemplate
 from awx.main.models import (
     ActivityStream, AdHocCommand, AdHocCommandEvent, Credential, CredentialInputSource,
@@ -1234,6 +1235,11 @@ class OAuth2ApplicationSerializer(BaseSerializer):
         ret = super(OAuth2ApplicationSerializer, self).get_summary_fields(obj)
         ret['tokens'] = self._summary_field_tokens(obj)
         return ret
+
+class ActionSerializer(BaseSerializer):
+    class Meta:
+        model = Action
+        fields = ('__all__')
 
 class DeployHistorySerializer(BaseSerializer):
 

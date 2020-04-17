@@ -9,6 +9,13 @@
     </button>
     <button
       class="btn btn-xs"
+      ng-class="{'btn-primary': displayView === 'actions', 'Button-primary--hollow': displayView !== 'actions'}"
+      ng-click="actionsClick()"
+    >
+      Actions
+    </button>
+    <button
+      class="btn btn-xs"
       ng-class="{'btn-primary': displayView === 'pipeline', 'Button-primary--hollow': displayView !== 'pipeline'}"
       ng-click="pipelineClick()"
     >
@@ -63,6 +70,28 @@
     </div>
   </div>
 
+  <!-- ADD ACTION -->
+  <div class="DashboardGraphs" style="padding: 20px 20px;" ng-show="!!isAddingAction && displayView === 'actions'">
+    <p style="font-weight: bold;">Name of action: </p>
+    <input
+      type="text"
+      id="action_name"
+      ng-model="actionName"
+      ng-change="actionNameInputChange()"
+    />
+    <p style="font-weight: bold;">Choose job template:</p>
+    <select style="width: 170px" ng-model="selected.action"
+      ng-options="item as item.name for item in storedJobTemplates track by item.id"
+    >
+    </select>
+    <p style="font-weight: bold;">Extra variables:</p>
+    <div id="jsoneditor" style="width: 400px; height: 400px;"></div>
+    <div class="pipeline" style="padding-top: 20px;">
+      <button class="btn btn-success" ng-click="handleSaveAction()">Save</button>
+      <button class="btn" ng-click="handleCancel()">Cancel</button>
+    </div>
+  </div>
+
   <!-- VIEW TEMPLATES-->
   <div style="padding: 20px 0px" ng-show="displayView === 'templates'">
     <at-panel-body>
@@ -100,25 +129,6 @@
               >
               </at-row-item>
               <div class="at-Row-actions">
-                <!-- <div
-                  aw-tool-tip="{{ project.scm_update_tooltip }}"
-                  data-tip-watch="project.scm_update_tooltip"
-                  data-placement="top"
-                >
-                  <div
-                    class="at-RowAction"
-                    ng-class="{'at-RowAction--disabled': project.scm_update_disabled }"
-                    ng-click="vm.SCMUpdate(project.id, $event)"
-                    ng-show="project.summary_fields.user_capabilities.start"
-                  >
-                    <i class="fa fa-refresh"></i>
-                  </div>
-                </div> -->
-                <!-- <at-row-action
-                  icon="fa-pencil"
-                  ng-click="vm.copyProject(project)"
-                >
-                </at-row-action> -->
                 <at-row-action
                   icon="fa-trash"
                   ng-click="deleteTemplate(project.id)"
@@ -171,6 +181,96 @@
     base-path="api/v2/deploy_template"
   >
   </paginate>
+
+  <!-- VIEW ACTIONS -->
+  <div style="padding: 20px 0px;" ng-if="displayView === 'actions'">
+    <at-panel-body>
+      <div class="at-List-toolbarAction">
+        <button
+          type="button"
+          ng-show="!isAdding"
+          class="at-Button--add"
+          id="button-add"
+          data-placement="top"
+          aria-haspopup="false"
+          aria-expanded="false"
+          style="line-height: 20px;"
+          ng-click="handleAddAction()"
+        >
+          Add new action
+        </button>
+      </div>
+      <h3>Available actions</h3>
+      <hr/>
+      <at-list results="storedActions">
+        <at-row
+          ng-repeat="project in storedActions"
+          ng-class="{'at-Row--active': (project.id === vm.activeId), 'at-Row--collapsed': vm.isCollapsed}"
+          id="row-{{ project.id }}"
+        >
+          <div class="at-Row-items">
+            <div class="at-Row-container">
+              <at-row-item
+                status="{{ project.statusIcon }}"
+                status-tip="{{ project.statusTip }}"
+                status-click="vm.showSCMStatus(project.id)"
+                header-value="{{ project.name }}"
+                header-tag="{{ vm.projectTypes[project.scm_type] }}"
+              >
+              </at-row-item>
+              <div class="at-Row-actions">
+                <at-row-action
+                  icon="fa-trash"
+                  ng-click="deleteAction(project.id)"
+                >
+                </at-row-action>
+              </div>
+            </div>
+            <div class="at-Row-container--wrapped">
+              <div class="at-RowItem" ng-if="project.scm_revision">
+                <div class="at-RowItem-label">
+                  {{ :: vm.strings.get('list.ROW_ITEM_LABEL_REVISION') }}
+                </div>
+                <at-truncate
+                  string="{{ project.scm_revision }}"
+                  maxLength="7"
+                ></at-truncate>
+              </div>
+              <at-row-item
+                label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_DESCRIPTION')}}"
+                value="{{ project.description | sanitize }}"
+              >
+              </at-row-item>
+              <at-row-item
+                label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_ORGANIZATION')}}"
+                value="{{ project.summary_fields.organization.name }}"
+                value-link="/#/organizations/{{ project.organization }}"
+              >
+              </at-row-item>
+              <at-row-item
+                label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_MODIFIED') }}"
+                value-bind-html="{{ vm.getLastModified(project) }}"
+              >
+              </at-row-item>
+              <at-row-item
+                label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_USED') }}"
+                value-bind-html="{{ vm.getLastUsed(project) }}"
+              >
+              </at-row-item>
+            </div>
+          </div>
+        </at-row>
+      </at-list>
+    </at-panel-body>
+    <paginate
+    ng-if="displayView === 'actions'"
+    collection="storedActions"
+    dataset="actionsDataset"
+    iterator="action"
+    base-path="api/v2/action"
+  >
+  </paginate>
+  </div>
 
   <!-- VIEW HISTORY -->
   <div style="padding: 20px 0px;" ng-if="displayView === 'history'">

@@ -75,6 +75,7 @@ from awx.main.access import (  # noqa
 
 from awx.main.models.deployhistory import DeployHistory
 from awx.main.models.deploytemplate import DeployTemplate
+from awx.main.models.action import Action
 
 
 User.add_to_class('get_queryset', get_user_queryset)
@@ -185,6 +186,7 @@ activity_stream_registrar.connect(Inventory)
 activity_stream_registrar.connect(Host)
 activity_stream_registrar.connect(Group)
 activity_stream_registrar.connect(InventorySource)
+activity_stream_registrar.connect(Action)
 #activity_stream_registrar.connect(InventoryUpdate)
 activity_stream_registrar.connect(Credential)
 activity_stream_registrar.connect(CredentialType)

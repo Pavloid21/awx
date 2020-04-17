@@ -3,10 +3,17 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   this.allowRun = null;
   this.allowDelete = null;
   $scope.domainsList = ["ulbs11_sales_domain", "ulbs13_sales_domain"];
+  Wait('start')
+  $http({
+    method: 'GET',
+    url: '/deploytemplate/actions/'
+  }).then(function success(response) {
+    $scope.actionsList = response.data.results
+    Wait('stop')
+  })
   $scope.status = "start";
   this.$onInit = function() {
     // Init from history if exists
-    console.log(this.index)
     if (this.index > 0) {
       if ($rootScope.isConfigUploaded[this.index - 1].status !== 'start' &&
           $rootScope.isConfigUploaded[this.index - 1].status !== 'pending') {
@@ -22,6 +29,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
     $scope.allowDelete = this.allowdelete;
     if ($rootScope.isConfigUploaded.length) {
       $scope.domain = $rootScope.isConfigUploaded[this.index].domain;
+      $scope.action = $rootScope.isConfigUploaded[this.index].action[0];
       $scope.status = $rootScope.isConfigUploaded[this.index].status;
       if (
         $rootScope.isConfigUploaded.length > $scope.domainsList.length && this.allowRun
@@ -38,6 +46,10 @@ export default function($rootScope, $scope, $element, Wait, $http) {
     $rootScope.isConfigUploaded[$scope.index].domain = $scope.domain;
   };
 
+  $scope.setAction = () => {
+    $rootScope.isConfigUploaded[$scope.index].action = [$scope.action];
+  };
+
   $scope.handleDeleteCard = () => {
     $rootScope.isConfigUploaded.splice($scope.index, 1);
   }
@@ -51,7 +63,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         $scope.domain
       }&file=${$rootScope.configFileName ? $rootScope.configFileName.url.replace("/media/", "") : $rootScope.isConfigUploaded[this.index - 1].config}&domain=${
         $scope.domain
-      }&prevstep=${$scope.parentIndex || null}`
+      }&prevstep=${$scope.parentIndex || null}&action=${$scope.action}`
     }).then(function success(response) {
       if (response.data.status === "failed") {
         $scope.final = { status: "failed", job: response.data.job.job };

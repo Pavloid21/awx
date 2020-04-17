@@ -29,33 +29,38 @@ class UploadFile(View):
 
 class RunDeploy(View):
     def getJob(self, obj):
-        getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + str(obj['job']), auth=('admin', 'password'))
+        getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + str(obj['job']), auth=('admin', 'password'), verify=False)
         temp = json.dumps(getResponse.json())
         result = json.loads(temp)
         return result
 
     def get(self, request, *args, **kwargs):
-        response = requests.get(AWX_API_PATH + '/api/v2/inventories/', auth=('admin', 'password'))
+        response = requests.get(AWX_API_PATH + '/api/v2/inventories/', auth=('admin', 'password'), verify=False)
         inventories = json.loads(response.text)
         prevStep = None
+        actionsResponse = requests.get(AWX_API_PATH + '/api/v2/action/' + str(request.GET['action'][0]) + '/', auth=('admin', 'password'), verify=False)
+        action = json.loads(actionsResponse.text)
         if request.GET['prevstep'].isnumeric():
             prevStep = request.GET['prevstep']
 
         for inventory in inventories['results']:
             if inventory['name'] == request.GET['inventory']:
-                launch = requests.post(AWX_API_PATH + '/api/v2/job_templates/11/launch/', json={
-                    'extra_vars': {
-                        'deploy_file': request.GET['file'],
-                    },
+                extraVars = json.loads(action['extra_vars'])
+                extraVars["deploy_file"] = request.GET["file"]
+                print(extraVars)
+                launch = requests.post(AWX_API_PATH + '/api/v2/job_templates/' + str(action['job_templates'][0]) + '/launch/', json={
+                    'extra_vars': extraVars,
                     'inventory': inventory['id'],
                 },
-                auth=('admin', 'password'))
+                auth=('admin', 'password'),
+                verify=False)
                 test = requests.post(AWX_API_PATH + '/api/v2/deploy_history/', json={
                     'status': 'pending',
                     'name': ''.join(random.choice(string.ascii_letters) for _ in range(12)),
                     "description": "",
                     'config': request.GET['file'],
                     'domain': request.GET['domain'],
+                    'action': [action['id']],
                     'prev_step_id': prevStep
                 }, 
                 auth=('admin', 'password'),
@@ -65,7 +70,6 @@ class RunDeploy(View):
                 jsonDump = json.dumps(jsonObj)
                 obj = json.loads(jsonDump)
                 job = self.getJob(obj)
-                print(str(testJson))
                 return JsonResponse({'job': job, 'prevStep': testJson['id']})
         return JsonResponse({'status': 'failed', 'description': 'inventory not exists'})
 

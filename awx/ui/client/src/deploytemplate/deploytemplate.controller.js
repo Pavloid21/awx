@@ -1,4 +1,5 @@
 "use strict";
+import JSONEditor from 'jsoneditor';
 
 export default [
   "$rootScope",
@@ -7,6 +8,7 @@ export default [
   "ConfigService",
   "Dataset",
   "History",
+  "Actions",
   "$http",
   "Wait",
   "Uploader",
@@ -17,6 +19,7 @@ export default [
     ConfigService,
     Dataset,
     History,
+    Action,
     $http,
     Wait,
     Uploader
@@ -28,17 +31,42 @@ export default [
     $rootScope.isConfigUploaded = [];
     $scope.dataset = Dataset.data;
     $scope.history = History.data;
+    $scope.actionsDataset = Action.data;
     $scope.errors = null;
     $scope.selected = {};
     $scope.$on("updateDataset", (e, dataset, queryset) => {
       if(e.targetScope.basePath.indexOf('deploy_template') > 0) {
         $scope.dataset = dataset;
         $scope.storedTemplates = dataset.results;
-      } else {
+      } else if (e.targetScope.basePath.indexOf('deploy_history') > 0) {
         $scope.history = dataset;
         $scope.deployHistoryRows = dataset.results;
+      } else {
+        $scope.actions = dataset;
+        $scope.deployActionRows = dataset.results;
       }
     });
+
+    // JSON EDITOR INIT https://github.com/josdejong/jsoneditor
+    const container = document.getElementById("jsoneditor")
+    const options = {
+      search: false,
+      mode: 'code',
+      onChangeText: (jsonString) => {
+        $scope.actionExtraVars = jsonString;
+        // console.log(JSON.parse(jsonString))
+      }
+    }
+    const editor = new JSONEditor(container, options)
+
+    // set json
+    const initialJson = {
+    }
+    editor.set(initialJson)
+
+    // get json
+    const updatedJson = editor.get()
+
     let handleFilesConfig = (file) => {
       const reader = new FileReader();
       reader.onload = (event) => {
@@ -64,8 +92,21 @@ export default [
 
       reader.readAsText(file);
     };
+    Wait('start')
+    $http({
+      method: 'GET',
+      url: 'deploytemplate/job_templates/'
+    }).then(function success(result) {
+      $scope.storedJobTemplates = result.data.results;
+      Wait('stop')
+    })
     $scope.templatesClick = () => {
       $scope.displayView = "templates";
+      $scope.isAllowRun = false;
+      $scope.isAllowDelete = true;
+    };
+    $scope.actionsClick = () => {
+      $scope.displayView = "actions";
       $scope.isAllowRun = false;
       $scope.isAllowDelete = true;
     };
@@ -82,6 +123,7 @@ export default [
 
     $scope.storedTemplates = Dataset.data.results;
     $scope.deployHistoryRows = History.data.results;
+    $scope.storedActions = Action.data.results;
     $rootScope.isConfigUploaded = [];
     $scope.cards = [];
 
@@ -96,6 +138,10 @@ export default [
         prev_step_id: $scope.parentIndex,
       });
     };
+
+    $scope.handleAddAction = () => {
+      $scope.isAddingAction = true;
+    }
 
     $scope.deleteTemplate = (id) => {
       Wait('start')
@@ -125,6 +171,34 @@ export default [
       )
     }
 
+    $scope.deleteAction = (id) => {
+      Wait('start')
+      $http({
+        method: 'GET',
+        url: `/deploytemplate/deleteaction/?id=${id}`
+      }).then(
+        function success() {
+          $http({
+            method: "GET",
+            url: "/deploytemplate/actions/",
+          }).then(
+            function success(response) {
+              $scope.storedActions = response.data.results;
+              $scope.actionsDataset = response.data;
+              Wait("stop");
+            },
+            function error() {
+              alert("Somethinng went wrong.");
+              Wait("stop");
+            }
+          );
+        },
+        function error() {
+          Wait('stop')
+        }
+      )
+    }
+
     $scope.setConfigFile = (files) => {
       $scope.fileObj = files[0];
       handleFilesConfig(files[0]);
@@ -134,8 +208,13 @@ export default [
       $scope.errors = null;
     };
 
+    $scope.actionNameInputChange = () => {
+      $scope.errors = null;
+    };
+
     $scope.handleCancel = () => {
       $scope.isAdding = false;
+      $scope.isAddingAction = false;
       $scope.cards = [];
       $rootScope.isConfigUploaded = [];
       $scope.templateName = null;
@@ -150,12 +229,14 @@ export default [
         config: null,
         name: null,
         domain: null,
+        action: [],
         prev_step_id: $scope.parentIndex,
       });
     };
 
 
     $scope.handleSave = () => {
+      console.log($scope.isConfigUploaded)
       if (!$scope.templateName || $scope.templateName === "") {
         $scope.errors = {
           details: "Template name not specified.",
@@ -214,6 +295,28 @@ export default [
         }
       }
     };
+
+    $scope.handleSaveAction = () => {
+      Wait('start');
+      $http({
+        method: 'POST',
+        url: '/deploytemplate/actionsave/',
+        data: {
+          extravars: $scope.actionExtraVars,
+          name: $scope.actionName,
+          jobtemplate: [$scope.selected.action.id]
+        }
+      }).then(function success(){
+        $scope.isAddingAction = false;
+        $http({
+          method: 'GET',
+          url: 'deploytemplate/actions/'
+        }).then(function success(result) {
+          $scope.storedActions = result.data.results;
+          Wait('stop')
+        })
+      })
+    }
 
     $scope.uploadConfig = () => {
       Wait("start");

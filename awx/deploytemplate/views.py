@@ -28,10 +28,8 @@ class SaveTemplate(View):
         savedData = requests.post(AWX_API_PATH + '/api/v2/deploy_history/', json=step,
         auth=('admin', 'password'),
         verify=False)
-        print('saved: ' + savedData.text)
         return savedData.text
     def post(self, request, *args, **kwargs):
-        print(request.body)
         prevStep = None
         ids = []
         dataList = json.loads(request.body)
@@ -56,6 +54,39 @@ class GetTemplates(View):
 class DeleteTemplate(View):
     def get(self, request, *args, **kwargs):
         result = requests.delete(AWX_API_PATH + '/api/v2/deploy_template/' + request.GET['id'] + '/',
+        auth=('admin', 'password'),
+        verify=False)
+        return JsonResponse(json.loads('{}'))
+
+class GetJobTemplates(View):
+    def get(self, request, *args, **kwargs):
+        result = requests.get(AWX_API_PATH + '/api/v2/job_templates/',
+        auth=('admin', 'password'),
+        verify=False)
+        return JsonResponse(json.loads(result.text))
+
+class SaveAction(View):
+    def post(self, request, *args, **kwargs):
+        dataList = json.loads(request.body)
+        result = requests.post(AWX_API_PATH + '/api/v2/action/', json={
+            "name": dataList['name'],
+            "extra_vars": dataList['extravars'],
+            "job_templates": dataList['jobtemplate']
+        },
+        auth=('admin', 'password'),
+        verify=False)
+        return JsonResponse(json.loads(result.text))
+
+class GetActions(View):
+    def get(self, request, *args, **kwargs):
+        result = requests.get(AWX_API_PATH + '/api/v2/action/?order_by=-created',
+        auth=('admin', 'password'),
+        verify=False)
+        return JsonResponse(json.loads(result.text))
+
+class DeleteAction(View):
+    def get(self, request, *args, **kwargs):
+        result = requests.delete(AWX_API_PATH + '/api/v2/action/' + request.GET['id'] + '/',
         auth=('admin', 'password'),
         verify=False)
         return JsonResponse(json.loads('{}'))
