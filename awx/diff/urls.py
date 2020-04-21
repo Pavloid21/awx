@@ -9,7 +9,8 @@ from awx.diff.views import (
     DiffView,
     DiffResultView,
     DiffFinalView,
-    JobsList
+    JobsList,
+    CommitsList
 )
 
 app_name = 'diff'
@@ -19,6 +20,7 @@ urlpatterns = [
     url(r'^compare/(?P<left_version_id>[a-z0-9-]+)/(?P<right_version_id>[a-z0-9-]+)/$', DiffView.as_view(), name='diff'),
     url(r'^results/$', DiffResultView.as_view(), name='res'),
     url(r'^final/$', DiffFinalView.as_view(), name='fin'),
-    url(r'^jobs/$', JobsList.as_view(), name='jobs')
+    url(r'^jobs/$', JobsList.as_view(), name='jobs'),
+    url(r'^commits/(?P<env>[0-9_-]+)/$', CommitsList.as_view(), name='commits_list'),
 ]
 

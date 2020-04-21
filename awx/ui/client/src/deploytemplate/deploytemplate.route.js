@@ -3,9 +3,9 @@ import controller from "./deploytemplate.controller";
 import { N_ } from "../i18n";
 
 export default {
-  searchPrefix: "deploytemplate",
-  name: "deploytemplate",
-  route: "/deploytemplate",
+  searchPrefix: "deptemplate",
+  name: "deptemplate",
+  route: "/deptemplate",
   controller: controller,
   ncyBreadcrumb: {
     label: N_("DEPLOY TEMPLATES")

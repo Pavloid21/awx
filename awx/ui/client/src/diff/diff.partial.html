@@ -11,13 +11,18 @@
     <button 
       class="btn btn-xs"
       ng-class="{'btn-primary': displayView === 'compare', 'Button-primary--hollow': displayView !== 'compare'}"
-      ng-click="switchView()"
+      ng-click="switchView('compare')"
     >Compare</button>
     <button 
       class="btn btn-xs"
       ng-class="{'btn-primary': displayView === 'history', 'Button-primary--hollow': displayView !== 'history'}"
-      ng-click="switchView()"
+      ng-click="switchView('history')"
     >History</button>
+    <button 
+      class="btn btn-xs"
+      ng-class="{'btn-primary': displayView === 'commits', 'Button-primary--hollow': displayView !== 'commits'}"
+      ng-click="switchView('commits')"
+    >Versions</button>
   </div>
   <!-- VIEW COMPARE -->
   <div class="DashboardGraphs" ng-show="displayView === 'compare'">
@@ -238,6 +243,38 @@
       base-path="diff/jobs"
     >
     </paginate>
+  </div>
+  <!-- VIEW COMMITS -->
+  <div class="DashboardGraphs" ng-show="displayView === 'commits'" style="padding-bottom: 20px;">
+    <div style="padding-bottom: 20px;">
+      <p>Source Environment:</p>
+      <select style="width: 170px" ng-model="environmentDomain" ng-change="getEnvironmentDomain()">
+        <option
+          ng-repeat="env1option in diffEnvironments.versions"
+          ng-value="env1option"
+          >{{env1option.name}}</option
+        >
+      </select>  
+    </div>
+    <div>
+      <input type="checkbox" name="composites" id="composites" ng-model="confirmed" ng-change="setCompareComposite()"/>
+      <label for="composites"> Compare composite configurations</label>
+    </div>
+    <button id="verCompareButton" class="btn btn-success" ng-class="{disabled: !allowCompareVersions}" style="margin-bottom: 20px;" ng-click="handleCompareVersions()">Compare</button>
+    <div class="card_view">
+      <div class="card_radio" ng-repeat="commit in domainVersions track by $index" style="width: 370px;">
+        <input type="checkbox" ng-value="commit.title" name="commit" id="{{commit.id}}" ng-model="$parent.commitsSelected[commit.short_id]" ng-change="setCommit()"/>
+        <label for="{{commit.title}}">{{commit.title}}</label>
+        <div>
+          <div class="commit_info">
+            <p ng-bind="commit.committed_date | date:'dd-MM-yyyy HH:mm'"></p>
+            <p><i class="fa fa-user"></i> {{commit.committer_name}}</p>
+            <p><i class="fa fa-envelope"></i> {{commit.committer_email}}</p>
+            <p>{{commit.id}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 

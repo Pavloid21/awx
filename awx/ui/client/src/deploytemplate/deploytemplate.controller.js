@@ -95,7 +95,7 @@ export default [
     Wait('start')
     $http({
       method: 'GET',
-      url: 'deploytemplate/job_templates/'
+      url: 'deptemplate/job_templates/'
     }).then(function success(result) {
       $scope.storedJobTemplates = result.data.results;
       Wait('stop')
@@ -147,12 +147,12 @@ export default [
       Wait('start')
       $http({
         method: 'GET',
-        url: `/deploytemplate/delete/?id=${id}`
+        url: `/deptemplate/delete/?id=${id}`
       }).then(
         function success() {
           $http({
             method: "GET",
-            url: "/deploytemplate/rows/",
+            url: "/deptemplate/rows/",
           }).then(
             function success(response) {
               $scope.storedTemplates = response.data.results;
@@ -175,12 +175,12 @@ export default [
       Wait('start')
       $http({
         method: 'GET',
-        url: `/deploytemplate/deleteaction/?id=${id}`
+        url: `/deptemplate/deleteaction/?id=${id}`
       }).then(
         function success() {
           $http({
             method: "GET",
-            url: "/deploytemplate/actions/",
+            url: "/deptemplate/actions/",
           }).then(
             function success(response) {
               $scope.storedActions = response.data.results;
@@ -264,7 +264,7 @@ export default [
           $rootScope.isConfigUploaded = tempArr;
           $http({
             method: "POST",
-            url: "/deploytemplate/save/",
+            url: "/deptemplate/save/",
             data: {
               list: $rootScope.isConfigUploaded,
               name: $scope.templateName,
@@ -274,7 +274,7 @@ export default [
               $scope.isAdding = false;
               $http({
                 method: "GET",
-                url: "/deploytemplate/rows/",
+                url: "/deptemplate/rows/",
               }).then(
                 function success(response) {
                   $scope.storedTemplates = response.data.results;
@@ -300,7 +300,7 @@ export default [
       Wait('start');
       $http({
         method: 'POST',
-        url: '/deploytemplate/actionsave/',
+        url: '/deptemplate/actionsave/',
         data: {
           extravars: $scope.actionExtraVars,
           name: $scope.actionName,
@@ -310,7 +310,7 @@ export default [
         $scope.isAddingAction = false;
         $http({
           method: 'GET',
-          url: 'deploytemplate/actions/'
+          url: 'deptemplate/actions/'
         }).then(function success(result) {
           $scope.storedActions = result.data.results;
           Wait('stop')

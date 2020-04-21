@@ -43,6 +43,11 @@ class JobsList(View):
             
         return JsonResponse(response.json())
 
+class CommitsList(View):
+    def get(self, request, *args, **kwargs):
+        response = requests.get(REPO_PATH + '/' + kwargs['env'] + '/repository/commits?ref_name=master', headers={'Private-Token': '8s7Ryzi621Yhzf8hvRhP'})
+        return JsonResponse({'commits': response.json()})
+
 
 class VersionList(View):
 

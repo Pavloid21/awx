@@ -15,6 +15,7 @@ export default [
     Wait("start");
 
     $("#diffCompareButton").css("cursor", "not-allowed");
+    $("#verCompareButton").css("cursor", "not-allowed");
 
     $scope.diffView = "APP_CFG";
     $scope.displayView = 'compare';
@@ -26,6 +27,7 @@ export default [
     });
 
     $scope.storedJobs = Dataset.data.results;
+    $scope.allowCompareVersions = false;
 
     $http({ method: "GET", url: "/diff/environments/" }).then(
       function success(response) {
@@ -58,15 +60,8 @@ export default [
       new_values: false
     };
 
-    $scope.switchView = () => {
-      if ($scope.displayView === 'compare') {
-        $scope.isList = true;
-        $scope.displayView = 'history';
-      } else {
-        $scope.isList = false;
-        $scope.final = null;
-        $scope.displayView = 'compare';
-      }
+    $scope.switchView = (chapter) => {
+      $scope.displayView = chapter
     }
     
     $scope.parse = (source) => {
@@ -130,6 +125,136 @@ export default [
       }
     };
 
+    $scope.getEnvironmentDomain = () => {
+      Wait("start");
+        var url = `/diff/commits/${$scope.environmentDomain.id}/`;
+        $http({ method: "GET", url: url }).then(
+          function success(response) {
+            $scope.domainVersions = response.data.commits;
+            $scope.domainVersion = null;
+            $scope.diffErrorMessage = null;
+            $scope.compareData = null;
+            $scope.final = null;
+            Wait("stop");
+          },
+          function error(response) {
+            $scope.diffErrorMessage = "Error at "
+              .concat(url)
+              .concat(" : ")
+              .concat(response.statusText);
+            $scope.domainVersions = null;
+            $scope.domainVersion = null;
+            $scope.compareData = null;
+            $scope.final = null;
+            $("html, body").animate({ scrollTop: 0 }, "slow");
+            Wait("stop");
+          }
+        );
+    }
+
+    $scope.setCommit = () => {
+      let count = 0;
+      Object.keys($scope.commitsSelected).map(item => {
+        if ($scope.commitsSelected[item]) {
+          count++
+        }
+      })
+      if (count === 2) {
+        $scope.allowCompareVersions = true
+        $("#verCompareButton").css("cursor", "pointer");
+      } else {
+        $scope.allowCompareVersions = false
+        $("#verCompareButton").css("cursor", "not-allowed");
+      }
+    }
+
+    $scope.handleCompareVersions = () => {
+      if ($scope.allowCompareVersions) {
+        $scope.compareData = null;
+        $scope.diffErrorMessage = null;
+        $scope.final = null;
+        let selected = [];
+        Object.keys($scope.commitsSelected).forEach(item => {
+          $scope.domainVersions.map(version => {
+            if (version.short_id === item) {
+              selected.push(version)
+            }
+          })
+        })
+        var url = `/diff/compare/${selected[0].id}/${
+          selected[1].id
+        }/?env1=${$scope.environmentDomain.name}&env2=${$scope.environmentDomain.name}&v1=${
+          selected[0].title
+        }&v2=${
+          selected[1].title
+        }&composite=${!!$scope.confirmed}&isnode=undefined`;
+      }
+      $http({ method: "GET", url: url, timeout: 60 * 1000 }).then(
+        function success(response) {
+          $scope.compareData = {};
+          if (response.data.status === "failed") {
+            $scope.final = { status: "failed", job: response.data.job };
+            $scope.compareData = response.data;
+          } else {
+            $scope.job = response.data;
+            let requestJob = () => {
+              $http({
+                method: "GET",
+                url: `/diff/results/?job=${$scope.job.id}`
+              }).then(function success(response) {
+                if (
+                  response.data.status !== "successful" &&
+                  response.data.status !== "failed"
+                ) {
+                  setTimeout(() => requestJob(), 30 * 1000);
+                } else if (response.data.status === "failed") {
+                  $scope.final = {
+                    status: "failed",
+                    job: $scope.job.id
+                  };
+                  Wait("stop");
+                } else {
+                  $http({
+                    method: "GET",
+                    url: `/diff/final/?job=${$scope.job.id}&status=successful`
+                  }).then(function success(response) {
+                    $scope.compareData = response.data.compare.results.find(
+                      res => {
+                        if (
+                          res.task.indexOf("сompare v_one and v_two") >=
+                            0 &&
+                          !!res.event_data.res
+                        ) {
+                          return true;
+                        }
+                        return false;
+                      }
+                    );
+                    $scope.final = JSON.parse(
+                      $scope.compareData.event_data.res.stdout
+                    );
+                    $scope.isEmpty =
+                      Object.keys($scope.final)[0] === undefined;
+                    Wait("stop");
+                  });
+                }
+              });
+            };
+            requestJob();
+          }
+        },
+        function error(response) {
+          $scope.diffErrorMessage = "Error at "
+            .concat(url)
+            .concat(" : ")
+            .concat(response.statusText);
+          $scope.compareData = null;
+          console.log($scope.diffErrorMessage);
+          Wait("stop");
+        }
+      );
+    }
+
     $scope.setVersionEnv1 = function() {
       $scope.compareData = null;
       $scope.final = null;
@@ -166,7 +291,7 @@ export default [
       $scope.final = null;
       if ($scope.env1Version !== null) {
         if ($scope.env2Version !== null) {
-          Wait("start");
+          // Wait("start");
           let env1 = $scope.diffEnvironments.versions.filter(version => {
             if (version.id === $scope.env1) return version;
           });
