@@ -48,6 +48,16 @@ class CommitsList(View):
         response = requests.get(REPO_PATH + '/' + kwargs['env'] + '/repository/commits?ref_name=master', headers={'Private-Token': '8s7Ryzi621Yhzf8hvRhP'})
         return JsonResponse({'commits': response.json()})
 
+class BranchesList(View):
+    def get(self, request, *args, **kwargs):
+        response = requests.get(REPO_PATH + '/' + request.GET['env'] + '/repository/branches', headers={'Private-Token': '8s7Ryzi621Yhzf8hvRhP'})
+        return JsonResponse({'branches': response.json()})
+
+class FilesList(View):
+    def get(self, request, *args, **kwargs):
+        response = requests.get(REPO_PATH + '/' + request.GET['env'] + '/repository/tree/?ref=' + request.GET['ref'], headers={'Private-Token': '8s7Ryzi621Yhzf8hvRhP'})
+        return JsonResponse({'files': response.json()})
+
 
 class VersionList(View):
 

@@ -14,6 +14,7 @@ if ($basePath) {
 import diff from './diff/main';
 import deploy from './deploy/main';
 import deploytemplate from './deploytemplate/main';
+import convert from './convert/main';
 
 import start from './app.start';
 import inventoriesHosts from './inventories-hosts/main';
@@ -95,6 +96,7 @@ angular
         diff.name,
         deploy.name,
         deploytemplate.name,
+        convert.name,
 
         'Utilities',
         'templates',

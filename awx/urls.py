@@ -21,6 +21,7 @@ urlpatterns = [
     url(r'^diff/', include('awx.diff.urls', namespace='diff')),
     url(r'^deploy/', include('awx.deploy.urls', namespace='deploy_cnf')),
     url(r'^deptemplate/', include('awx.deploytemplate.urls', namespace='deploytemplate_cnf')),
+    url(r'^convert/', include('awx.convert.urls', namespace='convert')),
     url(r'^(?:api/)?400.html$', handle_400),
     url(r'^(?:api/)?403.html$', handle_403),
     url(r'^(?:api/)?404.html$', handle_404),

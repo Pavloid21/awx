@@ -1,0 +1,49 @@
+<div class="DashboardGraphs" style="padding: 20px 20px;">
+    <div class="btn-group">
+        <button 
+          class="btn btn-xs"
+          ng-class="{'btn-primary': displayView === 'sql2excel', 'Button-primary--hollow': displayView !== 'sql2excel'}"
+          ng-click="switchView('sql2excel')"
+        >SQL2EXCEL</button>
+        <button 
+          class="btn btn-xs"
+          ng-class="{'btn-primary': displayView === 'excel2sql', 'Button-primary--hollow': displayView !== 'excel2sql'}"
+          ng-click="switchView('excel2sql')"
+        >EXCEL2SQL</button>
+      </div>
+      <div class="DashboardGraphs" style="padding: 20px 20px;">
+        <div>
+            <div>
+              <p>Source Environment:</p>
+              <select style="width: 170px" ng-model="env" ng-change="getDataEnv()">
+                <option
+                  ng-repeat="envoption in environments"
+                  ng-value="envoption.id"
+                  >{{envoption.name}}</option
+                >
+              </select>
+            </div>
+            <div>
+                <p>Branch:</p>
+                <select style="width: 170px" ng-model="branch" ng-change="getDataBranch()">
+                  <option
+                    ng-repeat="branchoption in branches"
+                    ng-value="branchoption.name"
+                    >{{branchoption.name}}</option
+                  >
+                </select>
+              </div>
+          </div>
+          <div ng-show="!!files.length">
+            <p>Files:</p>
+            <div ng-repeat="file in files" ng-class="{fileselected: selectedFile.id === file.id}" class="fileitem" ng-click="selectFile(file)">
+              <p style="margin-right: 20px; font-size: 24px;"><i class="fa fa-file-o"></i></p>
+              <p>{{file.name}}</p>
+            </div>
+            <p ng-show="!!selectedFile" class="selection-info"><strong>Selected file:</strong> {{selectedFile.name}}</p>
+          </div>
+      </div>
+      <div style="margin-top: 20px">
+        <button class="btn btn-success" ng-show="!!selectedFile" ng-click="handleConvert()">Convert</button>
+      </div>
+</div>

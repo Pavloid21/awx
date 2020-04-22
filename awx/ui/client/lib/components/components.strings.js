@@ -87,6 +87,7 @@ function ComponentsStrings (BaseString) {
         DIFF: t.s('Compare configurations'),
         DEPLOY: t.s('Dynamic deploy configuration'),
         DEPLOYTEMPLATE: t.s('Deploy templates'),
+        CONVERT: t.s('Converting'),
         ABOUT: t.s('About'),
         COPYRIGHT: t.s('Copyright © 2019 Red Hat, Inc.'),
         VIEWS_HEADER: t.s('Views'),
