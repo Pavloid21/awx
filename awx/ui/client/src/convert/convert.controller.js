@@ -9,6 +9,7 @@ export default [
     "Wait",
     ($rootScope, $scope, $location, ConfigService, Dataset, lastPath, $http, Wait) => {
         $scope.displayView = 'sql2excel'
+        const re = /(?:\.([^.]+))?$/;
         Wait('start')
         $http({
             method: 'GET',
@@ -20,6 +21,7 @@ export default [
 
         $scope.switchView = (view) => {
             $scope.displayView = view;
+            $scope.getDataBranch();
         }
 
         $scope.getDataEnv = () => {
@@ -40,9 +42,14 @@ export default [
                 url: `diff/files/?env=${$scope.env}&ref=${$scope.branch}`
             }).then(function success(response) {
                 $scope.files = response.data.files.filter(item => {
-                    return item.type === 'blob'
+                    if (item.type === 'blob') {
+                        if (re.exec(item.name)[1] === 'sql' && $scope.displayView === 'sql2excel') {
+                            return true
+                        } else if (re.exec(item.name)[1] === 'xls' || re.exec(item.name)[1] === 'xlsx' && $scope.displayView === 'excel2sql') {
+                            return true
+                        }
+                    }
                 });
-                console.log($scope.files);
                 Wait('stop')
             })
         }

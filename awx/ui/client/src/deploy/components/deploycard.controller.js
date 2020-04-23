@@ -6,7 +6,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   Wait('start')
   $http({
     method: 'GET',
-    url: '/deploytemplate/actions/'
+    url: '/deptemplate/actions/'
   }).then(function success(response) {
     $scope.actionsList = response.data.results
     Wait('stop')
