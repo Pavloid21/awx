@@ -2,9 +2,10 @@
 # All Rights Reserved.
 
 import json
-
+import os
+import requests
 # Django
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
@@ -98,6 +99,13 @@ def handle_csp_violation(request):
     logger.error(json.loads(request.body))
     return HttpResponse(content=None)
 
-
 def handle_login_redirect(request):
     return HttpResponseRedirect("/#/login")
+
+def handle_git_redirect(request):
+    target = os.getenv('npm_package_config_django_host', 'localhost')
+    port = os.getenv('gitnode_port', '3031')
+    # print( target + port)
+    response = requests.get('http://' + target + ':' + port + request.path, params=request.GET)
+    # print(request.GET)
+    return JsonResponse(json.loads(response.text))

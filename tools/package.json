@@ -1,0 +1,15 @@
+{
+  "name": "node-app",
+  "version": "1.0.0",
+  "description": "The best way to manage your Node app using Docker",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4",
+    "nodegit": "^0.26.5"
+  }
+}

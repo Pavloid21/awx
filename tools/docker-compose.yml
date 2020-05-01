@@ -18,9 +18,11 @@ services:
       SDB_HOST: 0.0.0.0
       SDB_PORT: 7899
       AWX_GROUP_QUEUES: tower
+      test_env: tester
     ports:
       - "8888:8888"
       - "8080:8080"
+      - "3031:3031"
       - "8013:8013"
       - "8043:8043"
       - "6899:6899"  # default port range for sdb-listen

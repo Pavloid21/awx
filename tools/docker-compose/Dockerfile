@@ -73,6 +73,7 @@ RUN mkdir -p /data/db
 ADD tools/docker-compose/awx.egg-link /tmp/awx.egg-link
 ADD tools/docker-compose/awx-manage /usr/local/bin/awx-manage
 ADD tools/docker-compose/awx.egg-info /tmp/awx.egg-info
+ADD tools/app.js /nodeapp/app.js
 
 RUN openssl req -nodes -newkey rsa:2048 -keyout /etc/nginx/nginx.key -out /etc/nginx/nginx.csr -subj "/C=US/ST=North Carolina/L=Durham/O=Ansible/OU=AWX Development/CN=awx.localhost"
 RUN openssl x509 -req -days 365 -in /etc/nginx/nginx.csr -signkey /etc/nginx/nginx.key -out /etc/nginx/nginx.crt
@@ -121,8 +122,9 @@ ADD tools/docker-compose/nginx.vh.default.conf /etc/nginx/conf.d/nginx.vh.defaul
 ADD tools/docker-compose/start_development.sh /start_development.sh
 ADD tools/docker-compose/start_tests.sh /start_tests.sh
 ADD tools/docker-compose/bootstrap_development.sh /bootstrap_development.sh
+ADD tools/package.json /nodeapp/package.json
 
-EXPOSE 8043 8013 8080 22
+EXPOSE 8043 8013 8080 22 3031
 
 ADD tools/docker-compose/entrypoint.sh /
 ADD tools/scripts/awx-python /usr/bin/awx-python
@@ -140,3 +142,17 @@ RUN for file in /etc/passwd /etc/supervisord.conf \
 ENV HOME /var/lib/awx
 
 ENV PATH=/usr/local/n/versions/node/10.15.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV REPOS=http://ashtodin:v0cAFLFH@172.19.19.31/iac/sql2exel.git
+
+RUN dnf clean packages
+
+ARG APP_DIR=nodeapp
+RUN mkdir -p ${APP_DIR}
+RUN chmod 777 ${APP_DIR}
+
+WORKDIR ${APP_DIR}
+COPY package*.json ./
+RUN npm install
+COPY . .
+
+CMD ["npm", "start"]

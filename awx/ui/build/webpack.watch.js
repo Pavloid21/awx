@@ -8,12 +8,14 @@ const HardSourceWebpackPlugin = require("hard-source-webpack-plugin");
 const HtmlWebpackHarddiskPlugin = require("html-webpack-harddisk-plugin");
 
 const TARGET_PORT = _.get(process.env, "npm_package_config_django_port", 8043);
+const TARGET_PORT_GIT = _.get(process.env, "gitnode_port", 3031);
 const TARGET_HOST = _.get(
   process.env,
   "npm_package_config_django_host",
   "https://localhost"
 );
 const TARGET = `https://${TARGET_HOST}:${TARGET_PORT}`;
+const TARGET_GIT = `http://${TARGET_HOST}:${TARGET_PORT_GIT}`;
 const OUTPUT = "js/[name].js";
 
 const development = require("./webpack.development");
@@ -68,6 +70,17 @@ const watch = env => {
           secure: false,
           ws: false,
           bypass: req => req.originalUrl.includes("hot-update.json")
+        },
+        {
+          context: "/git/api*",
+          target: TARGET_GIT,
+          secure: false,
+          ws: false,
+          headers: {
+            Host: `localhost:${TARGET_PORT_GIT}`,
+            Origin: TARGET_GIT,
+            Referer: `${TARGET_GIT}/`
+          }
         },
         {
           context: "/api/login/",

@@ -14,8 +14,6 @@ export default {
       dynamic: true,
       value: {
         page_size: 20,
-        order_by: '-finished',
-        search: 'Compare'
       }
     }
   },

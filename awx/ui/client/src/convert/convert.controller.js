@@ -9,15 +9,22 @@ export default [
     "Wait",
     ($rootScope, $scope, $location, ConfigService, Dataset, lastPath, $http, Wait) => {
         $scope.displayView = 'sql2excel'
+        $scope.searchString = ''
         const re = /(?:\.([^.]+))?$/;
         Wait('start')
         $http({
             method: 'GET',
-            url: 'diff/environments/'
+            url: '/git/api/repos/'
         }).then(function success(response) {
-            $scope.environments = response.data.versions;
+            $scope.environments = response.data.repositories;
             Wait('stop')
+        }).catch( reason => {
+            console.log(reason)
         })
+        $scope.$on("updateDataset", (e, dataset, queryset) => {
+            $scope.dataset = dataset;
+            $scope.files = dataset.files
+          });
 
         $scope.switchView = (view) => {
             $scope.displayView = view;
@@ -28,7 +35,7 @@ export default [
             Wait('start');
             $http({
                 method: 'GET',
-                url: `diff/branches/?env=${$scope.env}`
+                url: `git/api/${$scope.env}/branches/`
             }).then(function success(response) {
                 $scope.branches = response.data.branches;
                 Wait('stop')
@@ -39,17 +46,11 @@ export default [
             Wait('start');
             $http({
                 method: 'GET',
-                url: `diff/files/?env=${$scope.env}&ref=${$scope.branch}`
+                url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/`
             }).then(function success(response) {
-                $scope.files = response.data.files.filter(item => {
-                    if (item.type === 'blob') {
-                        if (re.exec(item.name)[1] === 'sql' && $scope.displayView === 'sql2excel') {
-                            return true
-                        } else if (re.exec(item.name)[1] === 'xls' || re.exec(item.name)[1] === 'xlsx' && $scope.displayView === 'excel2sql') {
-                            return true
-                        }
-                    }
-                });
+                $scope.dataset = response.data;
+                $scope.url = `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/`
+                $scope.files = response.data.files
                 Wait('stop')
             })
         }
@@ -59,7 +60,18 @@ export default [
         }
 
         $scope.handleConvert = () => {
-            alert($scope.selectedFile.name);
+            alert($scope.selectedFile);
+        }
+
+        $scope.handleSearch = () => {
+            $http({
+                method: 'GET',
+                url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/`
+            }).then(function success(response) {
+                $scope.files = response.data.files;
+                $scope.url = `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/`;
+                $scope.dataset = response.data;
+            })
         }
     }
 ]

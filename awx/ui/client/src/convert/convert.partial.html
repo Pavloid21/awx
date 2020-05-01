@@ -18,8 +18,8 @@
               <select style="width: 170px" ng-model="env" ng-change="getDataEnv()">
                 <option
                   ng-repeat="envoption in environments"
-                  ng-value="envoption.id"
-                  >{{envoption.name}}</option
+                  ng-value="envoption.repo"
+                  >{{envoption.repo}}</option
                 >
               </select>
             </div>
@@ -28,19 +28,31 @@
                 <select style="width: 170px" ng-model="branch" ng-change="getDataBranch()">
                   <option
                     ng-repeat="branchoption in branches"
-                    ng-value="branchoption.name"
-                    >{{branchoption.name}}</option
+                    ng-value="branchoption"
+                    >{{branchoption}}</option
                   >
                 </select>
               </div>
           </div>
           <div ng-show="!!files.length">
-            <p>Files:</p>
-            <div ng-repeat="file in files" ng-class="{fileselected: selectedFile.id === file.id}" class="fileitem" ng-click="selectFile(file)">
-              <p style="margin-right: 20px; font-size: 24px;"><i class="fa fa-file-o"></i></p>
-              <p>{{file.name}}</p>
+            <div class="gitsearch" style="padding: 20px 0px;">
+              <div class="form-group">
+                <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Search" ng-model="searchString" ng-change="handleSearch()">
+              </div>
             </div>
-            <p ng-show="!!selectedFile" class="selection-info"><strong>Selected file:</strong> {{selectedFile.name}}</p>
+            <p>Files:</p>
+            <div ng-repeat="file in files" ng-class="{fileselected: selectedFile === file}" class="fileitem" ng-click="selectFile(file)">
+              <p style="margin-right: 20px; font-size: 24px;"><i class="fa fa-file-o"></i></p>
+              <p>{{file}}</p>
+            </div>
+            <paginate
+              ng-if="!!dataset"
+              collection="files"
+              dataset="dataset"
+              iterator="diff"
+              base-path="{{url}}"
+            >
+            <p ng-show="!!selectedFile" class="selection-info"><strong>Selected file:</strong> {{selectedFile}}</p>
           </div>
       </div>
       <div style="margin-top: 20px">

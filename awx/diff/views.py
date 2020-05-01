@@ -55,8 +55,15 @@ class BranchesList(View):
 
 class FilesList(View):
     def get(self, request, *args, **kwargs):
-        response = requests.get(REPO_PATH + '/' + request.GET['env'] + '/repository/tree/?ref=' + request.GET['ref'], headers={'Private-Token': '8s7Ryzi621Yhzf8hvRhP'})
-        return JsonResponse({'files': response.json()})
+        ref = request.GET['ref']
+        index = ref.find('?')
+        reff = ref[:index]
+        print(reff, index)
+        if index > 0:
+            response = requests.get(REPO_PATH + '/' + request.GET['env'] + '/repository/tree/?ref=' + reff + '&page=' + request.GET['page'], headers={'Private-Token': '8s7Ryzi621Yhzf8hvRhP'})
+        else:
+            response = requests.get(REPO_PATH + '/' + request.GET['env'] + '/repository/tree/?ref=' + request.GET['ref'] + '&page=' + request.GET['page'], headers={'Private-Token': '8s7Ryzi621Yhzf8hvRhP'})
+        return JsonResponse({'files': response.json(), 'count': response.headers['X-Total']})
 
 
 class VersionList(View):
