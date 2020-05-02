@@ -52,9 +52,9 @@
               iterator="diff"
               base-path="{{url}}"
             >
-            <p ng-show="!!selectedFile" class="selection-info"><strong>Selected file:</strong> {{selectedFile}}</p>
           </div>
       </div>
+      <p ng-show="!!selectedFile" class="selection-info"><strong>Selected file:</strong> {{selectedFile}}</p>
       <div style="margin-top: 20px">
         <button class="btn btn-success" ng-show="!!selectedFile" ng-click="handleConvert()">Convert</button>
       </div>

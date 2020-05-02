@@ -9,11 +9,12 @@ import requests
 import time
 import json
 import logging
+import os
 from requests.auth import HTTPBasicAuth
 
 # Django
 from django.conf import settings
-from django.http import Http404, JsonResponse
+from django.http import Http404, JsonResponse, HttpResponse
 from django.utils.translation import ugettext_lazy as _
 from django.views import View
 from django.core.exceptions import PermissionDenied
@@ -124,6 +125,51 @@ class DiffFinalView(View):
     def get(self, request, *args, **kwargs):
         response = requests.get(AWX_API_PATH + '/api/v2/jobs/' + request.GET['job'] + '/job_events/?page=2', auth=('admin', 'password'))
         return JsonResponse({'compare': response.json(), 'status': request.GET['status'], 'job': request.GET['job']})
+class ConvertFinalView(View):
+    def get(self, request, *args, **kwargs):
+        response = requests.get(AWX_API_PATH + '/api/v2/jobs/' + request.GET['job'] + '/job_events/?page=1', auth=('admin', 'password'))
+        return JsonResponse({'convert': response.json(), 'status': request.GET['status'], 'job': request.GET['job']})
+class ConvertView(View):
+    def getJob(self, obj):
+        print(obj)
+        getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + str(obj['job']), auth=('admin', 'password'))
+        temp = json.dumps(getResponse.json())
+        result = json.loads(temp)
+        global JOB_LAUNCHED
+        JOB_LAUNCHED = str(result['id'])
+        print('GET JOB FUNC: ' + JOB_LAUNCHED)
+        return result
+
+    def get(self, request, *args, **kwargs):
+        jobLaunchResponse = requests.post(AWX_API_PATH + '/api/v2/job_templates/18/launch/', json={
+            'extra_vars': {
+                'git_vars': {
+                    'repo_name': request.GET['repo'],
+                    'branch': request.GET['branch']
+                },
+                'convert_file': request.GET['file']
+            }
+        }, auth=('admin', 'password'))
+        jsonObj = jobLaunchResponse.json()
+        jsonDump = json.dumps(jsonObj)
+        obj = json.loads(jsonDump)
+        job = self.getJob(obj)
+        status = str(job['status'])
+        response = ''
+        return JsonResponse(job)
+
+class Download(View):
+    def get(self, request, *args, **kwargs):
+        file_path = os.path.join(settings.MEDIA_ROOT, request.GET['file'])
+        if os.path.exists(file_path):
+                fh = open(file_path, 'rb')
+                file_data = fh.read()
+                response = HttpResponse(file_data, content_type='application/vnd.ms-excel')
+                response['Content-Disposition'] = 'attachment; filename=' + request.GET['file']
+                # response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
+                return response
+        raise Http404
+
 # Create view functions for all of the class-based views to simplify inclusion
 # in URL patterns and reverse URL lookups, converting CamelCase names to
 # lowercase_with_underscore (e.g. MyView.as_view() becomes my_view).

@@ -13,6 +13,9 @@ from awx.diff.views import (
     CommitsList,
     BranchesList,
     FilesList,
+    ConvertView,
+    ConvertFinalView,
+    Download
 )
 
 app_name = 'diff'
@@ -26,5 +29,8 @@ urlpatterns = [
     url(r'^commits/(?P<env>[0-9_-]+)/$', CommitsList.as_view(), name='commits_list'),
     url(r'^branches/', BranchesList.as_view(), name='branches_list'),
     url(r'^files/', FilesList.as_view(), name='files_list'),
+    url(r'^convert/', ConvertView.as_view(), name='convert'),
+    url(r'^cnvfinal/$', DiffFinalView.as_view(), name='cnvfin'),
+    url(r'^download/$', Download.as_view(), name='dwnload'),
 ]
 
