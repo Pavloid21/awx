@@ -277,10 +277,10 @@ export default [
         $scope.handleSearch = () => {
             $http({
                 method: 'GET',
-                url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/`
+                url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${$scope.directory || '*'}/`
             }).then(function success(response) {
                 $scope.files = response.data.files;
-                $scope.url = `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/`;
+                $scope.url = `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${$scope.directory || '*'}/`;
                 $scope.dataset = response.data;
             })
         }
