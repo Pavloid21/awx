@@ -30,7 +30,7 @@ export default {
         const searchParam = $stateParams.diff_search;
         const searchPath = 'diff/jobs/';
         Wait("start");
-        return qs.search(searchPath, searchParam).finally(() => Wait("stop"));
+        return [];
       }
     ],
   },

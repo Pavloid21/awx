@@ -1,6 +1,7 @@
 const express = require('express');
 var app = express();
 var Git = require("nodegit");
+var pathListToTree = require("path-list-to-tree");
 var cloneOptions = {};
 cloneOptions.fetchOpts = {
   callbacks: {
@@ -51,6 +52,40 @@ Git.Repository.open("sql2excel")
     // console.log(e)
   });
 
+let walkTree = (dir, fileList) => {
+  let resultList = fileList;
+  if (dir !== '*') {
+    let list = [];
+    fileList.forEach(item => {
+      let re = `^(.*?)${dir}/`
+      let regexp = new RegExp(re, 'is')
+      if (item.indexOf(dir + '/') >= 0) {
+        list.push(item.replace(regexp,''))
+      }
+    })
+    console.log('first item', list[0])
+    resultList = list.map(item => {
+      return item.replace((dir + '/'), '')
+    })
+  }
+  console.log(resultList)
+  let RepoTree = pathListToTree.default(resultList)
+  let filesArr = [];
+  let directories = [];
+  RepoTree.forEach(item => {
+    if (item.children.length === 0) {
+      filesArr.push(item.name)
+    } else {
+      directories.push(item)
+    }
+  })
+  return {
+    count: filesArr.length,
+    directories,
+    files: filesArr
+  }
+}
+
 //GET REPOS
 app.get('/git/api/repos/', (req, res) => {
   res.json({
@@ -79,8 +114,8 @@ app.get('/git/api/:repo/branches/', (req, res) => {
 
 // GET FILES
 // WARNING! Includes files inside subdirectories
-app.get('/git/api/:repo/:branch/files/:search/', (req, res) => {
-  const { repo , branch, search } = req.params;
+app.get('/git/api/:repo/:branch/files/:search/:dir/', (req, res) => {
+  const { repo , branch, search, dir } = req.params;
   const { sheet = 1 , page, page_size = 20 } = req.query;
   let pageNum = page || sheet
   Git.Repository.open(repo)
@@ -91,8 +126,8 @@ app.get('/git/api/:repo/:branch/files/:search/', (req, res) => {
       return commit.getTree()
     })
     .then(tree => {
-      const fileList = [];
-      let eventEmitter = tree.walk(true);
+      let fileList = [];
+      let eventEmitter = tree.walk();
       eventEmitter.on('entry' , en => {
         fileList.push(en.path())
       })
@@ -106,10 +141,9 @@ app.get('/git/api/:repo/:branch/files/:search/', (req, res) => {
             files: findedList.slice((pageNum * page_size) - page_size, (pageNum * page_size))
           })
         } else {
-          // console.log(fileList.slice((pageNum * page_size) - page_size, (pageNum * page_size)))
           res.json({
-            count: fileList.length,
-            files: fileList.slice((pageNum * page_size) - page_size, (pageNum * page_size))
+            ...walkTree(dir, fileList),
+            files: walkTree(dir, fileList).files.slice((pageNum * page_size) - page_size, (pageNum * page_size)),
           })
         }
       })

@@ -12,6 +12,7 @@ import logging
 import random
 import string
 from requests.auth import HTTPBasicAuth
+from django.conf import settings
 
 # AWX_API_PATH = 'http://172.19.19.231'
 AWX_API_PATH = 'https://127.0.0.1:8052'
@@ -91,3 +92,11 @@ class GetCard(View):
         print(response.text)
         card = json.loads(response.text)
         return JsonResponse(card)
+
+class SaveConvert(View):
+    def post(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+        with open(settings.MEDIA_ROOT +'/data.json', 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        return JsonResponse({})
+        

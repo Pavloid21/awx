@@ -4,13 +4,42 @@ export default [
     "$location",
     "ConfigService",
     "Dataset",
+    "Uploader",
     "lastPath",
     "$http",
     "Wait",
-    ($rootScope, $scope, $location, ConfigService, Dataset, lastPath, $http, Wait) => {
+    ($rootScope, $scope, $location, ConfigService, Dataset, Uploader, lastPath, $http, Wait) => {
         $scope.displayView = 'sql2excel'
         $scope.searchString = ''
+        $scope.directory = ''
+        $scope.breadCrumbs = ['root']
+        $scope.selectedFiles = []
         const re = /(?:\.([^.]+))?$/;
+        let handleFilesConfig = (file) => {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            // $scope.fileText = '';
+            // $scope.lineNumbers.length = [];
+            const file = event.target.result;
+            // const allLines = file.split(/\r\n|\n/);
+            // allLines.forEach((line, index) => {
+              // $scope.fileText += `${line}\n`;
+              // $scope.lineNumbers.push(index + 1);
+            // });
+            // $scope.showPopup = true;
+            // let tArea = document.getElementById("listing-data");
+            // let numBlock = document.getElementById("nums-data");
+            // tArea.addEventListener("scroll", (event) => {
+              // numBlock.scrollTop = tArea.scrollTop;
+            // });
+          };
+    
+          reader.onerror = (event) => {
+            alert(event.target.error.name);
+          };
+    
+          reader.readAsText(file);
+        };
         Wait('start')
         $http({
             method: 'GET',
@@ -28,10 +57,10 @@ export default [
 
         $scope.switchView = (view) => {
             $scope.displayView = view;
-            $scope.getDataBranch();
         }
 
         $scope.getDataEnv = () => {
+          console.log($scope.env)
             Wait('start');
             $http({
                 method: 'GET',
@@ -46,17 +75,138 @@ export default [
             Wait('start');
             $http({
                 method: 'GET',
-                url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/`
+                url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${$scope.directory || '*'}/`
             }).then(function success(response) {
                 $scope.dataset = response.data;
-                $scope.url = `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/`
+                $scope.url = `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${$scope.directory || '*'}/`
                 $scope.files = response.data.files
+                $scope.directories = response.data.directories
                 Wait('stop')
             })
         }
 
+        $scope.handleSelectDir = (dir) => {
+          console.log('DIR', dir, $scope.directory)
+          if (dir.name !== 'root') {
+            $scope.directory = dir.name;
+          } else {
+            $scope.directory = '';
+          }
+          $scope.breadCrumbs.push($scope.directory)
+          console.log($scope.breadCrumbs)
+          $scope.getDataBranch()
+        }
+
         $scope.selectFile = (file) => {
             $scope.selectedFile = file;
+        }
+
+        $scope.selectFileMult = (file) => {
+          if ($scope.oneOfSelected(file)) {
+            let position = 0;
+            $scope.selectedFiles.forEach((item, index) => {
+              if (item.file === file) {
+                position = index
+              }
+            })
+            $scope.selectedFiles.splice(position, 1)
+          } else {
+            $scope.selectedFiles.push({
+              file,
+              type: $scope.directory
+            })
+          }
+        }
+
+        $scope.setAttachment = (files, e) => {
+          // console.log('test', e.getAttr)
+          $scope.fileObj = files[0];
+          Wait("start");
+          let r = Uploader.upload("/deploy/uploads/", $scope.fileObj);
+          r.then(
+            function (r) {
+              // success
+              // $scope.showPopup = false;
+              $rootScope.configFileName = JSON.parse(r.response);
+              if (e) {
+                let position = 0;
+                $scope.selectedFiles.forEach((item, index) => {
+                  if (item.file === e.getAttribute('name')) {
+                    position = index
+                  }
+                })
+                $scope.selectedFiles[position].source = $rootScope.configFileName.url
+              }
+              $scope.errors = null;
+              console.log($scope.selectedFiles)
+              Wait("stop");
+            },
+            function (r) {
+              // failure
+              Wait("stop");
+              console.warn(r);
+            }
+      );
+        };
+
+        $scope.filesUploaded = () => {
+          let result = false;
+          $scope.selectedFiles.forEach(item => {
+            if (item.source) {
+              result = true;
+            } else {
+              result = false;
+            }
+          })
+          return result;
+        }
+
+        $scope.handleConvertExcel = () => {
+          $http({
+            method: 'POST',
+            url: '/deploy/saveconvert/',
+            data: { items: $scope.selectedFiles }
+          })
+        }
+
+        $scope.artVersionChange = (file, index) => {
+          $scope.selectedFiles[index].artefact_version = $scope.artefact_version[index]
+        }
+
+        $scope.deployTargetChange = (file, index) => {
+          $scope.selectedFiles[index].deploy_target = $scope.deploy_target[index]
+        }
+
+        $scope.oneOfSelected = (file) => {
+          let result = $scope.selectedFiles.filter(item => {
+            return item.file === file
+          })
+          if (result.length) {
+            return true
+          }
+          return false
+        }
+
+        $scope.handleClickCrumb = (crumb) => {
+          if (crumb === 'root') {
+            $scope.directory = '';
+          } else {
+            $scope.directory = crumb;
+          }
+          let newCrumbs = [];
+          try {
+            $scope.breadCrumbs.forEach((item, index) => {
+              if (item === crumb) {
+                newCrumbs.push(item)
+                throw {}
+              } else {
+                newCrumbs.push(item)
+              }
+            })
+          } catch(e) {
+            $scope.breadCrumbs = newCrumbs;
+            $scope.getDataBranch()
+          }
         }
 
         $scope.handleConvert = () => {

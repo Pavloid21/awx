@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.4",
-    "nodegit": "^0.26.5"
+    "nodegit": "^0.26.5",
+    "path-list-to-tree": "^1.1.1"
   }
 }

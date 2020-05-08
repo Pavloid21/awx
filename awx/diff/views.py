@@ -37,10 +37,7 @@ class JobsList(View):
 
     def get(self, request, *args, **kwargs):
         response = None
-        if (request.GET.get('page', 1)):
-            response = requests.get(AWX_API_PATH + '/api/v2/jobs/?search=Compare&page_size=20&order_by=-finished&page=' + request.GET.get('page', '1'), auth=('admin', 'password'))
-        else:
-            response = requests.get(AWX_API_PATH + '/api/v2/jobs/?search=Compare&page_size=20&order_by=-finished', auth=('admin', 'password'))
+        response = requests.get(AWX_API_PATH + '/api/v2/jobs/?search=Compare&page_size=20&order_by=-finished&page=' + request.GET.get('page', '1'), auth=('admin', 'password'))
             
         return JsonResponse(response.json())
 

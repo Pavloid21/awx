@@ -142,7 +142,7 @@ RUN for file in /etc/passwd /etc/supervisord.conf \
 ENV HOME /var/lib/awx
 
 ENV PATH=/usr/local/n/versions/node/10.15.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-ENV REPOS=http://ashtodin:v0cAFLFH@172.19.19.31/iac/sql2exel.git
+ENV REPOS=http://ashtodin:v0cAFLFH@172.19.19.31/iac/sql2exel.git,http://ashtodin:v0cAFLFH@172.19.19.31/iac/ulbs11_sales_domain.git
 
 RUN dnf clean packages
 

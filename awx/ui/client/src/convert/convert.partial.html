@@ -11,11 +11,12 @@
           ng-click="switchView('excel2sql')"
         >EXCEL2SQL</button>
       </div>
-      <div class="DashboardGraphs" style="padding: 20px 20px;">
+      <!-- SQL2EXCEL -->
+      <div class="DashboardGraphs" style="padding: 20px 20px;" ng-if="displayView === 'sql2excel'">
         <div>
             <div>
               <p>Source Environment:</p>
-              <select style="width: 170px" ng-model="env" ng-change="getDataEnv()">
+              <select style="width: 170px" ng-model="$parent.env" ng-change="getDataEnv()">
                 <option
                   ng-repeat="envoption in environments"
                   ng-value="envoption.repo"
@@ -25,7 +26,7 @@
             </div>
             <div>
                 <p>Branch:</p>
-                <select style="width: 170px" ng-model="branch" ng-change="getDataBranch()">
+                <select style="width: 170px" ng-model="$parent.branch" ng-change="getDataBranch()">
                   <option
                     ng-repeat="branchoption in branches"
                     ng-value="branchoption"
@@ -34,13 +35,13 @@
                 </select>
               </div>
           </div>
-          <div ng-show="!!files.length">
+          <div>
             <div class="gitsearch" style="padding: 20px 0px;">
-              <div class="form-group">
-                <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Search" ng-model="searchString" ng-change="handleSearch()">
+              <div class="form-group" ng-show="!!branch">
+                <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Search" ng-model="$parent.searchString" ng-change="handleSearch()">
               </div>
             </div>
-            <p>Files:</p>
+            <p ng-show="!!files.length">Files:</p>
             <div ng-repeat="file in files" ng-class="{fileselected: selectedFile === file}" class="fileitem" ng-click="selectFile(file)">
               <p style="margin-right: 20px; font-size: 24px;"><i class="fa fa-file-o"></i></p>
               <p>{{file}}</p>
@@ -57,5 +58,70 @@
       <p ng-show="!!selectedFile" class="selection-info"><strong>Selected file:</strong> {{selectedFile}}</p>
       <div style="margin-top: 20px">
         <button class="btn btn-success" ng-show="!!selectedFile" ng-click="handleConvert()">Convert</button>
+      </div>
+      <!-- EXCEL2SQL -->
+      <div class="DashboardGraphs" style="padding: 20px 20px;" ng-if="displayView === 'excel2sql'">
+        <div>
+            <div>
+              <p>Source Environment:</p>
+              <select style="width: 170px" ng-model="$parent.env" ng-change="getDataEnv()">
+                <option
+                  ng-repeat="envoption in environments"
+                  ng-value="envoption.repo"
+                  >{{envoption.repo}}</option
+                >
+              </select>
+            </div>
+            <div>
+                <p>Branch:</p>
+                <select style="width: 170px" ng-model="$parent.branch" ng-change="getDataBranch()">
+                  <option
+                    ng-repeat="branchoption in branches"
+                    ng-value="branchoption"
+                    >{{branchoption}}</option
+                  >
+                </select>
+              </div>
+          </div>
+          <div>
+            <div class="gitsearch" style="padding: 20px 0px;">
+              <div class="form-group" ng-show="!!branch">
+                <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Search" ng-model="$parent.searchString" ng-change="handleSearch()">
+              </div>
+              <div>
+                <span ng-show="!!branch" ng-repeat="crumb in $parent.breadCrumbs" ng-click="handleClickCrumb(crumb)"><span class="crumb">{{crumb}}</span> / </span>
+              </div>
+              <div>
+                <button ng-repeat="dir in $parent.directories" class="btn" ng-class="{'btn-primary': dir.name === $parent.directory}" ng-click="handleSelectDir(dir)">{{dir.name}}</button>
+              </div>
+            </div>
+            <p ng-show="!!files.length">Files:</p>
+            <div ng-repeat="file in files" ng-class="{fileselected: oneOfSelected(file)}" class="fileitem" ng-click="selectFileMult(file)">
+              <p style="margin-right: 20px; font-size: 24px;"><i class="fa fa-file-o"></i></p>
+              <p>{{file}}</p>
+            </div>
+            <paginate
+              ng-if="!!dataset"
+              collection="files"
+              dataset="dataset"
+              iterator="diff"
+              base-path="{{url}}"
+            >
+          </div>
+      </div>
+      <p ng-show="!!selectedFiles.length" class="selection-info"><strong>Selected files:</strong></p>
+      <div ng-repeat="(index, point) in selectedFiles">
+        <p>{{point.file}}</p>
+        <input type="text" ng-model="$parent.artefact_version[index]" ng-change="artVersionChange(point.file, index)" placeholder="Artefact Version">
+        <input type="text" ng-model="$parent.deploy_target[index]" ng-change="deployTargetChange(point.file, index)" placeholder="Deploy Target">
+        <input 
+          type="file"
+          name="{{point.file}}"
+          ng-model="attachment"
+          file-change="setAttachment"
+        >
+      </div>
+      <div style="margin-top: 20px">
+        <button class="btn btn-success" ng-show="filesUploaded()" ng-click="handleConvertExcel()">Convert</button>
       </div>
 </div>
