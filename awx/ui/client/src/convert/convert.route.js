@@ -13,7 +13,7 @@ export default {
     diff_search: {
       dynamic: true,
       value: {
-        page_size: 20,
+        page_size: 10,
       }
     }
   },

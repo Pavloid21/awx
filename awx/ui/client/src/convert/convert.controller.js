@@ -14,32 +14,6 @@ export default [
         $scope.directory = ''
         $scope.breadCrumbs = ['root']
         $scope.selectedFiles = []
-        const re = /(?:\.([^.]+))?$/;
-        let handleFilesConfig = (file) => {
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            // $scope.fileText = '';
-            // $scope.lineNumbers.length = [];
-            const file = event.target.result;
-            // const allLines = file.split(/\r\n|\n/);
-            // allLines.forEach((line, index) => {
-              // $scope.fileText += `${line}\n`;
-              // $scope.lineNumbers.push(index + 1);
-            // });
-            // $scope.showPopup = true;
-            // let tArea = document.getElementById("listing-data");
-            // let numBlock = document.getElementById("nums-data");
-            // tArea.addEventListener("scroll", (event) => {
-              // numBlock.scrollTop = tArea.scrollTop;
-            // });
-          };
-    
-          reader.onerror = (event) => {
-            alert(event.target.error.name);
-          };
-    
-          reader.readAsText(file);
-        };
         Wait('start')
         $http({
             method: 'GET',
@@ -75,7 +49,7 @@ export default [
             Wait('start');
             $http({
                 method: 'GET',
-                url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${$scope.directory || '*'}/`
+                url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${$scope.directory || '*'}/?page_size=10`
             }).then(function success(response) {
                 $scope.dataset = response.data;
                 $scope.url = `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${$scope.directory || '*'}/`
@@ -277,7 +251,7 @@ export default [
         $scope.handleSearch = () => {
             $http({
                 method: 'GET',
-                url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${$scope.directory || '*'}/`
+                url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${$scope.directory || '*'}/?page_size=10`
             }).then(function success(response) {
                 $scope.files = response.data.files;
                 $scope.url = `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${$scope.directory || '*'}/`;

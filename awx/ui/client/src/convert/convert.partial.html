@@ -40,11 +40,20 @@
               <div class="form-group" ng-show="!!branch">
                 <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Search" ng-model="$parent.searchString" ng-change="handleSearch()">
               </div>
+              <nav ng-show="!!branch" aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                  <li ng-repeat="(index, crumb) in $parent.breadCrumbs" ng-if="index < $parent.breadCrumbs.length - 1" class="breadcrumb-item" aria-current="page"><a ng-click="handleClickCrumb(crumb)">{{crumb}}</a></li>
+                  <li ng-repeat="(index, crumb) in $parent.breadCrumbs" ng-if="index === $parent.breadCrumbs.length - 1" class="breadcrumb-item" aria-current="page">{{crumb}}</li>
+                </ol>
+              </nav>
+              <div>
+                <button ng-repeat="dir in $parent.directories" class="btn" ng-class="{'btn-primary': dir.name === $parent.directory}" ng-click="handleSelectDir(dir)">{{dir.name}}</button>
+              </div>
             </div>
             <p ng-show="!!files.length">Files:</p>
             <div ng-repeat="file in files" ng-class="{fileselected: selectedFile === file}" class="fileitem" ng-click="selectFile(file)">
-              <p style="margin-right: 20px; font-size: 24px;"><i class="fa fa-file-o"></i></p>
-              <p>{{file}}</p>
+              <p style="margin-right: 20px; font-size: 16px; margin-bottom: 0;"><i class="fa fa-file-o"></i></p>
+              <p style="margin-bottom: 0;">{{file}}</p>
             </div>
             <paginate
               ng-if="!!dataset"
@@ -88,17 +97,20 @@
               <div class="form-group" ng-show="!!branch">
                 <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Search" ng-model="$parent.searchString" ng-change="handleSearch()">
               </div>
-              <div>
-                <span ng-show="!!branch" ng-repeat="crumb in $parent.breadCrumbs" ng-click="handleClickCrumb(crumb)"><span class="crumb">{{crumb}}</span> / </span>
-              </div>
+              <nav ng-show="!!branch" aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                  <li ng-repeat="(index, crumb) in $parent.breadCrumbs" ng-if="index < $parent.breadCrumbs.length - 1" class="breadcrumb-item" aria-current="page"><a ng-click="handleClickCrumb(crumb)">{{crumb}}</a></li>
+                  <li ng-repeat="(index, crumb) in $parent.breadCrumbs" ng-if="index === $parent.breadCrumbs.length - 1" class="breadcrumb-item" aria-current="page">{{crumb}}</li>
+                </ol>
+              </nav>
               <div>
                 <button ng-repeat="dir in $parent.directories" class="btn" ng-class="{'btn-primary': dir.name === $parent.directory}" ng-click="handleSelectDir(dir)">{{dir.name}}</button>
               </div>
             </div>
             <p ng-show="!!files.length">Files:</p>
             <div ng-repeat="file in files" ng-class="{fileselected: oneOfSelected(file)}" class="fileitem" ng-click="selectFileMult(file)">
-              <p style="margin-right: 20px; font-size: 24px;"><i class="fa fa-file-o"></i></p>
-              <p>{{file}}</p>
+              <p style="margin-right: 20px; font-size: 16px; margin-bottom: 0;"><i class="fa fa-file-o"></i></p>
+              <p style="margin-bottom: 0;">{{file}}</p>
             </div>
             <paginate
               ng-if="!!dataset"
