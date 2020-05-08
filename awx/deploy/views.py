@@ -11,6 +11,8 @@ import json
 import logging
 import random
 import string
+import os
+import binascii
 from requests.auth import HTTPBasicAuth
 from django.conf import settings
 
@@ -94,9 +96,12 @@ class GetCard(View):
         return JsonResponse(card)
 
 class SaveConvert(View):
+    def randomString(arg):
+        return binascii.hexlify(os.urandom(10))
     def post(self, request, *args, **kwargs):
         data = json.loads(request.body)
-        with open(settings.MEDIA_ROOT +'/data.json', 'w', encoding='utf-8') as f:
+        hash = self.randomString().decode('utf-8')
+        with open(settings.MEDIA_ROOT +'/data_'+ hash +'.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
-        return JsonResponse({})
+        return JsonResponse({'hash': hash})
         
