@@ -198,7 +198,7 @@ export default [
             }).then(function success(response) {
               Wait('stop');
               $scope.job = response.data;
-              $scope.job.id = 1405;
+              // $scope.job.id = 1405;
               let requestJob = () => {
                 $http({
                   method: "GET",
