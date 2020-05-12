@@ -9,8 +9,8 @@ import route from "./convert.route";
 
 export default angular
   .module("convert", [])
-  .factory('Uploader', function($q, $rootScope, $cookies) {
-    this.upload = function(url, file) {
+  .factory('Uploadfile', function($q, $rootScope, $cookies) {
+    this.load = function(url, file) {
       var deferred = $q.defer(),
           formdata = new FormData(),
           xhr = new XMLHttpRequest();
@@ -37,18 +37,18 @@ export default angular
     };
     return this;
   })
-  .directive("fileChange", function() {
-    return {
-      restrict: 'A',
-      link: function(scope, element, attrs){
-        element.bind('change', function() {
-          scope.$apply(function() {
-            scope[attrs['fileChange']](element[0].files, element[0]);
-          })
-        })
-      },
-    }
-  })
+  // .directive("fileChange", function() {
+  //   return {
+  //     restrict: 'A',
+  //     link: function(scope, element, attrs){
+  //       element.bind('change', function() {
+  //         scope.$apply(function() {
+  //           scope[attrs['fileChange']](element[0].files, element[0], attrs);
+  //         })
+  //       })
+  //     },
+  //   }
+  // })
   .controller("convert", controller)
   .run([
     "$stateExtender",

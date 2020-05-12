@@ -30,6 +30,17 @@ class UploadFile(View):
             return JsonResponse({'status': 'success', 'url': uploaded_file_url})
         return JsonResponse({'status': 'failed'})
 
+class UploadFileHash(View):
+    def post(self, request, *args, **kwargs):
+        if request.method == "POST":
+            hashFolder = request.GET['hash']
+            file = request.FILES['file']
+            fs = FileSystemStorage()
+            filename = fs.save(hashFolder + '/edited_xlsx/' + file.name, file)
+            uploaded_file_url = fs.url(filename)
+            return JsonResponse({'status': 'success', 'url': uploaded_file_url})
+        return JsonResponse({'status': 'failed'})
+
 class RunDeploy(View):
     def getJob(self, obj):
         getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + str(obj['job']), auth=('admin', 'password'), verify=False)
@@ -101,7 +112,34 @@ class SaveConvert(View):
     def post(self, request, *args, **kwargs):
         data = json.loads(request.body)
         hash = self.randomString().decode('utf-8')
-        with open(settings.MEDIA_ROOT +'/data_'+ hash +'.json', 'w', encoding='utf-8') as f:
+        with open(settings.MEDIA_ROOT + '/' + request.GET['hash'] +'/data.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
         return JsonResponse({'hash': hash})
+
+class ConvertDiff(View):
+    def getJob(self, obj):
+        getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + str(obj['job']), auth=('admin', 'password'), verify=False)
+        temp = json.dumps(getResponse.json())
+        result = json.loads(temp)
+        return result
+
+    def post(self, request, *args, **kwargs):
+        var = json.loads(request.body)
+        launch = requests.post(AWX_API_PATH + '/api/v2/job_templates/' + os.environ['CONVERT_DICT_JOB_ID'] + '/launch/', json={
+                    'extra_vars': {
+                        'git_vars': {
+                            'repo_name': var['reponame'],
+                            'brahch': var['branch'],
+                        },
+                        'hash_dir': var['hash']
+                    },
+                },
+                auth=('admin', 'password'),
+                verify=False)
+        jsonObj = launch.json()
+        jsonDump = json.dumps(jsonObj)
+        obj = json.loads(jsonDump)
+        job = self.getJob(obj)
+        return JsonResponse(job)
+        
         

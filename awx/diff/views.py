@@ -120,7 +120,13 @@ class DiffResultView(View):
 
 class DiffFinalView(View):
     def get(self, request, *args, **kwargs):
-        response = requests.get(AWX_API_PATH + '/api/v2/jobs/' + request.GET['job'] + '/job_events/?page=2', auth=('admin', 'password'))
+        page = 1
+        print(request.GET.keys())
+        if 'page' in request.GET.keys():
+            page = request.GET['page']
+        else:
+            page = '2'
+        response = requests.get(AWX_API_PATH + '/api/v2/jobs/' + request.GET['job'] + '/job_events/?page=' + page, auth=('admin', 'password'))
         return JsonResponse({'compare': response.json(), 'status': request.GET['status'], 'job': request.GET['job']})
 class ConvertFinalView(View):
     def get(self, request, *args, **kwargs):

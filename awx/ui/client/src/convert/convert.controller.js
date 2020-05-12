@@ -4,17 +4,29 @@ export default [
     "$location",
     "ConfigService",
     "Dataset",
-    "Uploader",
+    "Uploadfile",
     "lastPath",
     "$http",
     "Wait",
-    ($rootScope, $scope, $location, ConfigService, Dataset, Uploader, lastPath, $http, Wait) => {
+    ($rootScope, $scope, $location, ConfigService, Dataset, Uploadfile, lastPath, $http, Wait) => {
         $scope.displayView = 'sql2excel'
         $scope.searchString = ''
         $scope.directory = ''
         $scope.breadCrumbs = ['root']
-        $scope.selectedFiles = []
+        $scope.selectedFiles = [];
+        $scope.types = [];
+        $scope.allowGetDSL = false;
         Wait('start')
+        function makeid(length) {
+          var result           = '';
+          var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+          var charactersLength = characters.length;
+          for ( var i = 0; i < length; i++ ) {
+             result += characters.charAt(Math.floor(Math.random() * charactersLength));
+          }
+          $scope.hash = result;
+          return result;
+       }
         $http({
             method: 'GET',
             url: '/git/api/repos/'
@@ -22,7 +34,15 @@ export default [
             $scope.environments = response.data.repositories;
             Wait('stop')
         }).catch( reason => {
+            Wait('stop');
             console.log(reason)
+        })
+        Wait('start');
+        $http({
+          method: 'GET',
+          url: '/git/api/clone/'
+        }).then(function success(response) {
+          Wait('stop');
         })
         $scope.$on("updateDataset", (e, dataset, queryset) => {
             $scope.dataset = dataset;
@@ -45,30 +65,65 @@ export default [
             })
         }
 
-        $scope.getDataBranch = () => {
+        $scope.getDataBranch = (typeIndex) => {
             Wait('start');
-            $http({
-                method: 'GET',
-                url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${$scope.directory || '*'}/?page_size=10`
-            }).then(function success(response) {
-                $scope.dataset = response.data;
-                $scope.url = `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${$scope.directory || '*'}/`
-                $scope.files = response.data.files
-                $scope.directories = response.data.directories
-                Wait('stop')
-            })
+            if (typeIndex !== undefined) {
+              let path = '';
+              if ($scope.types[typeIndex].path.indexOf('*/') === 0) {
+                path = $scope.types[typeIndex].path.replace('*/','');
+              } else {
+                path = $scope.types[typeIndex].path;
+              }
+              $http({
+                method: 'POST',
+                url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.types[typeIndex].searchString || '*'}/?page_size=10&page=${$scope.types[typeIndex].currentPage}`,
+                data: {
+                  path
+                }
+              }).then(function success(response) {
+                $scope.types[typeIndex].directories = response.data.directories;
+                if ($scope.types[typeIndex].currentPage > 1) {
+                  $scope.types[typeIndex].files = [
+                    ...$scope.types[typeIndex].files,
+                    ...response.data.files
+                  ];
+                } else {
+                  $scope.types[typeIndex].files = response.data.files;
+                }
+                Wait('stop');
+              })
+            } else {
+              $http({
+                  method: 'GET',
+                  url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${$scope.directory || '*'}/pagi/?page_size=10`
+              }).then(function success(response) {
+                  $scope.dataset = response.data;
+                  $scope.url = `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${$scope.directory || '*'}/pagi/`
+                  $scope.files = response.data.files
+                  $scope.directories = response.data.directories
+                  Wait('stop')
+              })
+            }
         }
 
-        $scope.handleSelectDir = (dir) => {
-          console.log('DIR', dir, $scope.directory)
+        $scope.handleSelectDir = (dir, typeIndex) => {
           if (dir.name !== 'root') {
-            $scope.directory = dir.name;
+            typeIndex === undefined ?
+              $scope.directory = dir.name :
+              $scope.types[typeIndex].path = $scope.types[typeIndex].path + '/' + dir.name
           } else {
-            $scope.directory = '';
+            typeIndex === undefined ?
+              $scope.directory = '' :
+              $scope.types[typeIndex].path = '*'
           }
-          $scope.breadCrumbs.push($scope.directory)
-          console.log($scope.breadCrumbs)
-          $scope.getDataBranch()
+          typeIndex === undefined ?
+            $scope.breadCrumbs.push($scope.directory) :
+            $scope.types[typeIndex].breadCrumbs.push(dir.name);
+          console.log(typeIndex !== undefined)
+          if (typeIndex !== undefined) {
+            $scope.types[typeIndex].currentPage = 1;
+          }
+          $scope.getDataBranch(typeIndex)
         }
 
         $scope.selectFile = (file) => {
@@ -92,27 +147,17 @@ export default [
           }
         }
 
-        $scope.setAttachment = (files, e) => {
-          // console.log('test', e.getAttr)
+        $scope.setAttachment = (files, e, typeIndex, attachIndex) => {
           $scope.fileObj = files[0];
           Wait("start");
-          let r = Uploader.upload("/deploy/uploads/", $scope.fileObj);
+          let r = Uploadfile.load(`/deploy/uphash/?hash=${$scope.typesHash}`, $scope.fileObj);
           r.then(
             function (r) {
-              // success
-              // $scope.showPopup = false;
               $rootScope.configFileName = JSON.parse(r.response);
               if (e) {
-                let position = 0;
-                $scope.selectedFiles.forEach((item, index) => {
-                  if (item.file === e.getAttribute('name')) {
-                    position = index
-                  }
-                })
-                $scope.selectedFiles[position].source = $rootScope.configFileName.url
+                $scope.types[typeIndex].attachments[attachIndex].attachment = $rootScope.configFileName.url;
               }
               $scope.errors = null;
-              console.log($scope.selectedFiles)
               Wait("stop");
             },
             function (r) {
@@ -135,12 +180,74 @@ export default [
           return result;
         }
 
-        $scope.handleConvertExcel = () => {
+        $scope.handleConvertExcel = (data, hash) => {
           $http({
             method: 'POST',
-            url: '/deploy/saveconvert/',
-            data: { items: $scope.selectedFiles }
+            url: `/deploy/saveconvert/?hash=${hash}`,
+            data: { dsl: data }
+          }).then(function success(response) {
+            Wait('stop');
+            $http({
+              method: 'POST',
+              url: '/deploy/convertdiff/',
+              data: {
+                reponame: $scope.env,
+                branch: $scope.branch,
+                hash: $scope.hash
+              }
+            }).then(function success(response) {
+              Wait('stop');
+              $scope.job = response.data;
+              $scope.job.id = 1405;
+              let requestJob = () => {
+                $http({
+                  method: "GET",
+                  url: `/diff/results/?job=${$scope.job.id}`
+                }).then(function success(response) {
+                  if (
+                    response.data.status !== "successful" &&
+                    response.data.status !== "failed"
+                  ) {
+                    setTimeout(() => requestJob(), 30 * 1000);
+                  } else if (response.data.status === "failed") {
+                    $scope.final = {
+                      status: "failed",
+                      job: $scope.job.id
+                    };
+                    Wait("stop");
+                  } else {
+                    $http({
+                      method: "GET",
+                      url: `/diff/final/?job=${$scope.job.id}&status=successful&page=3`//scope.job.id
+                    }).then(function success(response) {
+                      $scope.compareData = response.data.compare.results.find(
+                        res => {
+                          if (
+                            res.task.indexOf("Try compare") >=
+                              0 &&
+                            !!res.event_data.res
+                          ) {
+                            return true;
+                          }
+                          return false;
+                        }
+                      );
+                      $scope.final = $scope.compareData.event_data.res.stdout_lines;
+                      console.log($scope.final)
+                      Wait("stop");
+                      $scope.showPopup = true;
+                    });
+                  }
+                });
+              };
+              requestJob();
+            })
           })
+        }
+
+        $scope.closePopup = () => {
+          $scope.final = null;
+          $scope.showPopup = false;
         }
 
         $scope.artVersionChange = (file, index) => {
@@ -161,25 +268,55 @@ export default [
           return false
         }
 
-        $scope.handleClickCrumb = (crumb) => {
+        $scope.handleClickCrumb = (crumb, typeIndex) => {
           if (crumb === 'root') {
             $scope.directory = '';
           } else {
             $scope.directory = crumb;
           }
           let newCrumbs = [];
-          try {
-            $scope.breadCrumbs.forEach((item, index) => {
-              if (item === crumb) {
-                newCrumbs.push(item)
-                throw {}
-              } else {
-                newCrumbs.push(item)
+          if (typeIndex === undefined) {
+            try {
+              $scope.breadCrumbs.forEach((item, index) => {
+                if (item === crumb) {
+                  newCrumbs.push(item)
+                  throw {}
+                } else {
+                  newCrumbs.push(item)
+                }
+              })
+            } catch(e) {
+              $scope.breadCrumbs = newCrumbs;
+              $scope.getDataBranch()
+            }
+          } else {
+            $scope.types[typeIndex].currentPage = 1;
+            try {
+              $scope.types[typeIndex].breadCrumbs.forEach((item, index) => {
+                if (item === crumb) {
+                  newCrumbs.push(item)
+                  throw {}
+                } else {
+                  newCrumbs.push(item)
+                }
+                let crumbsPath = newCrumbs.join('/');
+                crumbsPath = crumbsPath.replace('root/', '');
+                if (crumbsPath.indexOf('root') >= 0) {
+                  crumbsPath = crumbsPath.replace('root', '*');
+                }
+                $scope.types[typeIndex].path = crumbsPath;
+                $scope.getDataBranch(typeIndex);
+              })
+            } catch(e) {
+              let crumbsPath = newCrumbs.join('/');
+              crumbsPath = crumbsPath.replace('root/', '');
+              if (crumbsPath.indexOf('root') >= 0) {
+                crumbsPath = crumbsPath.replace('root', '*');
               }
-            })
-          } catch(e) {
-            $scope.breadCrumbs = newCrumbs;
-            $scope.getDataBranch()
+              $scope.types[typeIndex].breadCrumbs = newCrumbs;
+              $scope.types[typeIndex].path = crumbsPath;
+              $scope.getDataBranch(typeIndex)
+            }
           }
         }
 
@@ -251,12 +388,118 @@ export default [
         $scope.handleSearch = () => {
             $http({
                 method: 'GET',
-                url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${$scope.directory || '*'}/?page_size=10`
+                url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${$scope.directory || '*'}/pagi/?page_size=10`
             }).then(function success(response) {
                 $scope.files = response.data.files;
-                $scope.url = `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${$scope.directory || '*'}/`;
+                $scope.url = `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${$scope.directory || '*'}/pagi/`;
                 $scope.dataset = response.data;
             })
+        }
+
+        $scope.searchChange = (typeIndex) => {
+          let path = '';
+              if ($scope.types[typeIndex].path.indexOf('*/') === 0) {
+                path = $scope.types[typeIndex].path.replace('*/','');
+              } else {
+                path = $scope.types[typeIndex].path;
+              }
+          $http({
+            method: 'POST',
+            url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.types[typeIndex].searchString || '*'}/?page_size=10`,
+            data: {
+              path
+            }
+        }).then(function success(response) {
+          $scope.types[typeIndex].files = response.data.files;
+          $scope.types[typeIndex].directories = response.data.directories;
+        })
+        }
+
+        $scope.addType = () => {
+          if (!$scope.types.length) {
+            $scope.typesHash = makeid(10);
+          }
+          $scope.getDataBranch()
+          $scope.types.push({
+            path: '*',
+            files: $scope.files,
+            breadCrumbs: ['root'],
+            directories: $scope.directories,
+            attachments: [{
+              attachment: null,
+              file: null,
+              dropdown: false
+            }],
+            targets: [],
+            deploy_targets: [''],
+            currentPage: 1
+          })
+        }
+
+        $scope.setAttachmentOn = (typeIndex, attachIndex, file) => {
+          $scope.types[typeIndex].attachments[attachIndex].file = file;
+        }
+
+        $scope.addAttachmentRow = (typeIndex) => {
+          $scope.types[typeIndex].attachments.push({
+            attachment: null,
+            file: null,
+            dropdown: false
+          })
+        }
+
+        $scope.addDeployTargetRow = (typeIndex) => {
+          $scope.types[typeIndex].targets.push('');
+        }
+
+        $scope.pushNextPageFiles = (typeIndex, attachIndex) => {
+          let currentPage = $scope.types[typeIndex].currentPage;
+          currentPage += 1;
+          $scope.types[typeIndex].currentPage = currentPage;
+          $scope.getDataBranch(typeIndex);
+        }
+
+        $scope.openDropdown = (typeIndex, attachIndex) => {
+          $scope.types[typeIndex].attachments[attachIndex].dropdown = !$scope.types[typeIndex].attachments[attachIndex].dropdown;
+        }
+
+        $scope.getDifference = () => {
+          Wait('start');
+          let data = {
+            name: $scope.dslName,
+            appName: $scope.dslAppName,
+            appVersion: $scope.dslAppVersion,
+            techPlatform: $scope.dslTechPlatform,
+            techPlatformVersion: $scope.dslTechPlatformVersion,
+            version: $scope.dslVersion,
+            items: []
+          };
+          $scope.types.forEach(type => {
+            data.type_specific_parameters = {
+              [type.breadCrumbs[type.breadCrumbs.length - 2]]: {
+                database: type.targets[0],
+                artefactVersion: type.artefact_version
+              }
+            }
+            type.attachments.forEach(item => {
+              data.items.push({
+                file: item.file,
+                source: item.attachment,
+                type: type.breadCrumbs[type.breadCrumbs.length - 2]
+              })
+            })
+          })
+          $scope.handleConvertExcel(data, $scope.hash);
+          console.log(data)
+        }
+
+        $scope.confirmChanges = () => {
+          $scope.allowGetDSL = true;
+          $scope.closePopup();
+        }
+
+        $scope.getChangedDSL = () => {
+
         }
     }
 ]

@@ -92,8 +92,97 @@
                 </select>
               </div>
           </div>
-          <div>
-            <div class="gitsearch" style="padding: 20px 0px;">
+          <div style="margin-top: 10px;">
+            <div ng-repeat="(index, type) in $parent.types">
+              <h3 ng-show="type.breadCrumbs.length === 1">Type {{ index + 1 }}</h3>
+              <h3 ng-show="type.breadCrumbs.length > 1">SQLDVM_{{type.breadCrumbs[type.breadCrumbs.length - 2]}}</h3>
+              <hr/>
+              <div class="gitsearch" style="padding: 20px 0px;">
+                <!-- <div class="form-group" ng-show="!!branch">
+                  <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Search" ng-model="$parent.searchString" ng-change="handleSearch()">
+                </div> -->
+                <nav ng-show="!!branch" aria-label="breadcrumb">
+                  <ol class="breadcrumb">
+                    <li ng-repeat="(i, crumb) in type.breadCrumbs" ng-if="i < type.breadCrumbs.length - 1" class="breadcrumb-item" aria-current="page"><a ng-click="handleClickCrumb(crumb, index)">{{crumb}}</a></li>
+                    <li ng-repeat="(i, crumb) in type.breadCrumbs" ng-if="i === type.breadCrumbs.length - 1" class="breadcrumb-item" aria-current="page">{{crumb}}</li>
+                  </ol>
+                </nav>
+                <div>
+                  <button ng-repeat="dir in type.directories" class="btn" ng-class="{'btn-primary': dir.name === $parent.directory}" ng-click="handleSelectDir(dir, index)">{{dir.name}}</button>
+                </div>
+                <div>
+                  <!-- <div>
+                    <span>Upload EXCEL dictionaries</span>
+                    <hr/>
+                    <span>Select dictionary for change</span>
+                  </div> -->
+                  <div ng-repeat="(j, attachment) in type.attachments" style="margin-bottom: 5px;">
+                    <input type="file" type-index="{{index}}" attach-index="{{j}}" file-change="setAttachment">
+                    <div class="dropdown">
+                      <button ng-click="openDropdown(index, j)" class="dropbtn">Select dictionary for change</button>
+                      <div id="myDropdown" class="dropdown-content" ng-class="{show: $parent.types[index].attachments[j].dropdown}">
+                        <input type="text" placeholder="Search.." id="myInput" ng-model="$parent.types[index].searchString" ng-change="searchChange(index)">
+                        <div style="max-height: 200px;">
+                          <a ng-click="setAttachmentOn(index, j, file)" ng-repeat="file in $parent.types[index].files">{{file}}</a>
+                          <a ng-click="pushNextPageFiles(index, j)">Show more ...</a>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <label ng-show="$parent.types[index].attachments[j].file">Selected file: </label>
+                      <span>{{$parent.types[index].attachments[j].file}}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <button class="btn btn-xs btn-primary" ng-click="addAttachmentRow(index)">+</button>
+                  </div>
+                  <p>Deploy targets:</p>
+                  <div>
+                    <div ng-repeat="(k, target) in $parent.types[index].targets track by $index">
+                      <label>Target:</label>
+                      <input type="text" ng-model="$parent.types[index].targets[k]">
+                    </div>
+                    <button class="btn btn-xs btn-primary" ng-click="addDeployTargetRow(index)">+</button>
+                  </div>
+                  <label>Artefact version:</label>
+                  <input type="text" ng-model="$parent.types[index].artefact_version">
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-success" ng-click="addType()" ng-show="!!branch">Add Type</button>
+            <button class="btn btn-primary" ng-click="getDifference()" ng-show="!!branch && !!types.length">Show difference</button>
+            <hr/>
+            <div class="DashboardGraphs" ng-show="!!branch">
+              <p>
+                <label>Generate DSL data</label>
+              </p>
+              <div>
+                <label>Name</label>
+                <input type="text" ng-model="$parent.dslName">
+              </div>
+              <div>
+                <label>Version</label>
+                <input type="text" ng-model="$parent.dslVersion">
+              </div>
+              <div>
+                <label>appName</label>
+                <input type="text" ng-model="$parent.dslAppName">
+              </div>
+              <div>
+                <label>appVersion</label>
+                <input type="text" ng-model="$parent.dslAppVersion">
+              </div>
+              <div>
+                <label>techPlatform</label>
+                <input type="text" ng-model="$parent.dslTechPlatform">
+              </div>
+              <div>
+                <label>techPlatformVersion</label>
+                <input type="text" ng-model="$parent.dslTechPlatformVersion">
+              </div>
+              <button class="btn btn-primary" ng-show="$parent.allowGetDSL" ng-click="getChangedDSL()">Get changed DSL</button>
+            </div>
+            <!-- <div class="gitsearch" style="padding: 20px 0px;">
               <div class="form-group" ng-show="!!branch">
                 <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Search" ng-model="$parent.searchString" ng-change="handleSearch()">
               </div>
@@ -106,23 +195,23 @@
               <div>
                 <button ng-repeat="dir in $parent.directories" class="btn" ng-class="{'btn-primary': dir.name === $parent.directory}" ng-click="handleSelectDir(dir)">{{dir.name}}</button>
               </div>
-            </div>
-            <p ng-show="!!files.length">Files:</p>
-            <div ng-repeat="file in files" ng-class="{fileselected: oneOfSelected(file)}" class="fileitem" ng-click="selectFileMult(file)">
+            </div> -->
+            <!-- <p ng-show="!!files.length">Files:</p> -->
+            <!-- <div ng-repeat="file in files" ng-class="{fileselected: oneOfSelected(file)}" class="fileitem" ng-click="selectFileMult(file)">
               <p style="margin-right: 20px; font-size: 16px; margin-bottom: 0;"><i class="fa fa-file-o"></i></p>
               <p style="margin-bottom: 0;">{{file}}</p>
-            </div>
-            <paginate
+            </div> -->
+            <!-- <paginate
               ng-if="!!dataset"
               collection="files"
               dataset="dataset"
               iterator="diff"
               base-path="{{url}}"
-            >
+            > -->
           </div>
       </div>
-      <p ng-show="!!selectedFiles.length" class="selection-info"><strong>Selected files:</strong></p>
-      <div ng-repeat="(index, point) in selectedFiles">
+      <!-- <p ng-show="!!selectedFiles.length" class="selection-info"><strong>Selected files:</strong></p> -->
+      <!-- <div ng-repeat="(index, point) in selectedFiles">
         <p>{{point.file}}</p>
         <input type="text" ng-model="$parent.artefact_version[index]" ng-change="artVersionChange(point.file, index)" placeholder="Artefact Version">
         <input type="text" ng-model="$parent.deploy_target[index]" ng-change="deployTargetChange(point.file, index)" placeholder="Deploy Target">
@@ -132,8 +221,27 @@
           ng-model="attachment"
           file-change="setAttachment"
         >
-      </div>
-      <div style="margin-top: 20px">
+      </div> -->
+      <!-- <div style="margin-top: 20px">
         <button class="btn btn-success" ng-show="filesUploaded()" ng-click="handleConvertExcel()">Convert</button>
+      </div> -->
+      <div class="popup" ng-show="showPopup">
+        <div class="popup-content">
+          <div class="popup-header">
+            <span class="close" ng-click="closePopup()">&times;</span>
+            <h4>Upcoming changes</h4>
+          </div>
+          <div class="popup-body">
+            <div style="overflow: auto; max-height: 400px;">
+              <div ng-repeat="row in final" style="text-align: start;" ng-class="{'green-row': row.indexOf('+') == 0, 'red-row': row.indexOf('-') == 0}">
+                {{row}}
+              </div>
+            </div>
+            <button class="btn btn-primary" ng-click="confirmChanges()">
+              <i class="fa fa-play-circle"></i>
+              Apply
+            </button>
+          </div>
+        </div>
       </div>
 </div>

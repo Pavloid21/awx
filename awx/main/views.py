@@ -106,6 +106,9 @@ def handle_git_redirect(request):
     target = os.getenv('npm_package_config_django_host', 'localhost')
     port = os.getenv('gitnode_port', '3031')
     # print( target + port)
-    response = requests.get('http://' + target + ':' + port + request.path, params=request.GET)
-    # print(request.GET)
+    if request.method == 'GET':
+        response = requests.get('http://' + target + ':' + port + request.path, params=request.GET)
+    else:
+        response = requests.post('http://' + target + ':' + port + request.path, params=request.GET, data=json.loads(request.body))
+
     return JsonResponse(json.loads(response.text))

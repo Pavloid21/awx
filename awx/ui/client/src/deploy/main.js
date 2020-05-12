@@ -45,7 +45,7 @@ export default angular
       link: function(scope, element, attrs){
         element.bind('change', function() {
           scope.$apply(function() {
-            scope[attrs['fileChange']](element[0].files);
+            scope[attrs['fileChange']](element[0].files, element[0], attrs['typeIndex'], attrs['attachIndex']);
           })
         })
       },
