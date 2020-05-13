@@ -191,7 +191,7 @@ export default [
           $http({
             method: 'POST',
             url: `/deploy/saveconvert/?hash=${hash}`,
-            data: { dsl: data }
+            data: data
           }).then(function success(response) {
             Wait('stop');
             $http({
@@ -329,15 +329,12 @@ export default [
 
         $scope.handleConvert = () => {
           let hash = makeid(10)
+          let data = buildData()
             Wait('start')
             $http({
               method: 'POST',
               url: `/deploy/saveconvert/?hash=${hash}`,
-              data: {
-                dsl: {
-                  items: $scope.selectedFiles
-                }
-              }
+              data: data
             }).then((response) => {
               let url = `diff/convert/?repo=${$scope.env.replace('.git', '')}&branch=${$scope.branch}&hash=${hash}`;
               Wait('start')
@@ -503,15 +500,16 @@ export default [
           $scope.types[typeIndex].attachments[attachIndex].dropdown = !$scope.types[typeIndex].attachments[attachIndex].dropdown;
         }
 
-        $scope.getDifference = () => {
-          Wait('start');
+        let buildData = () => {
           let data = {
-            name: $scope.dslName,
-            appName: $scope.dslAppName,
-            appVersion: $scope.dslAppVersion,
-            techPlatform: $scope.dslTechPlatform,
-            techPlatformVersion: $scope.dslTechPlatformVersion,
-            version: $scope.dslVersion,
+            dsl: {
+              name: $scope.dslName,
+              appName: $scope.dslAppName,
+              appVersion: $scope.dslAppVersion,
+              techPlatform: $scope.dslTechPlatform,
+              techPlatformVersion: $scope.dslTechPlatformVersion,
+              version: $scope.dslVersion,
+            },
             items: []
           };
           $scope.types.forEach(type => {
@@ -529,6 +527,12 @@ export default [
               })
             })
           })
+          return data;
+        }
+
+        $scope.getDifference = () => {
+          Wait('start');
+          let data = buildData();
           $scope.handleConvertExcel(data, $scope.hash);
           console.log(data)
         }
@@ -554,7 +558,72 @@ export default [
         }
 
         $scope.getChangedDSL = () => {
-
+          let data = buildData();
+          Wait('start')
+          $http({
+            method: 'POST',
+            url: `deploy/savedsl/?hash=${$scope.hash}`,
+            data: data
+          }).then((response) => {
+            $http({
+              method: 'GET',
+              url: `diff/getDSL/?repo=${$scope.env}&branch=${$scope.branch}&hash=${$scope.hash}`
+            })
+            .then(function success(response) {
+              if (response.data.status === 'failed') {
+                $scope.final = { status: 'failed', job: response.data.job }
+              } else {
+                $scope.job = response.data.id;
+                console.log($scope.job)
+                let requestJob = () => {
+                    $http({
+                      method: "GET",
+                      url: `/diff/results/?job=${$scope.job}`
+                    }).then(function success(response) {
+                      if (
+                        response.data.status !== "successful" &&
+                        response.data.status !== "failed"
+                      ) {
+                        setTimeout(() => requestJob(), 4 * 1000);
+                      } else if (response.data.status === "failed") {
+                        $scope.final = {
+                          status: "failed",
+                          job: $scope.job
+                        };
+                        Wait("stop");
+                      } else {
+                        $http({
+                          method: "GET",
+                          url: `/diff/getDSLfinal/?job=${$scope.job}&status=successful`
+                        }).then(function success(response) {
+                          $scope.convertData = response.data.compare.results.find(
+                            res => {
+                              if (res && res.event_data && res.event_data.res && res.event_data.res.stdout_lines) {
+                                $scope.final = res.event_data.res.stdout_lines[0];
+                              }
+                            }
+                          );
+                          $http({
+                            method: 'GET',
+                            url: `/diff/download/?hash=${hash}&file=${$scope.final}`
+                          }).then(function success(response) {
+                            console.log(response)
+                            var link = document.createElement("a");
+                            link.download = name;
+                            link.href = `/diff/download/?hash=${hash}&file=${$scope.final}`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                          })
+                          Wait("stop");
+                        });
+                      }
+                    });
+                  };
+                  requestJob();
+              }
+            })
+          })
         }
     }
 ]
