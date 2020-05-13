@@ -188,25 +188,26 @@ export default [
         }
 
         $scope.handleConvertExcel = (data, hash) => {
+          Wait('start')
           $http({
             method: 'POST',
             url: `/deploy/saveconvert/?hash=${hash}`,
             data: data
           }).then(function success(response) {
-            Wait('stop');
             $http({
               method: 'POST',
               url: '/deploy/convertdiff/',
               data: {
                 reponame: $scope.env,
                 branch: $scope.branch,
-                hash: $scope.hash
+                hash: $scope.typesHash
               }
             }).then(function success(response) {
               Wait('stop');
               $scope.job = response.data;
               // $scope.job.id = 1405;
               let requestJob = () => {
+                Wait('start')
                 $http({
                   method: "GET",
                   url: `/diff/results/?job=${$scope.job.id}`
@@ -245,6 +246,8 @@ export default [
                       $scope.showPopup = true;
                     });
                   }
+                }, () => {
+                  Wait('stop')
                 });
               };
               requestJob();
@@ -365,25 +368,26 @@ export default [
                               };
                               Wait("stop");
                             } else {
+                              $scope.job = 1455
                               $http({
                                 method: "GET",
                                 url: `/diff/cnvfinal/?job=${$scope.job}&status=successful`
                               }).then(function success(response) {
-                                $scope.convertData = response.data.compare.results.find(
-                                  res => {
-                                    if (res && res.event_data && res.event_data.res && res.event_data.res.stdout_lines) {
-                                      $scope.final = res.event_data.res.stdout_lines[0];
-                                    }
-                                  }
-                                );
+                                // $scope.convertData = response.data.compare.results.find(
+                                //   res => {
+                                //     if (res && res.event_data && res.event_data.res && res.event_data.res.stdout_lines) {
+                                //       $scope.final = res.event_data.res.stdout_lines[0];
+                                //     }
+                                //   }
+                                // );
                                 $http({
                                   method: 'GET',
-                                  url: `/diff/download/?hash=${hash}`
+                                  url: `/diff/download/?hash=${hash}&file=converted_xlsx.tar.gz`
                                 }).then(function success(response) {
                                   console.log(response)
                                   var link = document.createElement("a");
                                   link.download = name;
-                                  link.href = `/diff/download/?hash=${hash}`;
+                                  link.href = `/diff/download/?hash=${hash}&file=converted_xlsx.tar.gz`;
                                   document.body.appendChild(link);
                                   link.click();
                                   document.body.removeChild(link);
@@ -533,7 +537,7 @@ export default [
         $scope.getDifference = () => {
           Wait('start');
           let data = buildData();
-          $scope.handleConvertExcel(data, $scope.hash);
+          $scope.handleConvertExcel(data, $scope.typesHash);
           console.log(data)
         }
 
@@ -562,12 +566,17 @@ export default [
           Wait('start')
           $http({
             method: 'POST',
-            url: `deploy/savedsl/?hash=${$scope.hash}`,
+            url: `deploy/savedsl/?hash=${$scope.typesHash}`,
             data: data
           }).then((response) => {
             $http({
-              method: 'GET',
-              url: `diff/getDSL/?repo=${$scope.env}&branch=${$scope.branch}&hash=${$scope.hash}`
+              method: 'POST',
+              url: `deploy/getdsl/?repo=${$scope.env}&branch=${$scope.branch}&hash=${$scope.typesHash}`,
+              data: {
+                reponame: $scope.env,
+                branch: $scope.branch,
+                hash: $scope.typesHash
+              }
             })
             .then(function success(response) {
               if (response.data.status === 'failed') {

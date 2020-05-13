@@ -15,6 +15,7 @@ import os
 import binascii
 from requests.auth import HTTPBasicAuth
 from django.conf import settings
+import shutil
 
 # AWX_API_PATH = 'http://172.19.19.231'
 AWX_API_PATH = 'https://127.0.0.1:8052'
@@ -114,10 +115,24 @@ class SaveConvert(View):
         hash = self.randomString().decode('utf-8')
         filename = "data.json"
         dirname = os.path.dirname(filename)
-        if not os.path.exists(dirname):
+        if not os.path.exists(os.path.join(settings.MEDIA_ROOT, request.GET['hash'], dirname)):
             os.makedirs(os.path.join(settings.MEDIA_ROOT, request.GET['hash'], dirname))
         with open(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data.json', 'w+', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
+        return JsonResponse({'hash': hash})
+
+class SaveDSL(View):
+    def randomString(arg):
+        return binascii.hexlify(os.urandom(10))
+    def post(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+        hash = self.randomString().decode('utf-8')
+        filename = "data2.json"
+        dirname = os.path.dirname(filename)
+        with open(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data2.json', 'w', encoding='utf-8') as f:
+            f.write(str(data))
+        shutil.copyfile(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data2.json', settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data.json')
+        os.remove(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data2.json')
         return JsonResponse({'hash': hash})
 
 class ConvertDiff(View):
@@ -146,4 +161,29 @@ class ConvertDiff(View):
         job = self.getJob(obj)
         return JsonResponse(job)
         
+class getDSL(View):
+    def getJob(self, obj):
+        getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + str(obj['job']), auth=('admin', 'password'), verify=False)
+        temp = json.dumps(getResponse.json())
+        result = json.loads(temp)
+        return result
+
+    def post(self, request, *args, **kwargs):
+        var = json.loads(request.body)
+        launch = requests.post(AWX_API_PATH + '/api/v2/job_templates/' + os.environ['COMMIT_DSL'] + '/launch/', json={
+                    'extra_vars': {
+                        'git_vars': {
+                            'repo_name': var['reponame'],
+                            'branch': var['branch'],
+                        },
+                        'hash_dir': var['hash']
+                    },
+                },
+                auth=('admin', 'password'),
+                verify=False)
+        jsonObj = launch.json()
+        jsonDump = json.dumps(jsonObj)
+        obj = json.loads(jsonDump)
+        job = self.getJob(obj)
+        return JsonResponse(job)
         

@@ -11,7 +11,9 @@ from awx.deploy.views import (
     GetCard,
     SaveConvert,
     UploadFileHash,
-    ConvertDiff
+    ConvertDiff,
+    SaveDSL,
+    getDSL
 )
 
 app_name = 'deploy_cnf'
@@ -23,6 +25,8 @@ urlpatterns = [
     url(r'^next_step/$', DeployHistoryNextStep.as_view(), name='deploy-next-step'),
     url(r'^step/$', GetCard.as_view(), name="deploy-card"),
     url(r'^saveconvert/$', SaveConvert.as_view(), name="save-convert"),
-    url(r'^convertdiff/$', ConvertDiff.as_view(), name="convert-diff")
+    url(r'^savedsl/$', SaveDSL.as_view(), name="save-dsl"),
+    url(r'^convertdiff/$', ConvertDiff.as_view(), name="convert-diff"),
+    url(r'^getdsl/$', getDSL.as_view(), name="get-dsl"),
 ]
 

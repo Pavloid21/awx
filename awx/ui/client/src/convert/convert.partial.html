@@ -63,14 +63,13 @@
               base-path="{{url}}"
             >
           </div>
-      </div>
-      <!-- <p ng-show="!!selectedFile" class="selection-info"><strong>Selected files:</strong> {{selectedFiles}}</p> -->
-      <p ng-show="!!selectedFiles.length" class="selection-info"><strong>Selected files:</strong></p>
-      <div ng-repeat="(index, point) in selectedFiles">
-        <p>{{point.file}}</p>
-      </div> 
-      <div style="margin-top: 20px">
-        <button class="btn btn-success" ng-show="!!selectedFiles.length" ng-click="handleConvert()">Convert</button>
+          <p ng-show="!!selectedFiles.length " class="selection-info"><strong>Selected files:</strong></p>
+          <div ng-repeat="(index, point) in selectedFiles">
+            <p>{{point.file}}</p>
+          </div> 
+          <div style="margin-top: 20px">
+            <button class="btn btn-success" ng-show="!!selectedFiles.length" ng-click="handleConvert()">Convert</button>
+          </div>
       </div>
       <!-- EXCEL2SQL -->
       <div class="DashboardGraphs" style="padding: 20px 20px;" ng-if="displayView === 'excel2sql'">
@@ -185,7 +184,7 @@
                 <label>techPlatformVersion</label>
                 <input type="text" ng-model="$parent.dslTechPlatformVersion">
               </div>
-              <button class="btn btn-primary" ng-show="$parent.allowGetDSL" ng-click="getChangedDSL()">Commit & Get changed DSL</button>
+              <button class="btn btn-primary" ng-show="!$parent.allowGetDSL" ng-click="getChangedDSL()">Commit & Get changed DSL</button>
               <button class="btn btn-primary" disabled ng-show="!$parent.allowGetDSL" ng-click="getChangedDSL()">Commit & Get changed DSL</button>
             </div>
             <!-- <div class="gitsearch" style="padding: 20px 0px;">
