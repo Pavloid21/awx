@@ -129,7 +129,7 @@ class ConvertDiff(View):
                     'extra_vars': {
                         'git_vars': {
                             'repo_name': var['reponame'],
-                            'brahch': var['branch'],
+                            'branch': var['branch'],
                         },
                         'hash_dir': var['hash']
                     },
