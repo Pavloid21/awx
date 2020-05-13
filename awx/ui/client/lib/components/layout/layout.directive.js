@@ -21,6 +21,7 @@ function AtLayoutController ($scope, $http, strings, ProcessErrors, $transitions
             if (!vm.isSuperUser) {
                 checkOrgAdmin();
                 checkNotificationAdmin();
+                checkSQLDVMaccess();
             }
         }
     });
@@ -86,6 +87,24 @@ function AtLayoutController ($scope, $http, strings, ProcessErrors, $transitions
                 ProcessErrors(null, data, status, null, {
                     hdr: strings.get('error.HEADER'),
                     msg: strings.get('error.CALL', { path: notifAdminOrgsPath, action: 'GET', status })
+                });
+            });
+    }
+
+    function checkSQLDVMaccess () {
+        const SQLDVMaccess = `api/v2/users/${vm.currentUserId}/teams/?name=SQLDVM`;
+        $http.get(SQLDVMaccess)
+            .then(({ data }) => {
+                if (data.count > 0) {
+                    vm.isSQLDVMmember = true;
+                } else {
+                    vm.isSQLDVMmember = false;
+                }
+            })
+            .catch(({ data, status }) => {
+                ProcessErrors(null, data, status, null, {
+                    hdr: strings.get('error.HEADER'),
+                    msg: strings.get('error.CALL', { path: SQLDVMaccess, action: 'GET', status })
                 });
             });
     }
