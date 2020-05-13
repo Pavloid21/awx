@@ -27,22 +27,22 @@ export default [
           $scope.hash = result;
           return result;
        }
-        $http({
-            method: 'GET',
-            url: '/git/api/repos/'
-        }).then(function success(response) {
-            $scope.environments = response.data.repositories;
-            Wait('stop')
-        }).catch( reason => {
-            Wait('stop');
-            console.log(reason)
-        })
-        Wait('start');
+       Wait('start');
         $http({
           method: 'GET',
           url: '/git/api/clone/'
         }).then(function success(response) {
           Wait('stop');
+          $http({
+            method: 'GET',
+            url: '/git/api/repos/'
+          }).then(function success(response) {
+              $scope.environments = response.data.repositories;
+              Wait('stop')
+          }).catch( reason => {
+              Wait('stop');
+              console.log(reason)
+          })
         })
         $scope.$on("updateDataset", (e, dataset, queryset) => {
             $scope.dataset = dataset;
@@ -140,11 +140,18 @@ export default [
             })
             $scope.selectedFiles.splice(position, 1)
           } else {
+            if ($scope.breadCrumbs.length > 1) {
+              $scope.typeSelected = $scope.breadCrumbs[$scope.breadCrumbs.length - 2]
+            } else {
+              $scope.typeSelected = $scope.breadCrumbs[$scope.breadCrumbs.length - 1]
+            }
             $scope.selectedFiles.push({
               file,
-              type: $scope.directory
+              type: $scope.typeSelected,
+              source: null
             })
           }
+          console.log($scope.selectedFiles)
         }
 
         $scope.setAttachment = (files, e, typeIndex, attachIndex) => {
@@ -321,68 +328,100 @@ export default [
         }
 
         $scope.handleConvert = () => {
-            let url = `diff/convert/?repo=${$scope.env.replace('.git', '')}&branch=${$scope.branch}&file=${$scope.selectedFile}`;
+          let hash = makeid(10)
             Wait('start')
             $http({
-                method: 'GET',
-                url: url,
-                timeout: 30 * 1000
-            })
-            .then(function success(response) {
-                if (response.data.status === 'failed') {
-                    $scope.final = { status: 'failed', job: response.data.job }
-                } else {
-                    $scope.job = response.data.id;
-                    console.log($scope.job)
-                    let requestJob = () => {
-                        $http({
-                          method: "GET",
-                          url: `/diff/results/?job=${$scope.job}`
-                        }).then(function success(response) {
-                          if (
-                            response.data.status !== "successful" &&
-                            response.data.status !== "failed"
-                          ) {
-                            setTimeout(() => requestJob(), 4 * 1000);
-                          } else if (response.data.status === "failed") {
-                            $scope.final = {
-                              status: "failed",
-                              job: $scope.job
-                            };
-                            Wait("stop");
-                          } else {
-                            $http({
-                              method: "GET",
-                              url: `/diff/cnvfinal/?job=${$scope.job}&status=successful`
-                            }).then(function success(response) {
-                              $scope.convertData = response.data.compare.results.find(
-                                res => {
-                                  if (res && res.event_data && res.event_data.res && res.event_data.res.stdout_lines) {
-                                    $scope.final = res.event_data.res.stdout_lines[0];
-                                  }
-                                }
-                              );
-                              console.log($scope.final)
-                              $http({
-                                method: 'GET',
-                                url: `/diff/download/?file=${$scope.final}`
-                              }).then(function success(response) {
-                                console.log(response)
-                                var link = document.createElement("a");
-                                link.download = name;
-                                link.href = `/diff/download/?file=${$scope.final}`;
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-                              })
-                              Wait("stop");
-                            });
-                          }
-                        });
-                      };
-                      requestJob();
+              method: 'POST',
+              url: `/deploy/saveconvert/?hash=${hash}`,
+              data: {
+                dsl: {
+                  items: $scope.selectedFiles
                 }
-            })            
+              }
+            }).then((response) => {
+              let url = `diff/convert/?repo=${$scope.env.replace('.git', '')}&branch=${$scope.branch}&hash=${hash}`;
+              Wait('start')
+              $http({
+                  method: 'POST',
+                  url: url,
+              })
+              .then(function success(response) {
+                  if (response.data.status === 'failed') {
+                      $scope.final = { status: 'failed', job: response.data.job }
+                  } else {
+                      $scope.job = response.data.id;
+                      console.log($scope.job)
+                      let requestJob = () => {
+                          $http({
+                            method: "GET",
+                            url: `/diff/results/?job=${$scope.job}`
+                          }).then(function success(response) {
+                            if (
+                              response.data.status !== "successful" &&
+                              response.data.status !== "failed"
+                            ) {
+                              setTimeout(() => requestJob(), 4 * 1000);
+                            } else if (response.data.status === "failed") {
+                              $scope.final = {
+                                status: "failed",
+                                job: $scope.job
+                              };
+                              Wait("stop");
+                            } else {
+                              $http({
+                                method: "GET",
+                                url: `/diff/cnvfinal/?job=${$scope.job}&status=successful`
+                              }).then(function success(response) {
+                                $scope.convertData = response.data.compare.results.find(
+                                  res => {
+                                    if (res && res.event_data && res.event_data.res && res.event_data.res.stdout_lines) {
+                                      $scope.final = res.event_data.res.stdout_lines[0];
+                                    }
+                                  }
+                                );
+                                $http({
+                                  method: 'GET',
+                                  url: `/diff/download/?hash=${hash}`
+                                }).then(function success(response) {
+                                  console.log(response)
+                                  var link = document.createElement("a");
+                                  link.download = name;
+                                  link.href = `/diff/download/?hash=${hash}`;
+                                  document.body.appendChild(link);
+                                  link.click();
+                                  document.body.removeChild(link);
+                                })
+                                Wait("stop");
+                              });
+                            }
+                          });
+                        };
+                        requestJob();
+                  }
+              })            
+            })
+        }
+
+        $scope.allowShowDifference = () => {
+          console.log($scope.types)
+          let flag = [];
+          $scope.types.forEach(type => {
+            if (!type.targets.length || !type.artefact_version) {
+              flag.push(false);
+            }
+            if (type.attachments.length < 1) {
+              flag.push(false);
+            } else {
+              type.attachments.forEach(attach => {
+                Object.keys(attach).forEach(key => {
+                  if (!attach[key] && key !== 'dropdown') {
+                    flag.push(false)
+                  }
+                })
+              })
+            }
+          })
+          return !flag.includes(false);
         }
 
         $scope.handleSearch = () => {
@@ -438,6 +477,7 @@ export default [
 
         $scope.setAttachmentOn = (typeIndex, attachIndex, file) => {
           $scope.types[typeIndex].attachments[attachIndex].file = file;
+          $scope.openDropdown(typeIndex, attachIndex);
         }
 
         $scope.addAttachmentRow = (typeIndex) => {
@@ -493,8 +533,23 @@ export default [
           console.log(data)
         }
 
+        const checkMainFields = () => {
+          if (
+            $scope.dslName &&
+            $scope.dslVersion &&
+            $scope.dslName &&
+            $scope.dslAppName &&
+            $scope.dslAppVersion &&
+            $scope.dslTechPlatform &&
+            $scope.dslTechPlatformVersion
+          ) {
+            return true;
+          }
+          return false;
+        }
+
         $scope.confirmChanges = () => {
-          $scope.allowGetDSL = true;
+          $scope.allowGetDSL = checkMainFields();
           $scope.closePopup();
         }
 

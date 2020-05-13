@@ -51,7 +51,7 @@
               </div>
             </div>
             <p ng-show="!!files.length">Files:</p>
-            <div ng-repeat="file in files" ng-class="{fileselected: selectedFile === file}" class="fileitem" ng-click="selectFile(file)">
+            <div ng-repeat="file in files" ng-class="{fileselected: oneOfSelected(file)}" class="fileitem" ng-click="selectFileMult(file)">
               <p style="margin-right: 20px; font-size: 16px; margin-bottom: 0;"><i class="fa fa-file-o"></i></p>
               <p style="margin-bottom: 0;">{{file}}</p>
             </div>
@@ -64,9 +64,13 @@
             >
           </div>
       </div>
-      <p ng-show="!!selectedFile" class="selection-info"><strong>Selected file:</strong> {{selectedFile}}</p>
+      <!-- <p ng-show="!!selectedFile" class="selection-info"><strong>Selected files:</strong> {{selectedFiles}}</p> -->
+      <p ng-show="!!selectedFiles.length" class="selection-info"><strong>Selected files:</strong></p>
+      <div ng-repeat="(index, point) in selectedFiles">
+        <p>{{point.file}}</p>
+      </div> 
       <div style="margin-top: 20px">
-        <button class="btn btn-success" ng-show="!!selectedFile" ng-click="handleConvert()">Convert</button>
+        <button class="btn btn-success" ng-show="!!selectedFiles.length" ng-click="handleConvert()">Convert</button>
       </div>
       <!-- EXCEL2SQL -->
       <div class="DashboardGraphs" style="padding: 20px 20px;" ng-if="displayView === 'excel2sql'">
@@ -150,7 +154,8 @@
               </div>
             </div>
             <button class="btn btn-success" ng-click="addType()" ng-show="!!branch">Add Type</button>
-            <button class="btn btn-primary" ng-click="getDifference()" ng-show="!!branch && !!types.length">Show difference</button>
+            <button class="btn btn-primary" ng-click="getDifference()" ng-show="!!branch && !!types.length && $parent.allowShowDifference()">Show difference</button>
+            <button class="btn btn-primary" disabled ng-show="!!branch && !!types.length && !$parent.allowShowDifference()">Show difference</button>
             <hr/>
             <div class="DashboardGraphs" ng-show="!!branch">
               <p>
@@ -180,7 +185,8 @@
                 <label>techPlatformVersion</label>
                 <input type="text" ng-model="$parent.dslTechPlatformVersion">
               </div>
-              <button class="btn btn-primary" ng-show="$parent.allowGetDSL" ng-click="getChangedDSL()">Get changed DSL</button>
+              <button class="btn btn-primary" ng-show="$parent.allowGetDSL" ng-click="getChangedDSL()">Commit & Get changed DSL</button>
+              <button class="btn btn-primary" disabled ng-show="!$parent.allowGetDSL" ng-click="getChangedDSL()">Commit & Get changed DSL</button>
             </div>
             <!-- <div class="gitsearch" style="padding: 20px 0px;">
               <div class="form-group" ng-show="!!branch">

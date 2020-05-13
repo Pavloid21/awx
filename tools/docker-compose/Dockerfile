@@ -144,6 +144,8 @@ ENV HOME /var/lib/awx
 ENV PATH=/usr/local/n/versions/node/10.15.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ENV REPOS=http://ashtodin:v0cAFLFH@172.19.19.31/iac/sql2exel.git,http://ashtodin:v0cAFLFH@172.19.19.31/iac/ulbs11_sales_domain.git
 ENV CONVERT_DICT_JOB_ID=19
+ENV CONVERT_XLSX_JOB_ID=18
+ENV COMMIT_DSL=20
 
 RUN dnf clean packages
 

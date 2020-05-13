@@ -143,14 +143,17 @@ class ConvertView(View):
         print('GET JOB FUNC: ' + JOB_LAUNCHED)
         return result
 
-    def get(self, request, *args, **kwargs):
-        jobLaunchResponse = requests.post(AWX_API_PATH + '/api/v2/job_templates/18/launch/', json={
+    def post(self, request, *args, **kwargs):
+        # data = json.loads(request.body)
+        # with open(settings.MEDIA_ROOT + '/' + request.GET['hash'] +'/data.json', 'w', encoding='utf-8') as f:
+        #     json.dump(data, f, ensure_ascii=False, indent=4)
+        jobLaunchResponse = requests.post(AWX_API_PATH + '/api/v2/job_templates/'+ os.environ['CONVERT_XLSX_JOB_ID'] +'/launch/', json={
             'extra_vars': {
                 'git_vars': {
                     'repo_name': request.GET['repo'],
                     'branch': request.GET['branch']
                 },
-                'convert_file': request.GET['file']
+                'hash_dir': request.GET['hash']
             }
         }, auth=('admin', 'password'))
         jsonObj = jobLaunchResponse.json()
@@ -163,7 +166,7 @@ class ConvertView(View):
 
 class Download(View):
     def get(self, request, *args, **kwargs):
-        file_path = os.path.join(settings.MEDIA_ROOT, request.GET['file'])
+        file_path = os.path.join(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/', request.GET['file'])
         if os.path.exists(file_path):
                 fh = open(file_path, 'rb')
                 file_data = fh.read()

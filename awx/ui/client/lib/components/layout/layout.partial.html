@@ -112,14 +112,19 @@
         <at-side-nav-item icon-class="fa-sitemap" route="diff" name="DIFF"
             ng-show="$parent.layoutVm.isSuperUser || $parent.layoutVm.isOrgAdmin">
         </at-side-nav-item>
-        <div class="at-Layout-sideNavSpacer" ng-show="$parent.layoutVm.isSuperUser || $parent.layoutVm.isOrgAdmin">
+        <div class="at-Layout-sideNavSpacer" ng-show="$parent.layoutVm.isSuperUser || $parent.layoutVm.isSQLDVMmember"">
             <span class="at-Layout-sideNavHeader">
-                CI/CD
+                SQLDVM
             <span>
         </div>
         <at-side-nav-item icon-class="fa-magic" route="convert" name="CONVERT"
             ng-show="$parent.layoutVm.isSuperUser || $parent.layoutVm.isSQLDVMmember">
         </at-side-nav-item>
+        <div class="at-Layout-sideNavSpacer" ng-show="$parent.layoutVm.isSuperUser || $parent.layoutVm.isOrgAdmin">
+            <span class="at-Layout-sideNavHeader">
+                CI/CD
+            <span>
+        </div>
         <at-side-nav-item icon-class="fa-archive" route="deptemplate" name="DEPLOYTEMPLATE"
             ng-show="$parent.layoutVm.isSuperUser || $parent.layoutVm.isOrgAdmin">
         </at-side-nav-item>

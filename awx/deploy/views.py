@@ -112,7 +112,11 @@ class SaveConvert(View):
     def post(self, request, *args, **kwargs):
         data = json.loads(request.body)
         hash = self.randomString().decode('utf-8')
-        with open(settings.MEDIA_ROOT + '/' + request.GET['hash'] +'/data.json', 'w', encoding='utf-8') as f:
+        filename = "data.json"
+        dirname = os.path.dirname(filename)
+        if not os.path.exists(dirname):
+            os.makedirs(os.path.join(settings.MEDIA_ROOT, request.GET['hash'], dirname))
+        with open(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data.json', 'w+', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
         return JsonResponse({'hash': hash})
 
