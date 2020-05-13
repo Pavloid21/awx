@@ -477,7 +477,7 @@ export default [
           $scope.types.forEach(type => {
             data.type_specific_parameters = {
               [type.breadCrumbs[type.breadCrumbs.length - 2]]: {
-                database: type.targets[0],
+                database: type.targets,
                 artefactVersion: type.artefact_version
               }
             }
