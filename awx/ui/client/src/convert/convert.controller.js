@@ -332,7 +332,10 @@ export default [
 
         $scope.handleConvert = () => {
           let hash = makeid(10)
-          let data = buildData()
+          let data = {
+            dsl: {},
+            items: $scope.selectedFiles
+          }
             Wait('start')
             $http({
               method: 'POST',
@@ -350,7 +353,6 @@ export default [
                       $scope.final = { status: 'failed', job: response.data.job }
                   } else {
                       $scope.job = response.data.id;
-                      console.log($scope.job)
                       let requestJob = () => {
                           $http({
                             method: "GET",
@@ -368,7 +370,6 @@ export default [
                               };
                               Wait("stop");
                             } else {
-                              $scope.job = 1455
                               $http({
                                 method: "GET",
                                 url: `/diff/cnvfinal/?job=${$scope.job}&status=successful`

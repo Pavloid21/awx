@@ -18,7 +18,7 @@ from django.conf import settings
 import shutil
 
 # AWX_API_PATH = 'http://172.19.19.231'
-AWX_API_PATH = 'https://127.0.0.1:8052'
+AWX_API_PATH = 'http://127.0.0.1:8052'
 
 class UploadFile(View):
     def post(self, request, *args, **kwargs):
