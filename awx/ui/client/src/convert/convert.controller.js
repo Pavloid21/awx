@@ -162,7 +162,7 @@ export default [
             function (r) {
               $rootScope.configFileName = JSON.parse(r.response);
               if (e) {
-                $scope.types[typeIndex].attachments[attachIndex].attachment = $rootScope.configFileName.url;
+                $scope.types[typeIndex].attachments[attachIndex].attachment = $rootScope.configFileName.url.replace(`/media/${$scope.typesHash}/edited_xlsx/`,'');
               }
               $scope.errors = null;
               Wait("stop");
@@ -527,7 +527,7 @@ export default [
             type.attachments.forEach(item => {
               data.items.push({
                 file: item.file,
-                source: item.attachment,
+                source: item.attachment.replace(`/media/${$scope.typesHash}/edited_xlsx/`, ''),
                 type: type.breadCrumbs[type.breadCrumbs.length - 2]
               })
             })
