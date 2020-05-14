@@ -636,8 +636,9 @@ export default [
                           //   }
                           // );
                           $http({
-                            method: 'GET',
-                            url: `/diff/downloaddsl/?hash=${$scope.typesHash}`
+                            method: 'POST',
+                            url: `/diff/downloaddsl/?hash=${$scope.typesHash}`,
+                            data: data
                           }).then(function success(response) {
                             var link = document.createElement("a");
                             link.download = name;
