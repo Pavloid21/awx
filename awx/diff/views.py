@@ -188,7 +188,7 @@ class DownloadDSL(View):
                 fh = open(file_path, 'rb')
                 file_data = fh.read()
                 response = HttpResponse(file_data, content_type='application/octet-stream')
-                response['Content-Disposition'] = 'attachment; filename=' + request.GET['file']
+                response['Content-Disposition'] = 'attachment; filename=' + data['dsl']['name']+'__jenkis.dsl'
                 # response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
                 return response
         raise Http404
