@@ -637,12 +637,11 @@ export default [
                           // );
                           $http({
                             method: 'GET',
-                            url: `/diff/downloaddsl/?hash=${hash}`
+                            url: `/diff/downloaddsl/?hash=${$scope.typesHash}`
                           }).then(function success(response) {
-                            console.log(response)
                             var link = document.createElement("a");
                             link.download = name;
-                            link.href = `/diff/downloaddsl/?hash=${hash}`;
+                            link.href = `/diff/downloaddsl/?hash=${$scope.typesHash}`;
                             document.body.appendChild(link);
                             link.click();
                             document.body.removeChild(link);
