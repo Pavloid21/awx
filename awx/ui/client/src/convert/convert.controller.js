@@ -636,13 +636,12 @@ export default [
                           //   }
                           // );
                           $http({
-                            method: 'POST',
-                            url: `/diff/downloaddsl/?hash=${$scope.typesHash}`,
-                            data: data
+                            method: 'GET',
+                            url: `/diff/download/?hash=${$scope.typesHash}&file=${data.dsl.name}_jenkins.dsl`,
                           }).then(function success(response) {
                             var link = document.createElement("a");
                             link.download = name;
-                            link.href = `/diff/downloaddsl/?hash=${$scope.typesHash}`;
+                            link.href = `/diff/download/?hash=${$scope.typesHash}&file=${data.dsl.name}_jenkins.dsl`;
                             document.body.appendChild(link);
                             link.click();
                             document.body.removeChild(link);
