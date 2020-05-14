@@ -183,12 +183,12 @@ class Download(View):
 class DownloadDSL(View):
     def post(self, request, *args, **kwargs):
         data = json.loads(request.body)
-        file_path = os.path.join(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/', data['dsl']['name']+'__jenkis.dsl')
+        file_path = os.path.join(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/', data['dsl']['name']+'_jenkis.dsl')
         if os.path.exists(file_path):
                 fh = open(file_path, 'rb')
                 file_data = fh.read()
                 response = HttpResponse(file_data, content_type='application/octet-stream')
-                response['Content-Disposition'] = 'attachment; filename=' + data['dsl']['name']+'__jenkis.dsl'
+                response['Content-Disposition'] = 'attachment; filename=' + data['dsl']['name']+'_jenkis.dsl'
                 # response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
                 return response
         raise Http404
