@@ -628,21 +628,21 @@ export default [
                           method: "GET",
                           url: `/diff/getDSLfinal/?job=${$scope.job}&status=successful`
                         }).then(function success(response) {
-                          $scope.convertData = response.data.compare.results.find(
-                            res => {
-                              if (res && res.event_data && res.event_data.res && res.event_data.res.stdout_lines) {
-                                $scope.final = res.event_data.res.stdout_lines[0];
-                              }
-                            }
-                          );
+                          // $scope.convertData = response.data.compare.results.find(
+                          //   res => {
+                          //     if (res && res.event_data && res.event_data.res && res.event_data.res.stdout_lines) {
+                          //       $scope.final = res.event_data.res.stdout_lines[0];
+                          //     }
+                          //   }
+                          // );
                           $http({
                             method: 'GET',
-                            url: `/diff/download/?hash=${hash}&file=${$scope.final}`
+                            url: `/diff/downloaddsl/?hash=${hash}`
                           }).then(function success(response) {
                             console.log(response)
                             var link = document.createElement("a");
                             link.download = name;
-                            link.href = `/diff/download/?hash=${hash}&file=${$scope.final}`;
+                            link.href = `/diff/downloaddsl/?hash=${hash}`;
                             document.body.appendChild(link);
                             link.click();
                             document.body.removeChild(link);

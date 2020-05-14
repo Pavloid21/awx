@@ -132,6 +132,10 @@ class ConvertFinalView(View):
     def get(self, request, *args, **kwargs):
         response = requests.get(AWX_API_PATH + '/api/v2/jobs/' + request.GET['job'] + '/job_events/?page=1', auth=('admin', 'password'))
         return JsonResponse({'convert': response.json(), 'status': request.GET['status'], 'job': request.GET['job']})
+class DSLFinalView(View):
+    def get(self, request, *args, **kwargs):
+        response = requests.get(AWX_API_PATH + '/api/v2/jobs/' + request.GET['job'] + '/job_events/?page=2', auth=('admin', 'password'))
+        return JsonResponse({'convert': response.json(), 'status': request.GET['status'], 'job': request.GET['job']})
 class ConvertView(View):
     def getJob(self, obj):
         print(obj)
@@ -167,6 +171,19 @@ class ConvertView(View):
 class Download(View):
     def get(self, request, *args, **kwargs):
         file_path = os.path.join(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/', request.GET['file'])
+        if os.path.exists(file_path):
+                fh = open(file_path, 'rb')
+                file_data = fh.read()
+                response = HttpResponse(file_data, content_type='application/octet-stream')
+                response['Content-Disposition'] = 'attachment; filename=' + request.GET['file']
+                # response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
+                return response
+        raise Http404
+
+class DownloadDSL(View):
+    def post(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+        file_path = os.path.join(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/', data['dsl']['name']+'__jenkis.dsl')
         if os.path.exists(file_path):
                 fh = open(file_path, 'rb')
                 file_data = fh.read()

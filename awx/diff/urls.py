@@ -15,7 +15,9 @@ from awx.diff.views import (
     FilesList,
     ConvertView,
     ConvertFinalView,
-    Download
+    Download,
+    DSLFinalView,
+    DownloadDSL
 )
 
 app_name = 'diff'
@@ -32,5 +34,7 @@ urlpatterns = [
     url(r'^convert/', ConvertView.as_view(), name='convert'),
     url(r'^cnvfinal/$', DiffFinalView.as_view(), name='cnvfin'),
     url(r'^download/$', Download.as_view(), name='dwnload'),
+    url(r'^getDSLfinal/$', DSLFinalView.as_view(), name='dslfin'),
+    url(r'^downloaddsl/$', DownloadDSL.as_view(), name='dwnloaddsl'),
 ]
 
