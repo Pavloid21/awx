@@ -405,7 +405,6 @@ export default [
         }
 
         $scope.allowShowDifference = () => {
-          console.log($scope.types)
           let flag = [];
           $scope.types.forEach(type => {
             if (!type.targets.length || !type.artefact_version) {
@@ -560,6 +559,19 @@ export default [
         $scope.confirmChanges = () => {
           $scope.allowGetDSL = checkMainFields();
           $scope.closePopup();
+        }
+
+        $scope.removeType = (typeIndex) => {
+          $scope.types.splice(typeIndex, 1);
+        }
+
+        $scope.removeAttach = (typeIndex, attachIndex) => {
+          $scope.types[typeIndex].attachments.splice(attachIndex, 1);
+        }
+
+        $scope.removeTarget = (typeIndex, targetIndex) => {
+          $scope.types[typeIndex].targets.splice(targetIndex, 1);
+          
         }
 
         $scope.getChangedDSL = () => {
