@@ -94,11 +94,18 @@ export default [
               })
             } else {
               $http({
-                  method: 'GET',
-                  url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${$scope.directory || '*'}/pagi/?page_size=10`
+                  method: 'POST',
+                  url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/?page_size=10`,
+                  data: $scope.breadCrumbs.length > 1 ? 
+                  {
+                    path: $scope.breadCrumbs.join('/').replace('root/', '')
+                  } :
+                  {
+                    path: $scope.breadCrumbs.join('/').replace('root', '*')
+                  }
               }).then(function success(response) {
                   $scope.dataset = response.data;
-                  $scope.url = `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${$scope.directory || '*'}/pagi/`
+                  $scope.url = `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/?page_size=10`
                   $scope.files = response.data.files
                   $scope.directories = response.data.directories
                   Wait('stop')
@@ -517,7 +524,7 @@ export default [
             items: []
           };
           $scope.types.forEach(type => {
-            data.type_specific_parameters = {
+            data.dsl.type_specific_parameters = {
               [type.breadCrumbs[type.breadCrumbs.length - 2]]: {
                 database: type.targets,
                 artefactVersion: type.artefact_version
