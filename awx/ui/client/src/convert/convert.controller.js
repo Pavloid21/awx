@@ -16,6 +16,7 @@ export default [
         $scope.selectedFiles = [];
         $scope.types = [];
         $scope.allowGetDSL = false;
+        $scope.applied = false;
         Wait('start')
         function makeid(length) {
           var result           = '';
@@ -556,7 +557,8 @@ export default [
             $scope.dslAppName &&
             $scope.dslAppVersion &&
             $scope.dslTechPlatform &&
-            $scope.dslTechPlatformVersion
+            $scope.dslTechPlatformVersion &&
+            $scope.applied
           ) {
             return true;
           }
@@ -564,6 +566,7 @@ export default [
         }
 
         $scope.confirmChanges = () => {
+          $scope.applied = true;
           $scope.allowGetDSL = checkMainFields();
           $scope.closePopup();
         }
