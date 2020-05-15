@@ -292,6 +292,7 @@ export default [
           }
           let newCrumbs = [];
           if (typeIndex === undefined) {
+            $scope.searchString = '';
             try {
               $scope.breadCrumbs.forEach((item, index) => {
                 if (item === crumb) {
