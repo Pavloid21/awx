@@ -17,6 +17,7 @@ export default [
         $scope.types = [];
         $scope.allowGetDSL = false;
         $scope.applied = false;
+        $scope.showCompleted = false;
         Wait('start')
         function makeid(length) {
           var result           = '';
@@ -250,6 +251,7 @@ export default [
                       console.log($scope.final)
                       Wait("stop");
                       $scope.showPopup = true;
+                      $scope.showCompleted = false;
                     });
                   }
                 }, () => {
@@ -392,6 +394,8 @@ export default [
                                   document.body.appendChild(link);
                                   link.click();
                                   document.body.removeChild(link);
+                                  $scope.showPopup = true;
+                                  $scope.showCompleted = true;
                                 })
                                 Wait("stop");
                               });
@@ -545,7 +549,6 @@ export default [
           Wait('start');
           let data = buildData();
           $scope.handleConvertExcel(data, $scope.typesHash);
-          console.log(data)
         }
 
         const checkMainFields = () => {
@@ -570,6 +573,10 @@ export default [
           $scope.closePopup();
         }
 
+        $scope.confirmCompleted = () => {
+          window.location.reload(true);
+        }
+
         $scope.removeType = (typeIndex) => {
           $scope.types.splice(typeIndex, 1);
         }
@@ -581,6 +588,10 @@ export default [
         $scope.removeTarget = (typeIndex, targetIndex) => {
           $scope.types[typeIndex].targets.splice(targetIndex, 1);
           
+        }
+
+        $scope.removeSelectedFile = (index) => {
+          $scope.selectedFiles.splice(index, 1);
         }
 
         $scope.getChangedDSL = () => {
@@ -627,13 +638,6 @@ export default [
                           method: "GET",
                           url: `/diff/getDSLfinal/?job=${$scope.job}&status=successful`
                         }).then(function success(response) {
-                          // $scope.convertData = response.data.compare.results.find(
-                          //   res => {
-                          //     if (res && res.event_data && res.event_data.res && res.event_data.res.stdout_lines) {
-                          //       $scope.final = res.event_data.res.stdout_lines[0];
-                          //     }
-                          //   }
-                          // );
                           $http({
                             method: 'GET',
                             url: `/diff/download/?hash=${$scope.typesHash}&file=${data.dsl.name}_jenkins.dsl`,
@@ -644,6 +648,8 @@ export default [
                             document.body.appendChild(link);
                             link.click();
                             document.body.removeChild(link);
+                            $scope.showPopup = true;
+                            $scope.showCompleted = true;
                           })
                           Wait("stop");
                         });

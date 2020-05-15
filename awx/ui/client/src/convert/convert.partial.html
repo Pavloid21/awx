@@ -64,9 +64,14 @@
             >
           </div>
           <p ng-show="!!selectedFiles.length " class="selection-info"><strong>Selected files:</strong></p>
-          <div ng-repeat="(index, point) in selectedFiles">
-            <p>{{point.file}}</p>
-          </div> 
+          <table class="table table-striped">
+            <tbody>
+              <tr ng-repeat="(index, point) in selectedFiles">
+                <td><button class="btn btn-xs btn-danger" ng-click="removeSelectedFile(index)">-</button></td>
+                <td>{{point.file}}</td>
+              </tr>
+            </tbody>
+          </table>
           <div style="margin-top: 20px">
             <button class="btn btn-success" ng-show="!!selectedFiles.length" ng-click="handleConvert()">Convert</button>
           </div>
@@ -236,12 +241,20 @@
             <h4>Upcoming changes</h4>
           </div>
           <div class="popup-body">
-            <div style="overflow: auto; max-height: 400px;">
-              <div ng-repeat="row in final" style="text-align: start;" ng-class="{'green-row': row.indexOf('+') == 0, 'red-row': row.indexOf('-') == 0}">
+            <div style="overflow: auto; max-height: 400px;" ng-if="showCompleted">
+              <div>
+                Convert completed!
+              </div>
+            </div>
+            <div style="overflow: auto; max-height: 400px;" ng-if="!showCompleted">
+              <div ng-repeat="row in $parent.final" style="text-align: start;" ng-class="{'green-row': row.indexOf('+') == 0, 'red-row': row.indexOf('-') == 0}, 'strong-row': row.indexOf('П') == 0">
                 {{row}}
               </div>
             </div>
-            <button class="btn btn-primary" ng-click="confirmChanges()">
+            <button class="btn btn-primary" ng-click="confirmCompleted()" ng-if="showCompleted">
+              Ok
+            </button>
+            <button class="btn btn-primary" ng-click="confirmChanges()" ng-if="!showCompleted">
               <i class="fa fa-play-circle"></i>
               Apply
             </button>
