@@ -101,9 +101,6 @@
               <h3 ng-show="type.breadCrumbs.length > 1">SQLDVM_{{type.breadCrumbs[type.breadCrumbs.length - 2]}} <button class="btn btn-xs btn-danger" ng-click="removeType(index)">-</button></h3>
               <hr/>
               <div class="gitsearch" style="padding: 20px 0px;">
-                <!-- <div class="form-group" ng-show="!!branch">
-                  <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Search" ng-model="$parent.searchString" ng-change="handleSearch()">
-                </div> -->
                 <nav ng-show="!!branch" aria-label="breadcrumb">
                   <ol class="breadcrumb">
                     <li ng-repeat="(i, crumb) in type.breadCrumbs" ng-if="i < type.breadCrumbs.length - 1" class="breadcrumb-item" aria-current="page"><a ng-click="handleClickCrumb(crumb, index)">{{crumb}}</a></li>

@@ -94,19 +94,18 @@ export default [
                 Wait('stop');
               })
             } else {
+              let path = '';
+              if ($scope.breadCrumbs.join('.').indexOf('root.') === 0) {
+                path = $scope.breadCrumbs.join('.').replace('root.','');
+              } else {
+                path = '*';
+              }
               $http({
-                  method: 'POST',
-                  url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/?page_size=10`,
-                  data: $scope.breadCrumbs.length > 1 ? 
-                  {
-                    path: $scope.breadCrumbs.join('/').replace('root/', '')
-                  } :
-                  {
-                    path: $scope.breadCrumbs.join('/').replace('root', '*')
-                  }
+                  method: 'GET',
+                  url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${path}/pagi/?page_size=10`,
               }).then(function success(response) {
                   $scope.dataset = response.data;
-                  $scope.url = `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/?page_size=10`
+                  $scope.url = `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${path}/pagi/`
                   $scope.files = response.data.files
                   $scope.directories = response.data.directories
                   Wait('stop')
@@ -127,7 +126,6 @@ export default [
           typeIndex === undefined ?
             $scope.breadCrumbs.push($scope.directory) :
             $scope.types[typeIndex].breadCrumbs.push(dir.name);
-          console.log(typeIndex !== undefined)
           if (typeIndex !== undefined) {
             $scope.types[typeIndex].currentPage = 1;
           }
@@ -382,13 +380,6 @@ export default [
                                 method: "GET",
                                 url: `/diff/cnvfinal/?job=${$scope.job}&status=successful`
                               }).then(function success(response) {
-                                // $scope.convertData = response.data.compare.results.find(
-                                //   res => {
-                                //     if (res && res.event_data && res.event_data.res && res.event_data.res.stdout_lines) {
-                                //       $scope.final = res.event_data.res.stdout_lines[0];
-                                //     }
-                                //   }
-                                // );
                                 $http({
                                   method: 'GET',
                                   url: `/diff/download/?hash=${hash}&file=converted_xlsx.tar.gz`
@@ -434,12 +425,19 @@ export default [
         }
 
         $scope.handleSearch = () => {
+          let path = '';
+              if ($scope.breadCrumbs.join('.').indexOf('root.') === 0) {
+                path = $scope.breadCrumbs.join('.').replace('root.','');
+              } else {
+                path = '*';
+              }
+
             $http({
                 method: 'GET',
-                url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${$scope.directory || '*'}/pagi/?page_size=10`
+                url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${path}/pagi/?page_size=10`,
             }).then(function success(response) {
                 $scope.files = response.data.files;
-                $scope.url = `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${$scope.directory || '*'}/pagi/`;
+                $scope.url = `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${path}/pagi/`;
                 $scope.dataset = response.data;
             })
         }

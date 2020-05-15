@@ -115,11 +115,13 @@ app.get('/git/api/:repo/branches/', (req, res) => {
 
 // GET FILES
 // WARNING! Includes files inside subdirectories
-app.get('/git/api/:repo/:branch/files/:search/:dir/:nopaginate/', (req, res) => {
-  const { repo , branch, search, dir, nopaginate = 'nopagi' } = req.params;
+app.get('/git/api/:repo/:branch/files/:search/:path/:nopaginate/', (req, res) => {
+  const { repo , branch, search, nopaginate = 'nopagi', path } = req.params;
   const { sheet = 1 , page, page_size = 20 } = req.query;
   let pageNum = page || sheet;
   let paginationFlag = nopaginate === 'nopagi';
+  let basePathArr = path.split('.');
+  let basePath = basePathArr.join('/');
   Git.Repository.open(repo)
     .then((repository) => {
       return repository.getBranchCommit(branch)
@@ -136,20 +138,22 @@ app.get('/git/api/:repo/:branch/files/:search/:dir/:nopaginate/', (req, res) => 
       eventEmitter.on('end', (trees) => {
         if (search !== '*') {
           let findedList = fileList.filter(item => {
-            return item.indexOf(search) >= 0
+            return item.indexOf(search) >= 0 && item.indexOf(basePath) >= 0
           })
           res.json({
             count: findedList.length,
             files: paginationFlag ?
               findedList :
-              findedList.slice((pageNum * page_size) - page_size, (pageNum * page_size))
+              findedList.map(item => {
+                return item.replace(basePath + '/', '')
+              }).slice((pageNum * page_size) - page_size, (pageNum * page_size))
           })
         } else {
           res.json({
-            ...walkTree(dir, fileList),
+            ...walkTree(basePath, fileList),
             files: paginationFlag ?
-              walkTree(dir, fileList).files:
-              walkTree(dir, fileList).files.slice((pageNum * page_size) - page_size, (pageNum * page_size)),
+              walkTree(basePath, fileList).files:
+              walkTree(basePath, fileList).files.slice((pageNum * page_size) - page_size, (pageNum * page_size)),
           })
         }
       })
