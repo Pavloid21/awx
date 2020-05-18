@@ -4,11 +4,13 @@ export default [
     "$location",
     "ConfigService",
     "Dataset",
+    "SQL2EXCEL",
+    "EXCEL2SQL",
     "Uploadfile",
     "lastPath",
     "$http",
     "Wait",
-    ($rootScope, $scope, $location, ConfigService, Dataset, Uploadfile, lastPath, $http, Wait) => {
+    ($rootScope, $scope, $location, ConfigService, Dataset, SQL2EXCEL, EXCEL2SQL, Uploadfile, lastPath, $http, Wait) => {
         $scope.displayView = 'sql2excel'
         $scope.searchString = ''
         $scope.directory = ''
@@ -18,6 +20,11 @@ export default [
         $scope.allowGetDSL = false;
         $scope.applied = false;
         $scope.showCompleted = false;
+        $scope.tab = 'sql2excel';
+        $scope.sql2excelHistoryDataset = SQL2EXCEL.data;
+        $scope.sql2excelHistory = SQL2EXCEL.data.results;
+        $scope.excel2sqlHistoryDataset = EXCEL2SQL.data;
+        $scope.excel2sqlHistory = EXCEL2SQL.data.results;
         Wait('start')
         function makeid(length) {
           var result           = '';
@@ -47,8 +54,18 @@ export default [
           })
         })
         $scope.$on("updateDataset", (e, dataset, queryset) => {
+          if (e.targetScope.basePath.indexOf('sql2excel_history') > 0) {
+            $scope.sql2excelHistoryDataset = dataset;
+            $scope.sql2excelHistory = dataset.results;
+            $scope.displayView = 'history';
+          } else if (e.targetScope.basePath.indexOf('excel2sql_history') > 0) {
+            $scope.excel2sqlHistoryDataset = dataset;
+            $scope.excel2sqlHistory = dataset.results;
+            $scope.displayView = 'history';
+          } else {
             $scope.dataset = dataset;
             $scope.files = dataset.files
+          }
           });
 
         $scope.switchView = (view) => {
@@ -76,9 +93,10 @@ export default [
               } else {
                 path = $scope.types[typeIndex].path;
               }
+              let branch = $scope.branch.replace('/', '.')
               $http({
                 method: 'POST',
-                url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.types[typeIndex].searchString || '*'}/?page_size=10&page=${$scope.types[typeIndex].currentPage}`,
+                url: `git/api/${$scope.env}/${branch}/files/${$scope.types[typeIndex].searchString || '*'}/?page_size=10&page=${$scope.types[typeIndex].currentPage}`,
                 data: {
                   path
                 }
@@ -101,12 +119,13 @@ export default [
               } else {
                 path = '*';
               }
+              let branch = $scope.branch.replace('/', '.')
               $http({
                   method: 'GET',
-                  url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${path}/pagi/?page_size=10`,
+                  url: `git/api/${$scope.env}/${branch}/files/${$scope.searchString || '*'}/${path}/pagi/?page_size=10`,
               }).then(function success(response) {
                   $scope.dataset = response.data;
-                  $scope.url = `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${path}/pagi/`
+                  $scope.url = `git/api/${$scope.env}/${branch}/files/${$scope.searchString || '*'}/${path}/pagi/`
                   $scope.files = response.data.files
                   $scope.directories = response.data.directories
                   Wait('stop')
@@ -201,12 +220,13 @@ export default [
             url: `/deploy/saveconvert/?hash=${hash}`,
             data: data
           }).then(function success(response) {
+            let branch = $scope.branch.replace('/', '.')
             $http({
               method: 'POST',
               url: '/deploy/convertdiff/',
               data: {
                 reponame: $scope.env,
-                branch: $scope.branch,
+                branch: branch,
                 hash: $scope.typesHash
               }
             }).then(function success(response) {
@@ -351,7 +371,8 @@ export default [
               url: `/deploy/saveconvert/?hash=${hash}`,
               data: data
             }).then((response) => {
-              let url = `diff/convert/?repo=${$scope.env.replace('.git', '')}&branch=${$scope.branch}&hash=${hash}`;
+              let branch = $scope.branch.replace('/', '.')
+              let url = `diff/convert/?repo=${$scope.env.replace('.git', '')}&branch=${branch}&hash=${hash}`;
               Wait('start')
               $http({
                   method: 'POST',
@@ -436,13 +457,13 @@ export default [
               } else {
                 path = '*';
               }
-
+              let branch = $scope.branch.replace('/', '.')
             $http({
                 method: 'GET',
-                url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${path}/pagi/?page_size=10`,
+                url: `git/api/${$scope.env}/${branch}/files/${$scope.searchString || '*'}/${path}/pagi/?page_size=10`,
             }).then(function success(response) {
                 $scope.files = response.data.files;
-                $scope.url = `git/api/${$scope.env}/${$scope.branch}/files/${$scope.searchString || '*'}/${path}/pagi/`;
+                $scope.url = `git/api/${$scope.env}/${branch}/files/${$scope.searchString || '*'}/${path}/pagi/`;
                 $scope.dataset = response.data;
             })
         }
@@ -454,9 +475,10 @@ export default [
               } else {
                 path = $scope.types[typeIndex].path;
               }
+          let branch = $scope.branch.replace('/', '.')
           $http({
             method: 'POST',
-            url: `git/api/${$scope.env}/${$scope.branch}/files/${$scope.types[typeIndex].searchString || '*'}/?page_size=10`,
+            url: `git/api/${$scope.env}/${branch}/files/${$scope.types[typeIndex].searchString || '*'}/?page_size=10`,
             data: {
               path
             }
@@ -602,12 +624,13 @@ export default [
             url: `deploy/savedsl/?hash=${$scope.typesHash}`,
             data: data
           }).then((response) => {
+            let branch = $scope.branch.split('/').join('.')
             $http({
               method: 'POST',
-              url: `deploy/getdsl/?repo=${$scope.env}&branch=${$scope.branch}&hash=${$scope.typesHash}`,
+              url: `deploy/getdsl/?repo=${$scope.env}&branch=${branch}&hash=${$scope.typesHash}`,
               data: {
                 reponame: $scope.env,
-                branch: $scope.branch,
+                branch: branch,
                 hash: $scope.typesHash
               }
             })
@@ -660,6 +683,14 @@ export default [
               }
             })
           })
+        }
+
+        $scope.handleTabClick = (tab) => {
+          $scope.tab = tab;
+        }
+
+        $scope.getJSON = (data) => {
+          return JSON.parse(data)
         }
     }
 ]

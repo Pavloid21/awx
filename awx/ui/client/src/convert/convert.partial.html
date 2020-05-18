@@ -10,6 +10,11 @@
           ng-class="{'btn-primary': displayView === 'excel2sql', 'Button-primary--hollow': displayView !== 'excel2sql'}"
           ng-click="switchView('excel2sql')"
         >EXCEL2SQL</button>
+        <button 
+          class="btn btn-xs"
+          ng-class="{'btn-primary': displayView === 'history', 'Button-primary--hollow': displayView !== 'history'}"
+          ng-click="switchView('history')"
+        >History</button>
       </div>
       <!-- SQL2EXCEL -->
       <div class="DashboardGraphs" style="padding: 20px 20px;" ng-if="displayView === 'sql2excel'">
@@ -233,6 +238,91 @@
               <button style="margin-top: 15px;" class="btn btn-primary" disabled ng-show="!$parent.allowGetDSL">Commit & Get changed DSL</button>
             </div>
           </div>
+      </div>
+      <!-- HISTORY -->
+      <div class="DashboardGraphs" ng-if="displayView === 'history'">
+        <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <a class="nav-link" ng-class="{'active': $parent.tab === 'sql2excel'}" ng-click="handleTabClick('sql2excel')">SQL2EXCEL</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" ng-class="{'active': $parent.tab === 'excel2sql'}" ng-click="handleTabClick('excel2sql')">EXCEL2SQL</a>
+          </li>
+        </ul>
+        <!-- SQL2EXCEL HISTORY -->
+        <div ng-if="tab === 'sql2excel'">
+          <table class="table">
+            <thead>
+              <tr class="table-head">
+                <th>ID</th>
+                <th>DATE</th>                
+                <th>USER</th>
+                <th>CONVERTED FILES</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                ng-repeat="item in sql2excelHistory"
+                ng-click="historyRowClick(item)"
+              >
+                <td>{{item.id}}</td>
+                <td
+                  ng-bind="item.created | date:'dd-MM-yyyy HH:mm:ss'"
+                  style="width: 200px;"
+                ></td>
+                <td>{{item.summary_fields.created_by.username}}</td>
+                <td>
+                  <button class="btn btn-success btn-xs"><i class="fa fa-download"></i> Download</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <paginate
+            collection="sql2excelHistory"
+            dataset="sql2excelHistoryDataset"
+            iterator="excel2sql"
+            base-path="/deploy/sql2excel_history"
+            >
+        </div>
+        <!-- EXCEL2SQL HISTORY -->
+        <div ng-if="tab === 'excel2sql'">
+          <table class="table">
+            <thead>
+              <tr class="table-head">
+                <th>ID</th>
+                <th>DATE</th>                
+                <th>USER</th>
+                <th>DIFFERENCE</th>
+                <th>DSL FILE</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                ng-repeat="item in excel2sqlHistory"
+                ng-click="historyRowClick(item)"
+              >
+                <td>{{item.id}}</td>
+                <td
+                  ng-bind="item.created | date:'dd-MM-yyyy HH:mm:ss'"
+                  style="width: 200px;"
+                ></td>
+                <td>{{item.summary_fields.created_by.username}}</td>
+                <td>
+                  <button class="btn btn-xs btn-primary"><i class="fa fa-eye"></i> Show</button>
+                </td>
+                <td>
+                  <button class="btn btn-success btn-xs"><i class="fa fa-download"></i> Download</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <paginate
+            collection="excel2sqlHistory"
+            dataset="excel2sqlHistoryDataset"
+            iterator="sql2excel"
+            base-path="/deploy/excel2sql_history"
+            >
+        </div>
       </div>
       <div class="popup" ng-show="showPopup">
         <div class="popup-content">

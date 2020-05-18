@@ -4,6 +4,7 @@ var Git = require("nodegit");
 var pathListToTree = require("path-list-to-tree");
 const bodyParser = require('body-parser');
 const rimraf = require('rimraf');
+const cp = require('child_process');
 var cloneOptions = {};
 cloneOptions.fetchOpts = {
   callbacks: {
@@ -23,16 +24,30 @@ let repos = SSHStrings.map(str => {
   }
 });
 
+// let clone = (rep) => {
+//   Git.Clone(rep.ssh, rep.repo, cloneOptions).then(function(repository) {
+//     console.log(`Repo ${rep.repo} clonning done.`);
+//   }).catch(e => {
+//     rimraf(rep.repo, () => {
+//       console.log(`Done ${rep.repo} remove.`);
+//       console.log(rep)
+//       console.log(e)
+//       clone(rep)
+//     })
+//   });
+// }
+
 let clone = (rep) => {
-  Git.Clone(rep.ssh, rep.repo, cloneOptions).then(function(repository) {
+  cp.exec(`git clone ${rep.ssh}`, (error, stdout, stderr) => {
+    if (error) {
+      rimraf(rep.repo, () => {
+        console.log(`Done ${rep.repo} remove.`);
+        console.log(rep)
+        console.log(error)
+        clone(rep)
+      })
+    }
     console.log(`Repo ${rep.repo} clonning done.`);
-  }).catch(e => {
-    rimraf(rep.repo, () => {
-      console.log(`Done ${rep.repo} remove.`);
-      console.log(rep)
-      console.log(e)
-      clone(rep)
-    })
   });
 }
 
@@ -103,8 +118,10 @@ app.get('/git/api/:repo/branches/', (req, res) => {
     }).then(names => {
       const branches = [];
       names.forEach(item => {
-        if (item.indexOf('origin') < 0) {
-          branches.push(item.replace('refs/heads/', ''))
+        if (item.indexOf('origin') >= 0) {
+          if (branches.indexOf(item.replace('refs/remotes/origin/', '')) === -1) {
+            branches.push(item.replace('refs/remotes/origin/', ''))
+          }
         }
       })
       res.json({
@@ -122,9 +139,10 @@ app.get('/git/api/:repo/:branch/files/:search/:path/:nopaginate/', (req, res) =>
   let paginationFlag = nopaginate === 'nopagi';
   let basePathArr = path.split('.');
   let basePath = basePathArr.join('/');
+  let br = branch.replace('.', '/');
   Git.Repository.open(repo)
     .then((repository) => {
-      return repository.getBranchCommit(branch)
+      return repository.getBranchCommit('refs/remotes/origin/' + br)
     })
     .then(commit => {
       return commit.getTree()
@@ -168,9 +186,10 @@ app.post('/git/api/:repo/:branch/files/:search/', (req, res) => {
   const { repo, branch, search } = req.params;
   const { sheet = 1 , page, page_size = 20 } = req.query;
   let pageNum = page || sheet;
+  let br = branch.replace('.', '/');
   Git.Repository.open(repo)
     .then((repository) => {
-      return repository.getBranchCommit(branch)
+      return repository.getBranchCommit('refs/remotes/origin/' + br)
     })
     .then(commit => {
       return commit.getTree()

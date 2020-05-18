@@ -13,7 +13,9 @@ from awx.deploy.views import (
     UploadFileHash,
     ConvertDiff,
     SaveDSL,
-    getDSL
+    getDSL,
+    SQL2ExcelJobHistory,
+    EXCEL2SQlJobHistory
 )
 
 app_name = 'deploy_cnf'
@@ -28,5 +30,7 @@ urlpatterns = [
     url(r'^savedsl/$', SaveDSL.as_view(), name="save-dsl"),
     url(r'^convertdiff/$', ConvertDiff.as_view(), name="convert-diff"),
     url(r'^getdsl/$', getDSL.as_view(), name="get-dsl"),
+    url(r'^sql2excel_history/$', SQL2ExcelJobHistory.as_view(), name="excel-history"),
+    url(r'^excel2sql_history/$', EXCEL2SQlJobHistory.as_view(), name="sql-history"),
 ]
 

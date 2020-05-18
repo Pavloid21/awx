@@ -39,6 +39,7 @@ class UploadFileHash(View):
             fs = FileSystemStorage()
             filename = fs.save(hashFolder + '/edited_xlsx/' + file.name, file)
             uploaded_file_url = fs.url(filename)
+            os.chmod(hashFolder, 0o0777)
             return JsonResponse({'status': 'success', 'url': uploaded_file_url})
         return JsonResponse({'status': 'failed'})
 
@@ -94,6 +95,28 @@ class DeployHistoryRows(View):
         rows = json.loads(response.text)
         return JsonResponse(rows)
 
+class SQL2ExcelJobHistory(View):
+    def get(self, request, *args, **kwargs):
+        url = AWX_API_PATH + '/api/v2/jobs/?unified_job_template=' + os.environ['CONVERT_XLSX_JOB_ID'] + '&status=successful&order_by=-created'
+        if 'page_size' in request.GET.keys():
+            url = url + '&page_size=' + request.GET['page_size']
+        if 'page' in request.GET.keys():
+            url = url + '&page=' + request.GET['page']
+        response = requests.get(url, auth=('admin', 'password'), verify=False)
+        rows = json.loads(response.text)
+        return JsonResponse(rows)
+
+class EXCEL2SQlJobHistory(View):
+    def get(self, request, *args, **kwargs):
+        url = AWX_API_PATH + '/api/v2/jobs/?unified_job_template=' + os.environ['CONVERT_DICT_JOB_ID'] + '&status=successful&order_by=-created'
+        if 'page_size' in request.GET.keys():
+            url = url + '&page_size=' + request.GET['page_size']
+        if 'page' in request.GET.keys():
+            url = url + '&page=' + request.GET['page']
+        response = requests.get(url, auth=('admin', 'password'), verify=False)
+        rows = json.loads(response.text)
+        return JsonResponse(rows)
+
 class DeployHistoryNextStep(View):
     def get(self, request, *args, **kwargs):
         response = requests.get(AWX_API_PATH + '/api/v2/deploy_history/?prev_step_id=' + request.GET['id'], auth=('admin', 'password'), verify=False)
@@ -117,6 +140,7 @@ class SaveConvert(View):
         dirname = os.path.dirname(filename)
         if not os.path.exists(os.path.join(settings.MEDIA_ROOT, request.GET['hash'], dirname)):
             os.makedirs(os.path.join(settings.MEDIA_ROOT, request.GET['hash'], dirname))
+            os.chmod(os.path.join(settings.MEDIA_ROOT, request.GET['hash']), 0o0777)
         with open(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data.json', 'w+', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
         return JsonResponse({'hash': hash})
