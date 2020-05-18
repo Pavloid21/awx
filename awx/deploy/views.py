@@ -39,7 +39,7 @@ class UploadFileHash(View):
             fs = FileSystemStorage()
             filename = fs.save(hashFolder + '/edited_xlsx/' + file.name, file)
             uploaded_file_url = fs.url(filename)
-            os.chmod(hashFolder, 0o0777)
+            os.chmod(settings.MEDIA_ROOT + '/' + hashFolder, 0o0777)
             return JsonResponse({'status': 'success', 'url': uploaded_file_url})
         return JsonResponse({'status': 'failed'})
 
@@ -140,9 +140,9 @@ class SaveConvert(View):
         dirname = os.path.dirname(filename)
         if not os.path.exists(os.path.join(settings.MEDIA_ROOT, request.GET['hash'], dirname)):
             os.makedirs(os.path.join(settings.MEDIA_ROOT, request.GET['hash'], dirname))
-            os.chmod(os.path.join(settings.MEDIA_ROOT, request.GET['hash']), 0o0777)
         with open(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data.json', 'w+', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
+        os.chmod(os.path.join(settings.MEDIA_ROOT, request.GET['hash']), 0o0777)
         return JsonResponse({'hash': hash})
 
 class SaveDSL(View):
