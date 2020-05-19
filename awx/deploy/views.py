@@ -19,6 +19,8 @@ import shutil
 
 # AWX_API_PATH = 'http://172.19.19.231'
 AWX_API_PATH = 'http://127.0.0.1:8052'
+LOGIN = os.environ('LOGIN')
+PASS = os.environ('PASS')
 
 class UploadFile(View):
     def post(self, request, *args, **kwargs):
@@ -45,16 +47,16 @@ class UploadFileHash(View):
 
 class RunDeploy(View):
     def getJob(self, obj):
-        getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + str(obj['job']), auth=('admin', 'password'), verify=False)
+        getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + str(obj['job']), auth=(LOGIN, PASS), verify=False)
         temp = json.dumps(getResponse.json())
         result = json.loads(temp)
         return result
 
     def get(self, request, *args, **kwargs):
-        response = requests.get(AWX_API_PATH + '/api/v2/inventories/', auth=('admin', 'password'), verify=False)
+        response = requests.get(AWX_API_PATH + '/api/v2/inventories/', auth=(LOGIN, PASS), verify=False)
         inventories = json.loads(response.text)
         prevStep = None
-        actionsResponse = requests.get(AWX_API_PATH + '/api/v2/action/' + str(request.GET['action'][0]) + '/', auth=('admin', 'password'), verify=False)
+        actionsResponse = requests.get(AWX_API_PATH + '/api/v2/action/' + str(request.GET['action'][0]) + '/', auth=(LOGIN, PASS), verify=False)
         action = json.loads(actionsResponse.text)
         if request.GET['prevstep'].isnumeric():
             prevStep = request.GET['prevstep']
@@ -68,7 +70,7 @@ class RunDeploy(View):
                     'extra_vars': extraVars,
                     'inventory': inventory['id'],
                 },
-                auth=('admin', 'password'),
+                auth=(LOGIN, PASS),
                 verify=False)
                 test = requests.post(AWX_API_PATH + '/api/v2/deploy_history/', json={
                     'status': 'pending',
@@ -79,7 +81,7 @@ class RunDeploy(View):
                     'action': [action['id']],
                     'prev_step_id': prevStep
                 }, 
-                auth=('admin', 'password'),
+                auth=(LOGIN, PASS),
                 verify=False)
                 testJson = json.loads(json.dumps(test.json()))
                 jsonObj = launch.json()
@@ -91,7 +93,7 @@ class RunDeploy(View):
 
 class DeployHistoryRows(View):
     def get(self, request, *args, **kwargs):
-        response = requests.get(AWX_API_PATH + '/api/v2/deploy_history/?prev_step_id__isnull=true&not__status=start', auth=('admin', 'password'), verify=False)
+        response = requests.get(AWX_API_PATH + '/api/v2/deploy_history/?prev_step_id__isnull=true&not__status=start', auth=(LOGIN, PASS), verify=False)
         rows = json.loads(response.text)
         return JsonResponse(rows)
 
@@ -102,7 +104,7 @@ class SQL2ExcelJobHistory(View):
             url = url + '&page_size=' + request.GET['page_size']
         if 'page' in request.GET.keys():
             url = url + '&page=' + request.GET['page']
-        response = requests.get(url, auth=('admin', 'password'), verify=False)
+        response = requests.get(url, auth=(LOGIN, PASS), verify=False)
         rows = json.loads(response.text)
         return JsonResponse(rows)
 
@@ -113,19 +115,19 @@ class EXCEL2SQlJobHistory(View):
             url = url + '&page_size=' + request.GET['page_size']
         if 'page' in request.GET.keys():
             url = url + '&page=' + request.GET['page']
-        response = requests.get(url, auth=('admin', 'password'), verify=False)
+        response = requests.get(url, auth=(LOGIN, PASS), verify=False)
         rows = json.loads(response.text)
         return JsonResponse(rows)
 
 class DeployHistoryNextStep(View):
     def get(self, request, *args, **kwargs):
-        response = requests.get(AWX_API_PATH + '/api/v2/deploy_history/?prev_step_id=' + request.GET['id'], auth=('admin', 'password'), verify=False)
+        response = requests.get(AWX_API_PATH + '/api/v2/deploy_history/?prev_step_id=' + request.GET['id'], auth=(LOGIN, PASS), verify=False)
         rows = json.loads(response.text)
         return JsonResponse(rows)
 
 class GetCard(View):
     def get(self, request, *args, **kwargs):
-        response = requests.get(AWX_API_PATH + '/api/v2/deploy_history/' + request.GET['id'] + '/', auth=('admin', 'password'), verify=False)
+        response = requests.get(AWX_API_PATH + '/api/v2/deploy_history/' + request.GET['id'] + '/', auth=(LOGIN, PASS), verify=False)
         print(response.text)
         card = json.loads(response.text)
         return JsonResponse(card)
@@ -161,7 +163,7 @@ class SaveDSL(View):
 
 class ConvertDiff(View):
     def getJob(self, obj):
-        getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + str(obj['job']), auth=('admin', 'password'), verify=False)
+        getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + str(obj['job']), auth=(LOGIN, PASS), verify=False)
         temp = json.dumps(getResponse.json())
         result = json.loads(temp)
         return result
@@ -177,7 +179,7 @@ class ConvertDiff(View):
                         'hash_dir': var['hash']
                     },
                 },
-                auth=('admin', 'password'),
+                auth=(LOGIN, PASS),
                 verify=False)
         jsonObj = launch.json()
         jsonDump = json.dumps(jsonObj)
@@ -187,7 +189,7 @@ class ConvertDiff(View):
         
 class getDSL(View):
     def getJob(self, obj):
-        getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + str(obj['job']), auth=('admin', 'password'), verify=False)
+        getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + str(obj['job']), auth=(LOGIN, PASS), verify=False)
         temp = json.dumps(getResponse.json())
         result = json.loads(temp)
         return result
@@ -203,7 +205,7 @@ class getDSL(View):
                         'hash_dir': var['hash']
                     },
                 },
-                auth=('admin', 'password'),
+                auth=(LOGIN, PASS),
                 verify=False)
         jsonObj = launch.json()
         jsonDump = json.dumps(jsonObj)

@@ -146,6 +146,9 @@ ENV REPOS=http://ashtodin:v0cAFLFH@172.19.19.31/iac/sql2exel.git,http://ashtodin
 ENV CONVERT_DICT_JOB_ID=19
 ENV CONVERT_XLSX_JOB_ID=18
 ENV COMMIT_DSL=20
+ENV LOGIN=admin
+ENV PASS=password
+
 
 RUN dnf clean packages
 

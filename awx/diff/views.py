@@ -26,6 +26,8 @@ from django.core.exceptions import PermissionDenied
 REPO_PATH = 'http://172.19.19.31/api/v4/projects'
 AWX_API_PATH = 'http://127.0.0.1:8052'
 # AWX_API_PATH = 'http://172.19.19.231'
+LOGIN = os.environ('LOGIN')
+PASS = os.environ('PASS')
 
 
 class EnvironmentList(View):
@@ -38,7 +40,7 @@ class JobsList(View):
 
     def get(self, request, *args, **kwargs):
         response = None
-        response = requests.get(AWX_API_PATH + '/api/v2/jobs/?search=Compare&page_size=20&order_by=-finished&page=' + request.GET.get('page', '1'), auth=('admin', 'password'))
+        response = requests.get(AWX_API_PATH + '/api/v2/jobs/?search=Compare&page_size=20&order_by=-finished&page=' + request.GET.get('page', '1'), auth=(LOGIN, PASS))
             
         return JsonResponse(response.json())
 
@@ -79,7 +81,7 @@ class VersionList(View):
 
 class DiffView(View):
     def getJob(self, obj):
-        getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + str(obj['job']), auth=('admin', 'password'))
+        getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + str(obj['job']), auth=(LOGIN, PASS))
         temp = json.dumps(getResponse.json())
         result = json.loads(temp)
         global JOB_LAUNCHED
@@ -103,7 +105,7 @@ class DiffView(View):
             },
             'inventory': invId
         },
-        auth=('admin', 'password'))
+        auth=(LOGIN, PASS))
         jsonObj = jobLaunchResponse.json()
         jsonDump = json.dumps(jsonObj)
         obj = json.loads(jsonDump)
@@ -114,7 +116,7 @@ class DiffView(View):
         
 class DiffResultView(View):
     def get(self, request, *args, **kwargs):
-        getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + request.GET['job'], auth=('admin', 'password'))
+        getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + request.GET['job'], auth=(LOGIN, PASS))
         temp = json.dumps(getResponse.json())
         result = json.loads(temp)
         return JsonResponse(result)
@@ -127,20 +129,20 @@ class DiffFinalView(View):
             page = request.GET['page']
         else:
             page = '2'
-        response = requests.get(AWX_API_PATH + '/api/v2/jobs/' + request.GET['job'] + '/job_events/?page=' + page, auth=('admin', 'password'))
+        response = requests.get(AWX_API_PATH + '/api/v2/jobs/' + request.GET['job'] + '/job_events/?page=' + page, auth=(LOGIN, PASS))
         return JsonResponse({'compare': response.json(), 'status': request.GET['status'], 'job': request.GET['job']})
 class ConvertFinalView(View):
     def get(self, request, *args, **kwargs):
-        response = requests.get(AWX_API_PATH + '/api/v2/jobs/' + request.GET['job'] + '/job_events/?page=1', auth=('admin', 'password'))
+        response = requests.get(AWX_API_PATH + '/api/v2/jobs/' + request.GET['job'] + '/job_events/?page=1', auth=(LOGIN, PASS))
         return JsonResponse({'convert': response.json(), 'status': request.GET['status'], 'job': request.GET['job']})
 class DSLFinalView(View):
     def get(self, request, *args, **kwargs):
-        response = requests.get(AWX_API_PATH + '/api/v2/jobs/' + request.GET['job'] + '/job_events/?page=2', auth=('admin', 'password'))
+        response = requests.get(AWX_API_PATH + '/api/v2/jobs/' + request.GET['job'] + '/job_events/?page=2', auth=(LOGIN, PASS))
         return JsonResponse({'convert': response.json(), 'status': request.GET['status'], 'job': request.GET['job']})
 class ConvertView(View):
     def getJob(self, obj):
         print(obj)
-        getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + str(obj['job']), auth=('admin', 'password'))
+        getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + str(obj['job']), auth=(LOGIN, PASS))
         temp = json.dumps(getResponse.json())
         result = json.loads(temp)
         global JOB_LAUNCHED
@@ -160,7 +162,7 @@ class ConvertView(View):
                 },
                 'hash_dir': request.GET['hash']
             }
-        }, auth=('admin', 'password'))
+        }, auth=(LOGIN, PASS))
         jsonObj = jobLaunchResponse.json()
         jsonDump = json.dumps(jsonObj)
         obj = json.loads(jsonDump)

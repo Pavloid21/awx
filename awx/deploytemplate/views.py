@@ -17,6 +17,8 @@ from django.core.exceptions import PermissionDenied
 REPO_PATH = 'http://172.19.19.31/api/v4/projects'
 AWX_API_PATH = 'https://127.0.0.1:8052'
 # AWX_API_PATH = 'http://172.19.19.231'
+LOGIN = os.environ('LOGIN')
+PASS = os.environ('PASS')
 
 class SaveTemplate(View):
     def saveData(self, item, prevStep):
@@ -26,7 +28,7 @@ class SaveTemplate(View):
             itemJSON['prev_step_id'] = prevStep
             step = itemJSON
         savedData = requests.post(AWX_API_PATH + '/api/v2/deploy_history/', json=step,
-        auth=('admin', 'password'),
+        auth=(LOGIN, PASS),
         verify=False)
         return savedData.text
     def post(self, request, *args, **kwargs):
@@ -40,28 +42,28 @@ class SaveTemplate(View):
             'name': dataList['name'],
             'deployHistoryIds': ids
         },
-        auth=('admin', 'password'),
+        auth=(LOGIN, PASS),
         verify=False)
         return JsonResponse({'data': json.loads(request.body)})
 
 class GetTemplates(View):
     def get(self, request, *args, **kwargs):
         templatesList = requests.get(AWX_API_PATH + '/api/v2/deploy_template/?order=-created',
-        auth=('admin', 'password'),
+        auth=(LOGIN, PASS),
         verify=False)
         return JsonResponse(json.loads(templatesList.text))
 
 class DeleteTemplate(View):
     def get(self, request, *args, **kwargs):
         result = requests.delete(AWX_API_PATH + '/api/v2/deploy_template/' + request.GET['id'] + '/',
-        auth=('admin', 'password'),
+        auth=(LOGIN, PASS),
         verify=False)
         return JsonResponse(json.loads('{}'))
 
 class GetJobTemplates(View):
     def get(self, request, *args, **kwargs):
         result = requests.get(AWX_API_PATH + '/api/v2/job_templates/',
-        auth=('admin', 'password'),
+        auth=(LOGIN, PASS),
         verify=False)
         return JsonResponse(json.loads(result.text))
 
@@ -73,20 +75,20 @@ class SaveAction(View):
             "extra_vars": dataList['extravars'],
             "job_templates": dataList['jobtemplate']
         },
-        auth=('admin', 'password'),
+        auth=(LOGIN, PASS),
         verify=False)
         return JsonResponse(json.loads(result.text))
 
 class GetActions(View):
     def get(self, request, *args, **kwargs):
         result = requests.get(AWX_API_PATH + '/api/v2/action/?order_by=-created',
-        auth=('admin', 'password'),
+        auth=(LOGIN, PASS),
         verify=False)
         return JsonResponse(json.loads(result.text))
 
 class DeleteAction(View):
     def get(self, request, *args, **kwargs):
         result = requests.delete(AWX_API_PATH + '/api/v2/action/' + request.GET['id'] + '/',
-        auth=('admin', 'password'),
+        auth=(LOGIN, PASS),
         verify=False)
         return JsonResponse(json.loads('{}'))
