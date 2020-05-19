@@ -17,12 +17,14 @@ export default {
       }
     },
     sql2excel_search: {
+      dynamic: true,
       value: {
         page_size: 10,
         order_by: '-created',
       }
     },
     excel2sql_search: {
+      dynamic: true,
       value: {
         page_size: 10,
         order_by: '-created'
@@ -51,7 +53,7 @@ export default {
       "GetBasePath",
       "QuerySet",
       ($stateParams, Wait, GetBasePath, qs) => {
-        const searchParam = $stateParams.excel2sql_search;
+        const searchParam = $stateParams.sql2excel_search;
         const searchPath = 'deploy/sql2excel_history';
         Wait("start");
         return qs.search(searchPath, searchParam).finally(() => Wait("stop"));
@@ -63,7 +65,7 @@ export default {
       "GetBasePath",
       "QuerySet",
       ($stateParams, Wait, GetBasePath, qs) => {
-        const searchParam = $stateParams.sql2excel_search;
+        const searchParam = $stateParams.excel2sql_search;
         const searchPath = 'deploy/excel2sql_history';
         Wait("start");
         return qs.search(searchPath, searchParam).finally(() => Wait("stop"));

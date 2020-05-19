@@ -25,6 +25,22 @@ export default [
         $scope.sql2excelHistory = SQL2EXCEL.data.results;
         $scope.excel2sqlHistoryDataset = EXCEL2SQL.data;
         $scope.excel2sqlHistory = EXCEL2SQL.data.results;
+        $scope.$on("updateDataset", (e, dataset, queryset) => {
+          if (e.targetScope.basePath.indexOf('sql2excel_history') > 0) {
+            $scope.sql2excelHistoryDataset = dataset;
+            $scope.sql2excelHistory = dataset.results;
+            $scope.tab = 'sql2excel';
+            $scope.displayView = 'history';
+          } else if (e.targetScope.basePath.indexOf('excel2sql_history') > 0) {
+            $scope.excel2sqlHistoryDataset = dataset;
+            $scope.excel2sqlHistory = dataset.results;
+            $scope.tab = 'excel2sql';
+            $scope.displayView = 'history';
+          } else {
+            $scope.dataset = dataset;
+            $scope.files = dataset.files
+          }
+          });
         Wait('start')
         function makeid(length) {
           var result           = '';
@@ -53,27 +69,12 @@ export default [
               console.log(reason)
           })
         })
-        $scope.$on("updateDataset", (e, dataset, queryset) => {
-          if (e.targetScope.basePath.indexOf('sql2excel_history') > 0) {
-            $scope.sql2excelHistoryDataset = dataset;
-            $scope.sql2excelHistory = dataset.results;
-            $scope.displayView = 'history';
-          } else if (e.targetScope.basePath.indexOf('excel2sql_history') > 0) {
-            $scope.excel2sqlHistoryDataset = dataset;
-            $scope.excel2sqlHistory = dataset.results;
-            $scope.displayView = 'history';
-          } else {
-            $scope.dataset = dataset;
-            $scope.files = dataset.files
-          }
-          });
 
         $scope.switchView = (view) => {
             $scope.displayView = view;
         }
 
         $scope.getDataEnv = () => {
-          console.log($scope.env)
             Wait('start');
             $http({
                 method: 'GET',
@@ -267,8 +268,22 @@ export default [
                           return false;
                         }
                       );
-                      $scope.final = $scope.compareData.event_data.res.stdout_lines;
-                      console.log($scope.final)
+                      let colRowArr = $scope.compareData.event_data.res.stdout_lines.map(item => {
+                        return item.split('|')
+                      })
+                      let maxLength = Math.max.apply(null, colRowArr.map(col => col.length))
+                      let arr = colRowArr.map((col, index) => {
+                        if (col.length < maxLength) {
+                          let temp = col;
+                          let iterations = maxLength - col.length;
+                          for (let k = 0; k < iterations; k++) {
+                            temp.push('')
+                          }
+                          return temp
+                        }
+                        return col
+                      })
+                      $scope.final = arr;
                       Wait("stop");
                       $scope.showPopup = true;
                       $scope.showCompleted = false;
@@ -691,6 +706,64 @@ export default [
 
         $scope.getJSON = (data) => {
           return JSON.parse(data)
+        }
+
+        $scope.downloadArchive = (row) => {
+          Wait('start')
+          let hashDir = JSON.parse(row.extra_vars).hash_dir;
+          $http({
+            method: 'GET',
+            url: `/diff/download/?hash=${hashDir}&file=converted_xlsx.tar.gz`
+          }).then(function success(response) {
+            var link = document.createElement("a");
+            link.download = name;
+            link.href = `/diff/download/?hash=${hashDir}&file=converted_xlsx.tar.gz`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            Wait("stop");
+          })
+        }
+
+        $scope.showDifferenceButton = (row) => {
+          let hashDir = JSON.parse(row.extra_vars).hash_dir;
+          Wait('start')
+          $http({
+            method: "GET",
+            url: `/diff/final/?job=${row.id}&status=successful&page=3`//scope.job.id
+          }).then(function success(response) {
+            $scope.compareData = response.data.compare.results.find(
+              res => {
+                if (
+                  res.task.indexOf("Try compare") >=
+                    0 &&
+                  !!res.event_data.res
+                ) {
+                  return true;
+                }
+                return false;
+              }
+            );
+            let colRowArr = $scope.compareData.event_data.res.stdout_lines.map(item => {
+              return item.split('|')
+            })
+            let maxLength = Math.max.apply(null, colRowArr.map(col => col.length))
+            let arr = colRowArr.map((col, index) => {
+              if (col.length < maxLength) {
+                let temp = col;
+                let iterations = maxLength - col.length;
+                for (let k = 0; k < iterations; k++) {
+                  temp.push('')
+                }
+                return temp
+              }
+              return col
+            })
+            $scope.final = arr;
+            Wait("stop");
+            $scope.showPopup = true;
+            $scope.showCompleted = false;
+          });
         }
     }
 ]

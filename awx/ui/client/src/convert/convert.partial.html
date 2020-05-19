@@ -17,7 +17,7 @@
         >History</button>
       </div>
       <!-- SQL2EXCEL -->
-      <div class="DashboardGraphs" style="padding: 20px 20px;" ng-if="displayView === 'sql2excel'">
+      <div class="DashboardGraphs" style="padding: 20px 20px;" ng-show="displayView === 'sql2excel'">
         <div>
             <div>
               <p>Source Environment:</p>
@@ -82,7 +82,7 @@
           </div>
       </div>
       <!-- EXCEL2SQL -->
-      <div class="DashboardGraphs" style="padding: 20px 20px;" ng-if="displayView === 'excel2sql'">
+      <div class="DashboardGraphs" style="padding: 20px 20px;" ng-show="displayView === 'excel2sql'">
         <div>
             <div>
               <p>Source Environment:</p>
@@ -240,17 +240,17 @@
           </div>
       </div>
       <!-- HISTORY -->
-      <div class="DashboardGraphs" ng-if="displayView === 'history'">
+      <div class="DashboardGraphs" ng-show="displayView === 'history'">
         <ul class="nav nav-tabs">
           <li class="nav-item">
-            <a class="nav-link" ng-class="{'active': $parent.tab === 'sql2excel'}" ng-click="handleTabClick('sql2excel')">SQL2EXCEL</a>
+            <a class="nav-link" ng-class="{'active': tab === 'sql2excel'}" ng-click="handleTabClick('sql2excel')">SQL2EXCEL</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" ng-class="{'active': $parent.tab === 'excel2sql'}" ng-click="handleTabClick('excel2sql')">EXCEL2SQL</a>
+            <a class="nav-link" ng-class="{'active': tab === 'excel2sql'}" ng-click="handleTabClick('excel2sql')">EXCEL2SQL</a>
           </li>
         </ul>
         <!-- SQL2EXCEL HISTORY -->
-        <div ng-if="tab === 'sql2excel'">
+        <div ng-show="tab === 'sql2excel'">
           <table class="table">
             <thead>
               <tr class="table-head">
@@ -272,7 +272,7 @@
                 ></td>
                 <td>{{item.summary_fields.created_by.username}}</td>
                 <td>
-                  <button class="btn btn-success btn-xs"><i class="fa fa-download"></i> Download</button>
+                  <button class="btn btn-success btn-xs" ng-click="downloadArchive(item)"><i class="fa fa-download"></i> Download</button>
                 </td>
               </tr>
             </tbody>
@@ -280,12 +280,12 @@
           <paginate
             collection="sql2excelHistory"
             dataset="sql2excelHistoryDataset"
-            iterator="excel2sql"
-            base-path="/deploy/sql2excel_history"
+            iterator="sql2excel"
+            base-path="deploy/sql2excel_history"
             >
         </div>
         <!-- EXCEL2SQL HISTORY -->
-        <div ng-if="tab === 'excel2sql'">
+        <div ng-show="tab === 'excel2sql'">
           <table class="table">
             <thead>
               <tr class="table-head">
@@ -308,7 +308,7 @@
                 ></td>
                 <td>{{item.summary_fields.created_by.username}}</td>
                 <td>
-                  <button class="btn btn-xs btn-primary"><i class="fa fa-eye"></i> Show</button>
+                  <button class="btn btn-xs btn-primary" ng-click="showDifferenceButton(item)"><i class="fa fa-eye"></i> Show</button>
                 </td>
                 <td>
                   <button class="btn btn-success btn-xs"><i class="fa fa-download"></i> Download</button>
@@ -319,13 +319,13 @@
           <paginate
             collection="excel2sqlHistory"
             dataset="excel2sqlHistoryDataset"
-            iterator="sql2excel"
-            base-path="/deploy/excel2sql_history"
+            iterator="excel2sql"
+            base-path="deploy/excel2sql_history"
             >
         </div>
       </div>
       <div class="popup" ng-show="showPopup">
-        <div class="popup-content">
+        <div class="popup-content" style="width: 86%;">
           <div class="popup-header">
             <span class="close" ng-click="closePopup()">&times;</span>
             <h4>Upcoming changes</h4>
@@ -337,9 +337,16 @@
               </div>
             </div>
             <div style="overflow: auto; max-height: 400px;" ng-if="!showCompleted">
-              <div ng-repeat="row in $parent.final" style="text-align: start;" ng-class="{'green-row': row.indexOf('+') == 0, 'red-row': row.indexOf('-') == 0}, 'strong-row': row.indexOf('П') == 0">
+              <table class="table">
+                <tbody>
+                  <tr ng-repeat="row in $parent.final track by $index" ng-class="{'green-row': row[0].indexOf('+') === 0, 'red-row': row[0].indexOf('-') === 0, 'strong-row': row[0].indexOf('П') == 0}">
+                    <td ng-repeat="item in row track by $index">{{item}}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <!-- <div ng-repeat="row in $parent.final" style="text-align: start;" ng-class="{'green-row': row.indexOf('+') === 0, 'red-row': row.indexOf('-') === 0, 'strong-row': row.indexOf('П') == 0}">
                 {{row}}
-              </div>
+              </div> -->
             </div>
             <button class="btn btn-primary" ng-click="confirmCompleted()" ng-if="showCompleted">
               Ok
