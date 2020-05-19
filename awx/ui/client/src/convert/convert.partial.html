@@ -43,16 +43,16 @@
           <div>
             <div class="gitsearch" style="padding: 20px 0px;">
               <div class="form-group" ng-show="!!branch">
-                <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Search" ng-model="$parent.searchString" ng-change="handleSearch()">
+                <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Search" ng-model="searchString" ng-change="handleSearch()">
               </div>
               <nav ng-show="!!branch" aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                  <li ng-repeat="(index, crumb) in $parent.breadCrumbs" ng-if="index < $parent.breadCrumbs.length - 1" class="breadcrumb-item" aria-current="page"><a ng-click="handleClickCrumb(crumb)">{{crumb}}</a></li>
-                  <li ng-repeat="(index, crumb) in $parent.breadCrumbs" ng-if="index === $parent.breadCrumbs.length - 1" class="breadcrumb-item" aria-current="page">{{crumb}}</li>
+                  <li ng-repeat="(index, crumb) in breadCrumbs" ng-if="index < breadCrumbs.length - 1" class="breadcrumb-item" aria-current="page"><a ng-click="handleClickCrumb(crumb)">{{crumb}}</a></li>
+                  <li ng-repeat="(index, crumb) in breadCrumbs" ng-if="index === breadCrumbs.length - 1" class="breadcrumb-item" aria-current="page">{{crumb}}</li>
                 </ol>
               </nav>
               <div>
-                <button ng-repeat="dir in $parent.directories" class="btn" ng-class="{'btn-primary': dir.name === $parent.directory}" ng-click="handleSelectDir(dir)">{{dir.name}}</button>
+                <button ng-repeat="dir in directories" class="btn" ng-class="{'btn-primary': dir.name === directory}" ng-click="handleSelectDir(dir)">{{dir.name}}</button>
               </div>
             </div>
             <p ng-show="!!files.length">Files:</p>
