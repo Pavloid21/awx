@@ -96,7 +96,7 @@
             </div>
             <div>
                 <p>Branch:</p>
-                <select style="width: 170px" ng-model="$parent.branch" ng-change="getDataBranch()">
+                <select style="width: 170px" ng-model="$parent.branch" ng-change="getDataBranch(0)">
                   <option
                     ng-repeat="branchoption in branches"
                     ng-value="branchoption"
@@ -105,8 +105,8 @@
                 </select>
               </div>
           </div>
-          <div style="margin-top: 10px;">
-            <div ng-repeat="(index, type) in $parent.types">
+          <div style="margin-top: 10px;" ng-show="!!branch">
+            <div ng-repeat="(index, type) in types">
               <h3 ng-show="type.breadCrumbs.length === 1">Type {{ index + 1 }} <button class="btn btn-xs btn-danger" ng-click="removeType(index)">-</button></h3>
               <h3 ng-show="type.breadCrumbs.length > 1">SQLDVM_{{type.breadCrumbs[type.breadCrumbs.length - 2]}} <button class="btn btn-xs btn-danger" ng-click="removeType(index)">-</button></h3>
               <hr/>
@@ -311,7 +311,7 @@
                   <button class="btn btn-xs btn-primary" ng-click="showDifferenceButton(item)"><i class="fa fa-eye"></i> Show</button>
                 </td>
                 <td>
-                  <button class="btn btn-success btn-xs"><i class="fa fa-download"></i> Download</button>
+                  <button class="btn btn-success btn-xs" ng-click="handleDownloadDSLButton(item)"><i class="fa fa-download"></i> Download</button>
                 </td>
               </tr>
             </tbody>

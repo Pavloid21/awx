@@ -10,6 +10,7 @@ import time
 import json
 import logging
 import os
+import shutil
 from requests.auth import HTTPBasicAuth
 
 # Django
@@ -193,6 +194,10 @@ class DownloadDSL(View):
                 return response
         raise Http404
 
+class DownloadDSLArchive(View):
+    def get(self, request, *args, **kwargs):
+        shutil.make_archive(os.path.join(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/', 'archive'), 'zip', os.path.join(settings.MEDIA_ROOT + '/' + request.GET['hash']))
+        return JsonResponse({'path' : os.path.join(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/', 'archive')})
 # Create view functions for all of the class-based views to simplify inclusion
 # in URL patterns and reverse URL lookups, converting CamelCase names to
 # lowercase_with_underscore (e.g. MyView.as_view() becomes my_view).

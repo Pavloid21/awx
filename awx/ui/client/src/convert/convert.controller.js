@@ -16,7 +16,21 @@ export default [
         $scope.directory = ''
         $scope.breadCrumbs = ['root']
         $scope.selectedFiles = [];
-        $scope.types = [];
+        $scope.types = [{
+          path: '*',
+          files: $scope.files,
+          breadCrumbs: ['root'],
+          directories: $scope.directories,
+          attachments: [{
+            attachment: null,
+            file: null,
+            dropdown: false
+          }],
+          targets: [''],
+          deploy_targets: [''],
+          currentPage: 1
+        }];
+        $scope.typesHash = makeid(10);
         $scope.allowGetDSL = false;
         $scope.applied = false;
         $scope.showCompleted = false;
@@ -504,10 +518,6 @@ export default [
         }
 
         $scope.addType = () => {
-          if (!$scope.types.length) {
-            $scope.typesHash = makeid(10);
-          }
-          $scope.getDataBranch()
           $scope.types.push({
             path: '*',
             files: $scope.files,
@@ -518,10 +528,11 @@ export default [
               file: null,
               dropdown: false
             }],
-            targets: [],
+            targets: [''],
             deploy_targets: [''],
             currentPage: 1
           })
+          $scope.getDataBranch($scope.types.length - 1);
         }
 
         $scope.setAttachmentOn = (typeIndex, attachIndex, file) => {
@@ -764,6 +775,30 @@ export default [
             $scope.showPopup = true;
             $scope.showCompleted = false;
           });
+        }
+
+        $scope.handleDownloadDSLButton = (row) => {
+          let hashDir = JSON.parse(row.extra_vars).hash_dir;
+          console.log(hashDir)
+          Wait('start');
+          $http({
+            method: 'GET',
+            url: `diff/downloaddslarc/?hash=${hashDir}`
+          }).then(function success(response) {
+            console.log(response.data);
+            $http({
+              method: 'GET',
+              url: `/diff/download/?hash=${hashDir}&file=archive.zip`
+            }).then(function success(response) {
+              var link = document.createElement("a");
+              link.download = name;
+              link.href = `/diff/download/?hash=${hashDir}&file=archive.zip`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              Wait("stop");
+            })
+          })
         }
     }
 ]

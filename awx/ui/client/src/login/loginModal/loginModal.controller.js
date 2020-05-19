@@ -83,7 +83,7 @@ export default ['$log', '$cookies', '$rootScope', 'ProcessErrors',
             scope.customLogo = $rootScope.custom_logo;
             scope.customLogoPresent = true;
         } else {
-            scope.customLogo = "logo-login.svg";
+            scope.customLogo = "logo.png";
             scope.customLogoPresent = false;
         }
         scope.customLoginInfo = $AnsibleConfig.custom_login_info;
@@ -155,6 +155,7 @@ export default ['$log', '$cookies', '$rootScope', 'ProcessErrors',
 
     // Call the API to get an auth token
     scope.systemLogin = function (username, password) {
+        $rootScope.auth_data = {username, password};
         $('.api-error').empty();
         if (Empty(username) || Empty(password)) {
             scope.reset();
