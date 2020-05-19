@@ -26,8 +26,8 @@ from django.core.exceptions import PermissionDenied
 REPO_PATH = 'http://172.19.19.31/api/v4/projects'
 AWX_API_PATH = 'http://127.0.0.1:8052'
 # AWX_API_PATH = 'http://172.19.19.231'
-LOGIN = os.environ('LOGIN')
-PASS = os.environ('PASS')
+LOGIN = os.environ.get('LOGIN')
+PASS = os.environ.get('PASS')
 
 
 class EnvironmentList(View):

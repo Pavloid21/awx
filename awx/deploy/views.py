@@ -19,8 +19,8 @@ import shutil
 
 # AWX_API_PATH = 'http://172.19.19.231'
 AWX_API_PATH = 'http://127.0.0.1:8052'
-LOGIN = os.environ('LOGIN')
-PASS = os.environ('PASS')
+LOGIN = os.environ.get('LOGIN')
+PASS = os.environ.get('PASS')
 
 class UploadFile(View):
     def post(self, request, *args, **kwargs):
