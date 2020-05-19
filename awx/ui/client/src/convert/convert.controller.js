@@ -612,6 +612,14 @@ export default [
           ) {
             return true;
           }
+          console.log($scope.dslName,
+            $scope.dslVersion,
+            $scope.dslName,
+            $scope.dslAppName,
+            $scope.dslAppVersion,
+            $scope.dslTechPlatform,
+            $scope.dslTechPlatformVersion,
+            $scope.applied)
           return false;
         }
 
