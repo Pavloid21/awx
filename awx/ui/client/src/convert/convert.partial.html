@@ -166,19 +166,19 @@
                   <div>
                     <div ng-repeat="(k, target) in $parent.types[index].targets track by $index">
                       <span>Target:</span>
-                      <input type="text" ng-model="$parent.types[index].targets[k]">
+                      <input type="text" ng-model="$parent.types[index].targets[k]" ng-change="targetChange()">
                       <button class="btn btn-xs btn-danger" ng-click="removeTarget(index, k)">-</button>
                     </div>
                     <button class="btn btn-xs btn-primary" ng-click="addDeployTargetRow(index)">+</button>
                   </div>
                   <label>Artefact version:</label>
-                  <input type="text" ng-model="$parent.types[index].artefact_version">
+                  <input type="text" ng-model="$parent.types[index].artefact_version" ng-change="artifactVersionChanged()">
                 </div>
               </div>
             </div>
             <button class="btn btn-success" ng-click="addType()" ng-show="!!branch">Add Type</button>
-            <button class="btn btn-primary" ng-click="getDifference()" ng-show="!!branch && !!types.length && $parent.allowShowDifference()">Show difference</button>
-            <button class="btn btn-primary" disabled ng-show="!!branch && !!types.length && !$parent.allowShowDifference()">Show difference</button>
+            <button class="btn btn-primary" ng-click="getDifference()" ng-show="!!branch && !!types.length && isAllowShowDifference">Show difference</button>
+            <button class="btn btn-primary" disabled ng-show="!!branch && !!types.length && !isAllowShowDifference">Show difference</button>
             <hr/>
             <div class="DashboardGraphs" ng-show="!!branch" style="padding-bottom: 15px;">
               <p>
@@ -234,8 +234,8 @@
                   </td>
                 </tr>
               </table>
-              <button style="margin-top: 15px;" class="btn btn-primary" ng-show="$parent.allowGetDSL" ng-click="getChangedDSL()">Commit & Get changed DSL</button>
-              <button style="margin-top: 15px;" class="btn btn-primary" disabled ng-show="!$parent.allowGetDSL">Commit & Get changed DSL</button>
+              <button style="margin-top: 15px;" class="btn btn-primary" ng-show="allowGetDSL" ng-click="getChangedDSL()">Commit & Get changed DSL</button>
+              <button style="margin-top: 15px;" class="btn btn-primary" disabled ng-show="!allowGetDSL">Commit & Get changed DSL</button>
             </div>
           </div>
       </div>

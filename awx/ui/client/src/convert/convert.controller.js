@@ -206,6 +206,7 @@ export default [
                 $scope.types[typeIndex].attachments[attachIndex].attachment = $rootScope.configFileName.url.replace(`/media/${$scope.typesHash}/edited_xlsx/`,'');
               }
               $scope.errors = null;
+              $scope.allowShowDifference();
               Wait("stop");
             },
             function (r) {
@@ -458,11 +459,22 @@ export default [
             })
         }
 
+        $scope.targetChange = () => {
+          $scope.allowShowDifference();
+        }
+
         $scope.allowShowDifference = () => {
           let flag = [];
           $scope.types.forEach(type => {
             if (!type.targets.length || !type.artefact_version) {
               flag.push(false);
+            }
+            if (type.targets.length) {
+              type.targets.forEach(target => {
+                if (target === '') {
+                  flag.push(false)
+                }
+              })
             }
             if (type.attachments.length < 1) {
               flag.push(false);
@@ -476,7 +488,7 @@ export default [
               })
             }
           })
-          return !flag.includes(false);
+          $scope.isAllowShowDifference = !flag.includes(false);
         }
 
         $scope.handleSearch = () => {
@@ -537,6 +549,7 @@ export default [
 
         $scope.setAttachmentOn = (typeIndex, attachIndex, file) => {
           $scope.types[typeIndex].attachments[attachIndex].file = file;
+          $scope.allowShowDifference();
           $scope.openDropdown(typeIndex, attachIndex);
         }
 
@@ -545,11 +558,17 @@ export default [
             attachment: null,
             file: null,
             dropdown: false
-          })
+          });
+          $scope.allowShowDifference();
         }
 
         $scope.addDeployTargetRow = (typeIndex) => {
           $scope.types[typeIndex].targets.push('');
+          $scope.allowShowDifference();
+        }
+
+        $scope.artifactVersionChanged = () => {
+          $scope.allowShowDifference();
         }
 
         $scope.pushNextPageFiles = (typeIndex, attachIndex) => {
@@ -639,10 +658,12 @@ export default [
 
         $scope.removeAttach = (typeIndex, attachIndex) => {
           $scope.types[typeIndex].attachments.splice(attachIndex, 1);
+          $scope.allowShowDifference();
         }
 
         $scope.removeTarget = (typeIndex, targetIndex) => {
           $scope.types[typeIndex].targets.splice(targetIndex, 1);
+          $scope.allowShowDifference();
           
         }
 
