@@ -166,7 +166,7 @@
                   <div>
                     <div ng-repeat="(k, target) in $parent.types[index].targets track by $index">
                       <span>Target:</span>
-                      <input type="text" ng-model="$parent.types[index].targets[k]" ng-change="targetChange()">
+                      <input type="text" ng-model="$parent.types[index].targets[k]" style="min-width: 300px;" ng-change="targetChange()">
                       <button class="btn btn-xs btn-danger" ng-click="removeTarget(index, k)">-</button>
                     </div>
                     <button class="btn btn-xs btn-primary" ng-click="addDeployTargetRow(index)">+</button>
@@ -190,7 +190,7 @@
                     <label>Name</label>
                   </td>
                   <td>
-                    <input type="text" ng-model="$parent.dslName">
+                    <input type="text" ng-model="$parent.dslName" ng-change="checkMainFields()">
                   </td>
                 </tr>
                 <tr>
@@ -198,7 +198,7 @@
                     <label>Version</label>
                   </td>
                   <td>
-                    <input type="text" ng-model="$parent.dslVersion">
+                    <input type="text" ng-model="$parent.dslVersion" ng-change="checkMainFields()">
                   </td>
                 </tr>
                 <tr>
@@ -206,7 +206,7 @@
                     <label>appName</label>
                   </td>
                   <td>
-                    <input type="text" ng-model="$parent.dslAppName">
+                    <input type="text" ng-model="$parent.dslAppName" ng-change="checkMainFields()">
                   </td>
                 </tr>
                 <tr>
@@ -214,7 +214,7 @@
                     <label>appVersion</label>
                   </td>
                   <td>
-                    <input type="text" ng-model="$parent.dslAppVersion">
+                    <input type="text" ng-model="$parent.dslAppVersion" ng-change="checkMainFields()">
                   </td>
                 </tr>
                 <tr>
@@ -222,7 +222,7 @@
                     <label>techPlatform</label>
                   </td>
                   <td>
-                    <input type="text" ng-model="$parent.dslTechPlatform">
+                    <input type="text" ng-model="$parent.dslTechPlatform" ng-change="checkMainFields()">
                   </td>
                 </tr>
                 <tr>
@@ -230,7 +230,7 @@
                     <label>techPlatformVersion</label>
                   </td>
                   <td>
-                    <input type="text" ng-model="$parent.dslTechPlatformVersion">
+                    <input type="text" ng-model="$parent.dslTechPlatformVersion" ng-change="checkMainFields()">
                   </td>
                 </tr>
               </table>

@@ -156,7 +156,7 @@ app.get('/git/api/:repo/:branch/files/:search/:path/:nopaginate/', (req, res) =>
       eventEmitter.on('end', (trees) => {
         if (search !== '*') {
           let findedList = fileList.filter(item => {
-            return item.indexOf(search) >= 0 && item.indexOf(basePath) >= 0
+            return item.indexOf(search) >= 0 && item.indexOf(basePath) >= 0 && item.replace(basePath + '/', '').indexOf('/') < 0
           })
           res.json({
             count: findedList.length,
@@ -203,7 +203,7 @@ app.post('/git/api/:repo/:branch/files/:search/', (req, res) => {
       eventEmitter.on('end', (trees) => {
         if (search !== '*') {
           let findedList = fileList.filter(item => {
-            return item.indexOf(search) >= 0 && item.indexOf(path) >= 0
+            return item.indexOf(search) >= 0 && item.indexOf(path) >= 0 && item.replace(path + '/', '').indexOf('/') < 0
           })
           res.json({
             count: findedList.length,
