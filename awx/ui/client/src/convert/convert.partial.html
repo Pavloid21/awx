@@ -352,8 +352,9 @@
               Ok
             </button>
             <button class="btn btn-primary" ng-click="confirmChanges()" ng-if="!showCompleted">
-              <i class="fa fa-play-circle"></i>
-              Apply
+              <i class="fa fa-play-circle" ng-show="displayView !== 'history'"></i>
+              <span ng-show="displayView !== 'history'">Apply</span>
+              <span ng-show="displayView === 'history'">Ok</span>
             </button>
           </div>
         </div>
