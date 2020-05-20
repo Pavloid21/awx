@@ -631,6 +631,7 @@ export default [
             !!$scope.DSL.dslTechPlatformVersion &&
             $scope.applied
           ) {
+            $scope.allowGetDSL = true
             return true;
           }
           console.log($scope.DSL.dslName,
@@ -641,6 +642,7 @@ export default [
             $scope.DSL.dslTechPlatform,
             $scope.DSL.dslTechPlatformVersion,
             $scope.applied)
+          $scope.allowGetDSL = false;
           return false;
         }
 
