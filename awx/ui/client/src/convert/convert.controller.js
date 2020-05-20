@@ -14,6 +14,7 @@ export default [
         $scope.displayView = 'sql2excel'
         $scope.searchString = ''
         $scope.directory = ''
+        $scope.DSL = {};
         $scope.breadCrumbs = ['root']
         $scope.selectedFiles = [];
         $scope.types = [{
@@ -248,7 +249,7 @@ export default [
             }).then(function success(response) {
               Wait('stop');
               $scope.job = response.data;
-              // $scope.job.id = 1405;
+              // $scope.job.id = 1576;
               let requestJob = () => {
                 Wait('start')
                 $http({
@@ -368,14 +369,14 @@ export default [
                 } else {
                   newCrumbs.push(item)
                 }
-                let crumbsPath = newCrumbs.join('/');
-                crumbsPath = crumbsPath.replace('root/', '');
-                if (crumbsPath.indexOf('root') >= 0) {
-                  crumbsPath = crumbsPath.replace('root', '*');
-                }
-                $scope.types[typeIndex].path = crumbsPath;
-                $scope.getDataBranch(typeIndex);
               })
+              let crumbsPath = newCrumbs.join('/');
+              crumbsPath = crumbsPath.replace('root/', '');
+              if (crumbsPath.indexOf('root') >= 0) {
+                crumbsPath = crumbsPath.replace('root', '*');
+              }
+              $scope.types[typeIndex].path = crumbsPath;
+              $scope.getDataBranch(typeIndex);
             } catch(e) {
               let crumbsPath = newCrumbs.join('/');
               crumbsPath = crumbsPath.replace('root/', '');
@@ -525,7 +526,6 @@ export default [
             }
         }).then(function success(response) {
           $scope.types[typeIndex].files = response.data.files;
-          $scope.types[typeIndex].directories = response.data.directories;
         })
         }
 
@@ -579,18 +579,20 @@ export default [
         }
 
         $scope.openDropdown = (typeIndex, attachIndex) => {
+          $scope.types[typeIndex].searchString = '';
+          $scope.getDataBranch(typeIndex);
           $scope.types[typeIndex].attachments[attachIndex].dropdown = !$scope.types[typeIndex].attachments[attachIndex].dropdown;
         }
 
         let buildData = () => {
           let data = {
             dsl: {
-              name: $scope.dslName,
-              appName: $scope.dslAppName,
-              appVersion: $scope.dslAppVersion,
-              techPlatform: $scope.dslTechPlatform,
-              techPlatformVersion: $scope.dslTechPlatformVersion,
-              version: $scope.dslVersion,
+              name: $scope.DSL.dslName,
+              appName: $scope.DSL.dslAppName,
+              appVersion: $scope.DSL.dslAppVersion,
+              techPlatform: $scope.DSL.dslTechPlatform,
+              techPlatformVersion: $scope.DSL.dslTechPlatformVersion,
+              version: $scope.DSL.dslVersion,
             },
             items: []
           };
@@ -618,33 +620,33 @@ export default [
           $scope.handleConvertExcel(data, $scope.typesHash);
         }
 
-        const checkMainFields = () => {
+        $scope.checkMainFields = () => {
           if (
-            $scope.dslName &&
-            $scope.dslVersion &&
-            $scope.dslName &&
-            $scope.dslAppName &&
-            $scope.dslAppVersion &&
-            $scope.dslTechPlatform &&
-            $scope.dslTechPlatformVersion &&
+            !!$scope.DSL.dslName &&
+            !!$scope.DSL.dslVersion &&
+            !!$scope.DSL.dslName &&
+            !!$scope.DSL.dslAppName &&
+            !!$scope.DSL.dslAppVersion &&
+            !!$scope.DSL.dslTechPlatform &&
+            !!$scope.DSL.dslTechPlatformVersion &&
             $scope.applied
           ) {
             return true;
           }
-          console.log($scope.dslName,
-            $scope.dslVersion,
-            $scope.dslName,
-            $scope.dslAppName,
-            $scope.dslAppVersion,
-            $scope.dslTechPlatform,
-            $scope.dslTechPlatformVersion,
+          console.log($scope.DSL.dslName,
+            $scope.DSL.dslVersion,
+            $scope.DSL.dslName,
+            $scope.DSL.dslAppName,
+            $scope.DSL.dslAppVersion,
+            $scope.DSL.dslTechPlatform,
+            $scope.DSL.dslTechPlatformVersion,
             $scope.applied)
           return false;
         }
 
         $scope.confirmChanges = () => {
           $scope.applied = true;
-          $scope.allowGetDSL = checkMainFields();
+          $scope.allowGetDSL = $scope.checkMainFields();
           $scope.closePopup();
         }
 
