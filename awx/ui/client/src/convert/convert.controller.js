@@ -929,9 +929,9 @@ export default [
           Wait('start')
           $http({
             method: "GET",
-            url: `/diff/final/?job=${row.id}&status=successful&page=3`//scope.job.id
+            url: `/api/v2/jobs/${row.id}/job_events/?page=3`
           }).then(function success(response) {
-            $scope.compareData = response.data.compare.results.find(
+            $scope.compareData = response.data.results.find(
               res => {
                 if (
                   res.task.indexOf("Try compare") >=
