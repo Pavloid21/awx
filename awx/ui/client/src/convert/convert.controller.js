@@ -841,61 +841,129 @@ export default [
             let branch = $scope.branch.split('/').join('.')
             $http({
               method: 'POST',
-              url: `deploy/getdsl/?repo=${$scope.env}&branch=${branch}&hash=${$scope.typesHash}`,
+              url: `/api/v2/job_templates/${$scope.sysenv['COMMIT_DSL']}/launch/`,
               data: {
-                reponame: $scope.env,
-                branch: branch,
-                hash: $scope.typesHash
+                extra_vars: {
+                  git_vars: {
+                    repo_name: $scope.env,
+                    branch: branch
+                  },
+                  hash_dir: $scope.typesHash
+                }
               }
             })
-            .then(function success(response) {
-              if (response.data.status === 'failed') {
-                $scope.final = { status: 'failed', job: response.data.job }
-              } else {
-                $scope.job = response.data.id;
-                console.log($scope.job)
-                let requestJob = () => {
-                    $http({
-                      method: "GET",
-                      url: `/diff/results/?job=${$scope.job}`
-                    }).then(function success(response) {
-                      if (
-                        response.data.status !== "successful" &&
-                        response.data.status !== "failed"
-                      ) {
-                        setTimeout(() => requestJob(), 4 * 1000);
-                      } else if (response.data.status === "failed") {
-                        $scope.final = {
-                          status: "failed",
-                          job: $scope.job
-                        };
-                        Wait("stop");
-                      } else {
-                        $http({
-                          method: "GET",
-                          url: `/diff/getDSLfinal/?job=${$scope.job}&status=successful`
-                        }).then(function success(response) {
-                          $http({
-                            method: 'GET',
-                            url: `/diff/download/?hash=${$scope.typesHash}&file=${data.dsl.name}_jenkins.dsl`,
-                          }).then(function success(response) {
-                            var link = document.createElement("a");
-                            link.download = name;
-                            link.href = `/diff/download/?hash=${$scope.typesHash}&file=${data.dsl.name}_jenkins.dsl`;
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                            $scope.showPopup = true;
-                            $scope.showCompleted = true;
-                          })
+            .then(function success(launchResponse) {
+              $http({
+                method: 'GET',
+                url: `/api/v2/jobs/${launchResponse.data.job}/`
+              })
+              .then(function success(jobResponse) {
+                if (jobResponse.data.status === 'failed') {
+                  $scope.final = { status: 'failed', job: jobResponse.data.job }
+                } else {
+                  $scope.job = jobResponse.data.id;
+                  console.log($scope.job)
+                  let requestJob = () => {
+                      $http({
+                        method: "GET",
+                        url: `/api/v2/jobs/${$scope.job}/job_events/?page=2`
+                      }).then(function success(response) {
+                        if (
+                          response.data.status !== "successful" &&
+                          response.data.status !== "failed"
+                        ) {
+                          setTimeout(() => requestJob(), 4 * 1000);
+                        } else if (response.data.status === "failed") {
+                          $scope.final = {
+                            status: "failed",
+                            job: $scope.job
+                          };
                           Wait("stop");
-                        });
-                      }
-                    });
-                  };
-                  requestJob();
-              }
+                        } else {
+                          $http({
+                            method: "GET",
+                            url: `/api/v2/jobs/${$scope.job}/job_events/?page=2`
+                          }).then(function success(response) {
+                            $http({
+                              method: 'GET',
+                              url: `/diff/download/?hash=${$scope.typesHash}&file=${data.dsl.name}_jenkins.dsl`,
+                            }).then(function success(response) {
+                              var link = document.createElement("a");
+                              link.download = name;
+                              link.href = `/diff/download/?hash=${$scope.typesHash}&file=${data.dsl.name}_jenkins.dsl`;
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                              $scope.showPopup = true;
+                              $scope.showCompleted = true;
+                            })
+                            Wait("stop");
+                          });
+                        }
+                      });
+                    };
+                    requestJob();
+                }
+              })
             })
+
+            // $http({
+            //   method: 'POST',
+            //   url: `deploy/getdsl/?repo=${$scope.env}&branch=${branch}&hash=${$scope.typesHash}`,
+            //   data: {
+            //     reponame: $scope.env,
+            //     branch: branch,
+            //     hash: $scope.typesHash
+            //   }
+            // })
+            // .then(function success(response) {
+            //   if (response.data.status === 'failed') {
+            //     $scope.final = { status: 'failed', job: response.data.job }
+            //   } else {
+            //     $scope.job = response.data.id;
+            //     console.log($scope.job)
+            //     let requestJob = () => {
+            //         $http({
+            //           method: "GET",
+            //           url: `/diff/results/?job=${$scope.job}`
+            //         }).then(function success(response) {
+            //           if (
+            //             response.data.status !== "successful" &&
+            //             response.data.status !== "failed"
+            //           ) {
+            //             setTimeout(() => requestJob(), 4 * 1000);
+            //           } else if (response.data.status === "failed") {
+            //             $scope.final = {
+            //               status: "failed",
+            //               job: $scope.job
+            //             };
+            //             Wait("stop");
+            //           } else {
+            //             $http({
+            //               method: "GET",
+            //               url: `/diff/getDSLfinal/?job=${$scope.job}&status=successful`
+            //             }).then(function success(response) {
+            //               $http({
+            //                 method: 'GET',
+            //                 url: `/diff/download/?hash=${$scope.typesHash}&file=${data.dsl.name}_jenkins.dsl`,
+            //               }).then(function success(response) {
+            //                 var link = document.createElement("a");
+            //                 link.download = name;
+            //                 link.href = `/diff/download/?hash=${$scope.typesHash}&file=${data.dsl.name}_jenkins.dsl`;
+            //                 document.body.appendChild(link);
+            //                 link.click();
+            //                 document.body.removeChild(link);
+            //                 $scope.showPopup = true;
+            //                 $scope.showCompleted = true;
+            //               })
+            //               Wait("stop");
+            //             });
+            //           }
+            //         });
+            //       };
+            //       requestJob();
+            //   }
+            // })
           })
         }
 
