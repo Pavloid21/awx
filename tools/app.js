@@ -102,6 +102,10 @@ app.get('/git/api/clone/', (req, res) => {
   })
 });
 
+app.get('/git/api/env/', (req, res) => {
+  res.json(process.env)
+})
+
 //GET REPOS
 app.get('/git/api/repos/', (req, res) => {
   res.json({

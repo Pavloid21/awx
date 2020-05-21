@@ -84,6 +84,14 @@ export default [
               console.log(reason)
           })
         })
+        Wait('start');
+        $http({
+          method: 'GET',
+          url: '/git/api/env/'
+        }).then(function success(response) {
+          $scope.sysenv = response.data;
+          Wait('stop')
+        })
 
         $scope.switchView = (view) => {
             $scope.displayView = view;
@@ -240,77 +248,155 @@ export default [
             let branch = $scope.branch.replace('/', '.')
             $http({
               method: 'POST',
-              url: '/deploy/convertdiff/',
+              url: `/api/v2/job_templates/${$scope.env['CONVERT_DICT_JOB_ID']}/launch`,
               data: {
-                reponame: $scope.env,
-                branch: branch,
-                hash: $scope.typesHash
+                extra_vars: {
+                  git_vars: {
+                    repo_name: $scope.env,
+                    branch: branch
+                  },
+                  hash_dir: $scope.typesHash
+                }
               }
-            }).then(function success(response) {
-              Wait('stop');
-              $scope.job = response.data;
-              // $scope.job.id = 1576;
-              let requestJob = () => {
-                Wait('start')
-                $http({
-                  method: "GET",
-                  url: `/diff/results/?job=${$scope.job.id}`
-                }).then(function success(response) {
-                  if (
-                    response.data.status !== "successful" &&
-                    response.data.status !== "failed"
-                  ) {
-                    setTimeout(() => requestJob(), 30 * 1000);
-                  } else if (response.data.status === "failed") {
-                    $scope.final = {
-                      status: "failed",
-                      job: $scope.job.id
-                    };
-                    Wait("stop");
-                  } else {
-                    $http({
-                      method: "GET",
-                      url: `/diff/final/?job=${$scope.job.id}&status=successful&page=3`//scope.job.id
-                    }).then(function success(response) {
-                      $scope.compareData = response.data.compare.results.find(
-                        res => {
-                          if (
-                            res.task.indexOf("Try compare") >=
-                              0 &&
-                            !!res.event_data.res
-                          ) {
-                            return true;
-                          }
-                          return false;
-                        }
-                      );
-                      let colRowArr = $scope.compareData.event_data.res.stdout_lines.map(item => {
-                        return item.split('|')
-                      })
-                      let maxLength = Math.max.apply(null, colRowArr.map(col => col.length))
-                      let arr = colRowArr.map((col, index) => {
-                        if (col.length < maxLength) {
-                          let temp = col;
-                          let iterations = maxLength - col.length;
-                          for (let k = 0; k < iterations; k++) {
-                            temp.push('')
-                          }
-                          return temp
-                        }
-                        return col
-                      })
-                      $scope.final = arr;
+            }).then(function success(launchResponse) {
+              $http({
+                method: 'GET',
+                url: `/api/v2/jobs/${launchResponse.data.job}/`
+              }).then(function success(jobResponse) {
+                $scope.job = jobResponse.data;
+                let requestJob = () => {
+                  $http({
+                    method: "GET",
+                    url: `/api/v2/jobs/${$scope.job.id}/`
+                  }).then(function success(response) {
+                    if (
+                      response.data.status !== "successful" &&
+                      response.data.status !== "failed"
+                    ) {
+                      setTimeout(() => requestJob(), 30 * 1000);
+                    } else if (response.data.status === "failed") {
+                      $scope.final = {
+                        status: "failed",
+                        job: $scope.job.id
+                      };
                       Wait("stop");
-                      $scope.showPopup = true;
-                      $scope.showCompleted = false;
-                    });
-                  }
-                }, () => {
-                  Wait('stop')
-                });
-              };
-              requestJob();
+                    } else {
+                      $http({
+                        method: "GET",
+                        url: `/api/v2/jobs/${$scope.job.id}/job_events/?page=3`
+                      }).then(function success(response) {
+                        $scope.compareData = response.data.results.find(
+                          res => {
+                            if (
+                              res.task.indexOf("Try compare") >=
+                                0 &&
+                              !!res.event_data.res
+                            ) {
+                              return true;
+                            }
+                            return false;
+                          }
+                        );
+                        let colRowArr = $scope.compareData.event_data.res.stdout_lines.map(item => {
+                          return item.split('|')
+                        })
+                        let maxLength = Math.max.apply(null, colRowArr.map(col => col.length))
+                        let arr = colRowArr.map((col, index) => {
+                          if (col.length < maxLength) {
+                            let temp = col;
+                            let iterations = maxLength - col.length;
+                            for (let k = 0; k < iterations; k++) {
+                              temp.push('')
+                            }
+                            return temp
+                          }
+                          return col
+                        })
+                        $scope.final = arr;
+                        Wait("stop");
+                        $scope.showPopup = true;
+                        $scope.showCompleted = false;
+                      });
+                    }
+                  }, () => {
+                    Wait('stop')
+                  });
+                };
+              })
             })
+            // $http({
+            //   method: 'POST',
+            //   url: '/deploy/convertdiff/',
+            //   data: {
+            //     reponame: $scope.env,
+            //     branch: branch,
+            //     hash: $scope.typesHash
+            //   }
+            // }).then(function success(response) {
+            //   // Wait('stop');
+            //   $scope.job = response.data;
+            //   // $scope.job.id = 1576;
+            //   let requestJob = () => {
+            //     // Wait('start')
+            //     $http({
+            //       method: "GET",
+            //       url: `/diff/results/?job=${$scope.job.id}`
+            //     }).then(function success(response) {
+            //       if (
+            //         response.data.status !== "successful" &&
+            //         response.data.status !== "failed"
+            //       ) {
+            //         setTimeout(() => requestJob(), 30 * 1000);
+            //       } else if (response.data.status === "failed") {
+            //         $scope.final = {
+            //           status: "failed",
+            //           job: $scope.job.id
+            //         };
+            //         Wait("stop");
+            //       } else {
+            //         $http({
+            //           method: "GET",
+            //           url: `/diff/final/?job=${$scope.job.id}&status=successful&page=3`//scope.job.id
+            //         }).then(function success(response) {
+            //           $scope.compareData = response.data.compare.results.find(
+            //             res => {
+            //               if (
+            //                 res.task.indexOf("Try compare") >=
+            //                   0 &&
+            //                 !!res.event_data.res
+            //               ) {
+            //                 return true;
+            //               }
+            //               return false;
+            //             }
+            //           );
+            //           let colRowArr = $scope.compareData.event_data.res.stdout_lines.map(item => {
+            //             return item.split('|')
+            //           })
+            //           let maxLength = Math.max.apply(null, colRowArr.map(col => col.length))
+            //           let arr = colRowArr.map((col, index) => {
+            //             if (col.length < maxLength) {
+            //               let temp = col;
+            //               let iterations = maxLength - col.length;
+            //               for (let k = 0; k < iterations; k++) {
+            //                 temp.push('')
+            //               }
+            //               return temp
+            //             }
+            //             return col
+            //           })
+            //           $scope.final = arr;
+            //           Wait("stop");
+            //           $scope.showPopup = true;
+            //           $scope.showCompleted = false;
+            //         });
+            //       }
+            //     }, () => {
+            //       Wait('stop')
+            //     });
+            //   };
+            //   requestJob();
+            // })
           })
         }
 
@@ -405,58 +491,127 @@ export default [
               let branch = $scope.branch.replace('/', '.')
               let url = `diff/convert/?repo=${$scope.env.replace('.git', '')}&branch=${branch}&hash=${hash}`;
               Wait('start')
+
               $http({
-                  method: 'POST',
-                  url: url,
-              })
-              .then(function success(response) {
-                  if (response.data.status === 'failed') {
-                      $scope.final = { status: 'failed', job: response.data.job }
-                  } else {
-                      $scope.job = response.data.id;
-                      let requestJob = () => {
-                          $http({
-                            method: "GET",
-                            url: `/diff/results/?job=${$scope.job}`
-                          }).then(function success(response) {
-                            if (
-                              response.data.status !== "successful" &&
-                              response.data.status !== "failed"
-                            ) {
-                              setTimeout(() => requestJob(), 4 * 1000);
-                            } else if (response.data.status === "failed") {
-                              $scope.final = {
-                                status: "failed",
-                                job: $scope.job
-                              };
-                              Wait("stop");
-                            } else {
-                              $http({
-                                method: "GET",
-                                url: `/diff/cnvfinal/?job=${$scope.job}&status=successful`
-                              }).then(function success(response) {
-                                $http({
-                                  method: 'GET',
-                                  url: `/diff/download/?hash=${hash}&file=converted_xlsx.tar.gz`
-                                }).then(function success(response) {
-                                  console.log(response)
-                                  var link = document.createElement("a");
-                                  link.download = name;
-                                  link.href = `/diff/download/?hash=${hash}&file=converted_xlsx.tar.gz`;
-                                  document.body.appendChild(link);
-                                  link.click();
-                                  document.body.removeChild(link);
-                                  $scope.showPopup = true;
-                                  $scope.showCompleted = true;
-                                })
-                                Wait("stop");
-                              });
-                            }
-                          });
-                        };
-                        requestJob();
+                method: 'POST',
+                url: `/api/v2/job_templates/${$scope.sysenv['CONVERT_XLSX_JOB_ID']}/launch/`,
+                data: {
+                  extra_vars: {
+                    git_vars: {
+                      repo_name: $scope.env,
+                      branch: branch
+                    },
+                    hash_dir: $scope.typesHash
                   }
-              })            
+                }
+              }).then(function success(launchResponse) {
+                $http({
+                  method: 'GET',
+                  url: `/api/v2/jobs/${launchResponse.data.job}/`
+                })
+                .then(function success(jobResponse) {
+                  if (jobResponse.data.status === 'failed') {
+                    $scope.final = { status: 'failed', job: jobResponse.data.job }
+                } else {
+                    $scope.job = jobResponse.data.id;
+                    let requestJob = () => {
+                        $http({
+                          method: "GET",
+                          url: `/api/v2/jobs/${$scope.job}/`
+                        }).then(function success(response) {
+                          if (
+                            response.data.status !== "successful" &&
+                            response.data.status !== "failed"
+                          ) {
+                            setTimeout(() => requestJob(), 4 * 1000);
+                          } else if (response.data.status === "failed") {
+                            $scope.final = {
+                              status: "failed",
+                              job: $scope.job
+                            };
+                            Wait("stop");
+                          } else {
+                            $http({
+                              method: "GET",
+                              url: `/api/v2/jobs/${$scope.job}/job_events/?page=1`
+                              // url: `/diff/cnvfinal/?job=${$scope.job}&status=successful`
+                            }).then(function success(response) {
+                              $http({
+                                method: 'GET',
+                                url: `/diff/download/?hash=${hash}&file=converted_xlsx.tar.gz`
+                              }).then(function success(response) {
+                                console.log(response)
+                                var link = document.createElement("a");
+                                link.download = name;
+                                link.href = `/diff/download/?hash=${hash}&file=converted_xlsx.tar.gz`;
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                                $scope.showPopup = true;
+                                $scope.showCompleted = true;
+                              })
+                              Wait("stop");
+                            });
+                          }
+                        });
+                      };
+                      requestJob();
+                }
+                })
+              })
+
+              // $http({
+              //     method: 'POST',
+              //     url: url,
+              // })
+              // .then(function success(response) {
+              //     if (response.data.status === 'failed') {
+              //         $scope.final = { status: 'failed', job: response.data.job }
+              //     } else {
+              //         $scope.job = response.data.id;
+              //         let requestJob = () => {
+              //             $http({
+              //               method: "GET",
+              //               url: `/diff/results/?job=${$scope.job}`
+              //             }).then(function success(response) {
+              //               if (
+              //                 response.data.status !== "successful" &&
+              //                 response.data.status !== "failed"
+              //               ) {
+              //                 setTimeout(() => requestJob(), 4 * 1000);
+              //               } else if (response.data.status === "failed") {
+              //                 $scope.final = {
+              //                   status: "failed",
+              //                   job: $scope.job
+              //                 };
+              //                 Wait("stop");
+              //               } else {
+              //                 $http({
+              //                   method: "GET",
+              //                   url: `/diff/cnvfinal/?job=${$scope.job}&status=successful`
+              //                 }).then(function success(response) {
+              //                   $http({
+              //                     method: 'GET',
+              //                     url: `/diff/download/?hash=${hash}&file=converted_xlsx.tar.gz`
+              //                   }).then(function success(response) {
+              //                     console.log(response)
+              //                     var link = document.createElement("a");
+              //                     link.download = name;
+              //                     link.href = `/diff/download/?hash=${hash}&file=converted_xlsx.tar.gz`;
+              //                     document.body.appendChild(link);
+              //                     link.click();
+              //                     document.body.removeChild(link);
+              //                     $scope.showPopup = true;
+              //                     $scope.showCompleted = true;
+              //                   })
+              //                   Wait("stop");
+              //                 });
+              //               }
+              //             });
+              //           };
+              //           requestJob();
+              //     }
+              // })            
             })
         }
 
