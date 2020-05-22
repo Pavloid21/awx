@@ -884,19 +884,25 @@ export default [
                             method: "GET",
                             url: `/api/v2/jobs/${$scope.job}/job_events/?page=2`
                           }).then(function success(response) {
-                            $http({
-                              method: 'GET',
-                              url: `/diff/download/?hash=${$scope.typesHash}&file=${data.dsl.name}_jenkins.dsl`,
-                            }).then(function success(response) {
-                              var link = document.createElement("a");
-                              link.download = name;
-                              link.href = `/diff/download/?hash=${$scope.typesHash}&file=${data.dsl.name}_jenkins.dsl`;
-                              document.body.appendChild(link);
-                              link.click();
-                              document.body.removeChild(link);
-                              $scope.showPopup = true;
-                              $scope.showCompleted = true;
+                            let objString = JSON.stringify({
+                              extra_vars: {
+                                hash_dir: $scope.typesHash
+                              }
                             })
+                            $scope.handleDownloadDSLButton(objString)
+                            // $http({
+                            //   method: 'GET',
+                            //   url: `/diff/download/?hash=${$scope.typesHash}&file=${data.dsl.name}_jenkins.dsl`,
+                            // }).then(function success(response) {
+                            //   var link = document.createElement("a");
+                            //   link.download = name;
+                            //   link.href = `/diff/download/?hash=${$scope.typesHash}&file=${data.dsl.name}_jenkins.dsl`;
+                            //   document.body.appendChild(link);
+                            //   link.click();
+                            //   document.body.removeChild(link);
+                            //   $scope.showPopup = true;
+                            //   $scope.showCompleted = true;
+                            // })
                             Wait("stop");
                           });
                         }
