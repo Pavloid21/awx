@@ -318,6 +318,18 @@ export default [
                             return false;
                           }
                         );
+                        $scope.commitData = response.data.results.find(
+                          res => {
+                            if (
+                              res.task.indexOf("Push to git") >=
+                                0 &&
+                              !!res.event_data.res
+                            ) {
+                              return true;
+                            }
+                            return false;
+                          }
+                        );
                         let colRowArr = $scope.compareData.event_data.res.stdout_lines.map(item => {
                           return item.split('|')
                         })
@@ -333,6 +345,7 @@ export default [
                           }
                           return col
                         })
+                        $scope.commitStrings = $scope.commitData.event_data.res.stdout_lines;
                         $scope.final = arr;
                         Wait("stop");
                         $scope.showPopup = true;

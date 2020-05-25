@@ -335,6 +335,11 @@
               <div>
                 Convert completed!
               </div>
+              <div class="DashboardGraphs" ng-show="commitData">
+                <div ng-repeat="str in commitData">
+                  {{str}}
+                </div>
+              </div>
             </div>
             <div style="overflow: auto; max-height: 400px;" ng-if="!showCompleted">
               <table class="table">
