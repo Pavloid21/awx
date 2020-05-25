@@ -62,7 +62,7 @@ let walkTree = (dir, fileList) => {
     fileList.forEach(item => {
       let re = `^(.*?)${dir}/`
       let regexp = new RegExp(re, 'is')
-      if (item.indexOf(dir + '/') >= 0) {
+      if (item.indexOf(dir) >= 0) {
         list.push(item.replace(regexp,''))
       }
     })
@@ -70,7 +70,6 @@ let walkTree = (dir, fileList) => {
       return item.replace((dir + '/'), '')
     })
   }
-  console.log(resultList)
   let RepoTree = pathListToTree.default(resultList)
   let filesArr = [];
   let directories = [];
@@ -135,7 +134,6 @@ app.get('/git/api/:repo/branches/', (req, res) => {
 });
 
 // GET FILES
-// WARNING! Includes files inside subdirectories
 app.get('/git/api/:repo/:branch/files/:search/:path/:nopaginate/', (req, res) => {
   const { repo , branch, search, nopaginate = 'nopagi', path } = req.params;
   const { sheet = 1 , page, page_size = 20 } = req.query;
@@ -158,9 +156,17 @@ app.get('/git/api/:repo/:branch/files/:search/:path/:nopaginate/', (req, res) =>
         fileList.push(en.path())
       })
       eventEmitter.on('end', (trees) => {
+        let whichRoot = fileList.filter(item => {
+          return item.indexOf('EDM/VTB24/SQLDVM') >= 0
+        })
+        if (whichRoot.length > 0 && basePath !== '*') {
+          basePath = 'EDM/VTB24/SQLDVM/' + basePath.replace('*', '')
+        } else {
+          basePath = 'EDM/VTB24/SQLDVM'
+        }
         if (search !== '*') {
           let findedList = fileList.filter(item => {
-            return item.indexOf(search) >= 0 && item.indexOf(basePath) >= 0 && item.replace(basePath + '/', '').indexOf('/') < 0
+            return item.indexOf(search) >= 0 && item.indexOf(basePath) >= 0 && item.replace(basePath, '').indexOf('/') < 0
           })
           res.json({
             count: findedList.length,
@@ -191,6 +197,7 @@ app.post('/git/api/:repo/:branch/files/:search/', (req, res) => {
   const { sheet = 1 , page, page_size = 20 } = req.query;
   let pageNum = page || sheet;
   let br = branch.replace('.', '/');
+  let basePath = path;
   Git.Repository.open(repo)
     .then((repository) => {
       return repository.getBranchCommit('refs/remotes/origin/' + br)
@@ -205,20 +212,28 @@ app.post('/git/api/:repo/:branch/files/:search/', (req, res) => {
         fileList.push(en.path())
       })
       eventEmitter.on('end', (trees) => {
+        let whichRoot = fileList.filter(item => {
+          return item.indexOf('EDM/VTB24/SQLDVM') >= 0
+        })
+        if (whichRoot.length > 0 && path !== '*') {
+          basePath = 'EDM/VTB24/SQLDVM' + '/' + path.replace('*', '')
+        } else {
+          basePath = 'EDM/VTB24/SQLDVM'
+        }
         if (search !== '*') {
           let findedList = fileList.filter(item => {
-            return item.indexOf(search) >= 0 && item.indexOf(path) >= 0 && item.replace(path + '/', '').indexOf('/') < 0
+            return item.indexOf(search) >= 0 && item.indexOf(basePath) >= 0 && item.replace(basePath + '/', '').indexOf('/') < 0
           })
           res.json({
             count: findedList.length,
             files: findedList.map(item => {
-              return item.replace(path + '/', '')
+              return item.replace(basePath + '/', '')
             })
           })
         } else {
           res.json({
-            ...walkTree(path, fileList),
-            files: walkTree(path, fileList).files.slice((pageNum * page_size) - page_size, (pageNum * page_size))
+            ...walkTree(basePath, fileList),
+            files: walkTree(basePath, fileList).files.slice((pageNum * page_size) - page_size, (pageNum * page_size))
           })
         }
       })

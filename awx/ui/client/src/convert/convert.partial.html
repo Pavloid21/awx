@@ -177,8 +177,8 @@
               </div>
             </div>
             <button class="btn btn-success" ng-click="addType()" ng-show="!!branch">Add Type</button>
-            <button class="btn btn-primary" ng-click="getDifference()" ng-show="!!branch && !!types.length && isAllowShowDifference">Show difference</button>
-            <button class="btn btn-primary" disabled ng-show="!!branch && !!types.length && !isAllowShowDifference">Show difference</button>
+            <button class="btn btn-primary" ng-click="getDifference()" ng-show="!!branch && !!types.length && isAllowShowDifference && !isShowDifferencePressed">Show difference</button>
+            <button class="btn btn-primary" disabled ng-show="(!!branch && !!types.length && !isAllowShowDifference) || isShowDifferencePressed">Show difference</button>
             <hr/>
             <div class="DashboardGraphs" ng-show="!!branch" style="padding-bottom: 15px;">
               <p>

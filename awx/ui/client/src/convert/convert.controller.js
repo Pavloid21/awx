@@ -40,6 +40,7 @@ export default [
         $scope.sql2excelHistory = SQL2EXCEL.data.results;
         $scope.excel2sqlHistoryDataset = EXCEL2SQL.data;
         $scope.excel2sqlHistory = EXCEL2SQL.data.results;
+        $scope.isShowDifferencePressed = false;
         $scope.$on("updateDataset", (e, dataset, queryset) => {
           if (e.targetScope.basePath.indexOf('sql2excel_history') > 0) {
             $scope.sql2excelHistoryDataset = dataset;
@@ -126,14 +127,34 @@ export default [
                 }
               }).then(function success(response) {
                 $scope.types[typeIndex].directories = response.data.directories;
-                if ($scope.types[typeIndex].currentPage > 1) {
-                  $scope.types[typeIndex].files = [
-                    ...$scope.types[typeIndex].files,
-                    ...response.data.files
-                  ];
-                } else {
-                  $scope.types[typeIndex].files = response.data.files;
-                }
+                let responseFiles = response.data.files;
+                let resultFileArray = [];
+                let allAttachments = [];
+                $scope.types.forEach(type => {
+                  type.attachments.forEach(attachment => [
+                    allAttachments.push(attachment.file)
+                  ])
+                });
+                allAttachments.forEach(selectedFile => {
+                  if ($scope.types[typeIndex].currentPage > 1) {
+                    let sourceArr = [
+                      ...$scope.types[typeIndex].files,
+                      ...response.data.files
+                    ]; 
+                    let selectedIndex = sourceArr.indexOf(selectedFile);
+                    if (selectedIndex >= 0) { 
+                      sourceArr.splice(selectedIndex, 1)
+                    }
+                    resultFileArray = sourceArr;
+                  } else {
+                    let selectedIndex = responseFiles.indexOf(selectedFile);
+                    if (selectedIndex >= 0) {
+                      responseFiles.splice(selectedIndex, 1)
+                    }
+                    resultFileArray = responseFiles;
+                  }
+                })
+                $scope.types[typeIndex].files = resultFileArray;
                 Wait('stop');
               })
             } else {
@@ -316,6 +337,7 @@ export default [
                         Wait("stop");
                         $scope.showPopup = true;
                         $scope.showCompleted = false;
+                        $scope.isShowDifferencePressed = true;
                       });
                     }
                   }, () => {

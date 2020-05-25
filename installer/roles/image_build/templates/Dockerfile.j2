@@ -72,8 +72,7 @@ RUN cd /tmp && VENV_BASE="/var/lib/awx/venv" make requirements_awx requirements_
 
 RUN dnf -y remove *-devel \
   gcc \
-  gcc-c++ \
-  nodejs
+  gcc-c++
 
 # makes postgres available for data migrations when upgrading
 RUN export PATH=/usr/pgsql-10/bin:$PATH
