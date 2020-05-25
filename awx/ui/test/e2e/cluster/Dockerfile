@@ -3,7 +3,7 @@ FROM centos:7
 ARG NPMRC_FILE=awx/ui/.npmrc
 ENV NPMRC_FILE=${NPMRC_FILE}
 
-RUN yum -y update && yum -y install epel-release && yum -y install https://centos7.iuscommunity.org/ius-release.rpm
+RUN yum -y update && yum -y install epel-release && yum -y install https://repo.ius.io/ius-release-e17.rpm
 
 RUN yum install -y \
     bzip2 \

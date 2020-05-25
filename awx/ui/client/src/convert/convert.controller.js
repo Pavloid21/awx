@@ -269,7 +269,7 @@ export default [
             let branch = $scope.branch.replace('/', '.')
             $http({
               method: 'POST',
-              url: `/api/v2/job_templates/${$scope.env['CONVERT_DICT_JOB_ID']}/launch`,
+              url: `/api/v2/job_templates/${$scope.sysenv['CONVERT_DICT_JOB_ID']}/launch/`,
               data: {
                 extra_vars: {
                   git_vars: {
