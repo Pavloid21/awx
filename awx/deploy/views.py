@@ -133,11 +133,8 @@ class GetCard(View):
         return JsonResponse(card)
 
 class SaveConvert(View):
-    def randomString(arg):
-        return binascii.hexlify(os.urandom(10))
     def post(self, request, *args, **kwargs):
         data = json.loads(request.body)
-        hash = self.randomString().decode('utf-8')
         filename = "data.json"
         dirname = os.path.dirname(filename)
         if not os.path.exists(os.path.join(settings.MEDIA_ROOT, request.GET['hash'], dirname)):
@@ -145,7 +142,7 @@ class SaveConvert(View):
         with open(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data.json', 'w+', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
         os.chmod(os.path.join(settings.MEDIA_ROOT, request.GET['hash']), 0o0777)
-        return JsonResponse({'hash': hash})
+        return JsonResponse({'hash': request.GET['hash']})
 
 class SaveDSL(View):
     def randomString(arg):

@@ -523,7 +523,7 @@ export default [
                       repo_name: $scope.env,
                       branch: branch
                     },
-                    hash_dir: $scope.typesHash
+                    hash_dir: hash
                   }
                 }
               }).then(function success(launchResponse) {
