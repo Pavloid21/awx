@@ -30,7 +30,7 @@ export default {
       "QuerySet",
       ($stateParams, Wait, GetBasePath, qs) => {
         const searchParam = $stateParams.diff_search;
-        const searchPath = 'diff/jobs/';
+        const searchPath = '/api/v2/jobs/';
         Wait("start");
         return qs.search(searchPath, searchParam).finally(() => Wait("stop"));
       }

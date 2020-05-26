@@ -29,27 +29,60 @@ export default [
     $scope.storedJobs = Dataset.data.results;
     $scope.allowCompareVersions = false;
 
-    $http({ method: "GET", url: "/diff/environments/" }).then(
-      function success(response) {
-        $scope.URL = "/diff/environments/";
+    //CLONE REPOS
+    $http({
+      method: 'GET',
+      url: '/git/api/clone/'
+    }).then((response) => {
+      //GET REPOS LIST
+      $http({
+        method: 'GET',
+        url: '/git/api/repos/'
+      }).then(response => {
+        $scope.URL = '/git/api/repos/';
         $scope.diffEnvironments = {
           model: null,
-          versions: response.data.versions.map(version => {
-            return { id: version.id, name: version.name };
+          versions: response.data.repositories.map((repo, idx) => {
+            return {
+              id: idx,
+              name: repo.repo
+            }
           })
-        };
-        $scope.diffErrorMessage = null;
-        Wait("stop");
+        }
+        Wait('stop');
       },
-      function error(response) {
+      (response) => {
         $scope.diffErrorMessage = "Error at "
           .concat("url")
           .concat(" : ")
           .concat(response.statusText);
         $("html, body").animate({ scrollTop: 0 }, "slow");
         Wait("stop");
-      }
-    );
+      })
+      Wait('stop')
+    })
+
+    // $http({ method: "GET", url: "/diff/environments/" }).then(
+    //   function success(response) {
+    //     $scope.URL = "/diff/environments/";
+    //     $scope.diffEnvironments = {
+    //       model: null,
+    //       versions: response.data.versions.map(version => {
+    //         return { id: version.id, name: version.name };
+    //       })
+    //     };
+    //     $scope.diffErrorMessage = null;
+    //     Wait("stop");
+    //   },
+    //   function error(response) {
+    //     $scope.diffErrorMessage = "Error at "
+    //       .concat("url")
+    //       .concat(" : ")
+    //       .concat(response.statusText);
+    //     $("html, body").animate({ scrollTop: 0 }, "slow");
+    //     Wait("stop");
+    //   }
+    // );
 
     $scope.env1Versions = null;
     $scope.env2Versions = null;

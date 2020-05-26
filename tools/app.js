@@ -133,6 +133,86 @@ app.get('/git/api/:repo/branches/', (req, res) => {
     })
 });
 
+//GET COMMITS
+app.get('/git/api/:repo/commits/', (req, res) => {
+  const { repo } = req.params;
+  let globalCommits = [];
+  try {
+    Git.Repository.open(repo)
+      .then((repository) => {
+        let walker = Git.Revwalk.create(repository);
+        walker.pushGlob('refs/heads/*');
+        walker.getCommits(1000)
+          .then(commits => {
+            commits.forEach(x => {
+              globalCommits.push({
+                hash:  x.sha(),
+                msg: x.message().split('\n')[0],
+                date: x.date(),
+                author: x.author().name(),
+                repo: repo
+              });
+            });
+            res.json(globalCommits)
+          });
+        });
+  } catch (e) {
+    console.log(e)
+  }
+})
+
+//GET TAGS
+app.get('/git/api/:repo/tags/', (req, res) => {
+  const { repo } = req.params;
+  let tags = [];
+  let REPO = null;
+  Git.Repository.open(repo).then(repository => {
+    return repository.getReferenceNames(3);
+  })
+  .then(renames => {
+    console.log('RENAMES: ', renames);
+    let arr = renames.map(name => {
+      return Git.Repository.open(repo).then(repository => {
+        REPO = repository;
+        return repository.getReference(name)
+      });
+    })
+    Promise.all(arr).then(referencies => {
+      tags = referencies.filter(ref => {
+        if (ref.isTag()) {
+          return true;
+        }
+        return false
+      })
+      let commitsPromises = tags.map(reference => {
+        return reference.peel(Git.Object.TYPE.COMMIT)
+      });
+      Promise.all(commitsPromises).then(commits => {
+        let resultList = commits.map(commit => {
+          return Git.Commit.lookup(REPO, commit.id())
+        })
+        Promise.all(resultList).then(comm => {
+          let commitsData = comm.map((commit, idx) => ({
+            tag: tags[idx].name(),
+            hash: commit.sha(),
+            date: commit.date(),
+            author: commit.author().name()
+          }));
+          res.json(commitsData)
+        })
+        .catch(e => {
+          console.log(e)
+        })
+      })
+      .catch(e => {
+        console.log(e)
+      })
+      // console.log(commits)
+    })
+    
+  })
+})
+
 // GET FILES
 app.get('/git/api/:repo/:branch/files/:search/:path/:nopaginate/', (req, res) => {
   const { repo , branch, search, nopaginate = 'nopagi', path } = req.params;

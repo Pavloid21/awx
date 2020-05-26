@@ -357,6 +357,7 @@ export default [
                     Wait('stop')
                   });
                 };
+                requestJob();
               })
             })
             // $http({
