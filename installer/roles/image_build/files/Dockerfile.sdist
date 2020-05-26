@@ -1,8 +1,9 @@
 FROM centos:7
 
-RUN yum -y update && yum -y install epel-release && yum -y install https://repo.ius.io/ius-release-e17.rpm
+RUN yum -y update && yum -y install epel-release && yum -y install https://repo.ius.io/ius-release-el7.rpm
 
 RUN yum install -y bzip2 \
+    git \
     gcc-c++ \
     gettext \
     git2u \
