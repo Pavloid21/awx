@@ -17,6 +17,7 @@ export default [
         $scope.DSL = {};
         $scope.breadCrumbs = ['root']
         $scope.selectedFiles = [];
+        $scope.commitData = '';
         $scope.types = [{
           path: '*',
           files: $scope.files,
@@ -318,18 +319,18 @@ export default [
                             return false;
                           }
                         );
-                        $scope.commitData = response.data.results.find(
-                          res => {
-                            if (
-                              res.task.indexOf("Push to git") >=
-                                0 &&
-                              !!res.event_data.res
-                            ) {
-                              return true;
-                            }
-                            return false;
-                          }
-                        );
+                        // $scope.commitData = response.data.results.find(
+                        //   res => {
+                        //     if (
+                        //       res.task.indexOf("Push to git") >=
+                        //         0 &&
+                        //       !!res.event_data.res
+                        //     ) {
+                        //       return true;
+                        //     }
+                        //     return false;
+                        //   }
+                        // );
                         let colRowArr = $scope.compareData.event_data.res.stdout_lines.map(item => {
                           return item.split('|')
                         })
@@ -345,7 +346,7 @@ export default [
                           }
                           return col
                         })
-                        $scope.commitStrings = $scope.commitData.event_data.res.stdout_lines;
+                        // $scope.commitStrings = $scope.commitData.event_data.res.stdout_lines;
                         $scope.final = arr;
                         Wait("stop");
                         $scope.showPopup = true;
@@ -925,6 +926,19 @@ export default [
                                 hash_dir: $scope.typesHash
                               }
                             })
+                            $scope.commitData = response.data.results.find(
+                              res => {
+                                if (
+                                  res.task.indexOf("Push to git") >=
+                                    0 &&
+                                  !!res.event_data.res
+                                ) {
+                                  return true;
+                                }
+                                return false;
+                              }
+                            );
+                            $scope.commitStrings = $scope.commitData.event_data.res.stdout_lines;
                             $scope.handleDownloadDSLButton(objString)
                             // $http({
                             //   method: 'GET',
