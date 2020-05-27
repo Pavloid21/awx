@@ -95,7 +95,7 @@ export default [
     Wait('start')
     $http({
       method: 'GET',
-      url: 'deptemplate/job_templates/'
+      url: 'api/v2/job_templates/'
     }).then(function success(result) {
       $scope.storedJobTemplates = result.data.results;
       Wait('stop')
@@ -274,7 +274,7 @@ export default [
               $scope.isAdding = false;
               $http({
                 method: "GET",
-                url: "/deptemplate/rows/",
+                url: "/api/v2/deploy_template/?order=-created",
               }).then(
                 function success(response) {
                   $scope.storedTemplates = response.data.results;
@@ -300,17 +300,17 @@ export default [
       Wait('start');
       $http({
         method: 'POST',
-        url: '/deptemplate/actionsave/',
+        url: '/api/v2/action/',
         data: {
-          extravars: $scope.actionExtraVars,
+          extra_vars: $scope.actionExtraVars,
           name: $scope.actionName,
-          jobtemplate: [$scope.selected.action.id]
+          job_templates: [$scope.selected.action.id]
         }
       }).then(function success(){
         $scope.isAddingAction = false;
         $http({
           method: 'GET',
-          url: 'deptemplate/actions/'
+          url: '/api/v2/action/?order_by=-created'
         }).then(function success(result) {
           $scope.storedActions = result.data.results;
           Wait('stop')
@@ -343,7 +343,7 @@ export default [
       for (let item in $scope.selected.item.deployHistoryIds) {
         let card = $http({
           method: 'GET',
-          url: `/deploy/step/?id=${$scope.selected.item.deployHistoryIds[item]}`
+          url: `/api/v2/deploy_history/${$scope.selected.item.deployHistoryIds[item]}/`
         }).then(
           function success(response) {
             cardList.push(response.data)

@@ -128,7 +128,6 @@ class DeployHistoryNextStep(View):
 class GetCard(View):
     def get(self, request, *args, **kwargs):
         response = requests.get(AWX_API_PATH + '/api/v2/deploy_history/' + request.GET['id'] + '/', auth=(LOGIN, PASS), verify=False)
-        print(response.text)
         card = json.loads(response.text)
         return JsonResponse(card)
 
@@ -144,18 +143,29 @@ class SaveConvert(View):
         os.chmod(os.path.join(settings.MEDIA_ROOT, request.GET['hash']), 0o0777)
         return JsonResponse({'hash': request.GET['hash']})
 
+# class SaveDSL(View):
+#     def randomString(arg):
+#         return binascii.hexlify(os.urandom(10))
+#     def post(self, request, *args, **kwargs):
+#         data = json.loads(request.body)
+#         hash = self.randomString().decode('utf-8')
+#         filename = "data2.json"
+#         dirname = os.path.dirname(filename)
+#         with open(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data2.json', 'w', encoding='utf-8') as f:
+#             f.write(str(data))
+#         shutil.copyfile(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data2.json', settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data.json')
+#         os.remove(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data2.json')
+#         return JsonResponse({'hash': hash})
+
 class SaveDSL(View):
     def randomString(arg):
         return binascii.hexlify(os.urandom(10))
     def post(self, request, *args, **kwargs):
-        data = json.loads(request.body)
+        data = json.loads(request.body).replace('\'', '"')
         hash = self.randomString().decode('utf-8')
-        filename = "data2.json"
-        dirname = os.path.dirname(filename)
-        with open(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data2.json', 'w', encoding='utf-8') as f:
-            f.write(str(data))
-        shutil.copyfile(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data2.json', settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data.json')
-        os.remove(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data2.json')
+        os.remove(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data.json')
+        with open(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data.json', 'w+', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
         return JsonResponse({'hash': hash})
 
 class ConvertDiff(View):
