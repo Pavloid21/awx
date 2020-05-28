@@ -143,29 +143,16 @@ class SaveConvert(View):
         os.chmod(os.path.join(settings.MEDIA_ROOT, request.GET['hash']), 0o0777)
         return JsonResponse({'hash': request.GET['hash']})
 
-# class SaveDSL(View):
-#     def randomString(arg):
-#         return binascii.hexlify(os.urandom(10))
-#     def post(self, request, *args, **kwargs):
-#         data = json.loads(request.body)
-#         hash = self.randomString().decode('utf-8')
-#         filename = "data2.json"
-#         dirname = os.path.dirname(filename)
-#         with open(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data2.json', 'w', encoding='utf-8') as f:
-#             f.write(str(data))
-#         shutil.copyfile(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data2.json', settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data.json')
-#         os.remove(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data2.json')
-#         return JsonResponse({'hash': hash})
-
 class SaveDSL(View):
     def randomString(arg):
         return binascii.hexlify(os.urandom(10))
     def post(self, request, *args, **kwargs):
-        data = json.loads(request.body).replace('\'', '"')
+        data = json.loads(request.body)
         hash = self.randomString().decode('utf-8')
+        json_object = json.dumps(data, indent=4)
         os.remove(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data.json')
         with open(settings.MEDIA_ROOT + '/' + request.GET['hash'] + '/data.json', 'w+', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
+            f.write(json_object)
         return JsonResponse({'hash': hash})
 
 class ConvertDiff(View):

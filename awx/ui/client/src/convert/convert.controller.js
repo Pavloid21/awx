@@ -434,6 +434,8 @@ export default [
             //   };
             //   requestJob();
             // })
+          }, () => {
+            Wait('stop')
           })
         }
 
@@ -903,7 +905,7 @@ export default [
                   let requestJob = () => {
                       $http({
                         method: "GET",
-                        url: `/api/v2/jobs/${$scope.job}/job_events/?page=2`
+                        url: `/api/v2/jobs/${$scope.job}/`
                       }).then(function success(response) {
                         if (
                           response.data.status !== "successful" &&
