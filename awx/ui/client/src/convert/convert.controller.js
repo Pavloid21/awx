@@ -1092,7 +1092,12 @@ export default [
         }
 
         $scope.handleDownloadDSLButton = (row) => {
-          let hashDir = JSON.parse(row.extra_vars).hash_dir;
+          let hashDir = null;
+          try {
+            hashDir = JSON.parse(row.extra_vars).hash_dir;
+          } catch (e) {
+            hashDir = $scope.typesHash;
+          }
           console.log(hashDir)
           Wait('start');
           $http({
