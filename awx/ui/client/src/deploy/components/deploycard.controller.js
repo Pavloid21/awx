@@ -2,7 +2,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   this.index = null;
   this.allowRun = null;
   this.allowDelete = null;
-  $scope.domainsList = ["ulbs11_sales_domain", "ulbs13_sales_domain"];
+  $scope.domainsList = [];
   function makeid(length) {
     var result           = '';
     var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -16,9 +16,20 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   Wait('start')
   $http({
     method: 'GET',
-    url: '/git/api/repos/'
-  }).then((response) => {
-    $scope.domainsList = response.data.repositories.map(rep => rep.repo);
+    url: '/api/v2/inventories/'
+  }).then(invResponse => {
+    $scope.inventories = invResponse.data.results;
+    $http({
+      method: 'GET',
+      url: '/git/api/repos/'
+    }).then((response) => {
+      $scope.domainsList = [];
+      $scope.inventories.forEach(inv => {
+        if (inv.description) {
+          $scope.domainsList.push(inv.name)
+        }
+      });
+    })
   })
   $http({
     method: 'GET',
