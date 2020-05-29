@@ -940,8 +940,23 @@ export default [
                                 return false;
                               }
                             );
+                            $scope.commitHash = response.data.results.find(
+                              res => {
+                                if (
+                                  res.task.indexOf('Get Sha') >=
+                                    0 &&
+                                  !!res.event_data.res
+                                ) {
+                                  return true;
+                                }
+                                return false;
+                              }
+                            )
                             $scope.commitStrings = $scope.commitData.event_data.res.stdout_lines;
+                            $scope.commitHashStr = $scope.commitHash.event_data.res.stdout_lines;
                             $scope.handleDownloadDSLButton(objString)
+                            $scope.showPopup = true;
+                            $scope.showCompleted = true;
                             // $http({
                             //   method: 'GET',
                             //   url: `/diff/download/?hash=${$scope.typesHash}&file=${data.dsl.name}_jenkins.dsl`,

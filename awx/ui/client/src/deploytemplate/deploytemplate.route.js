@@ -42,7 +42,7 @@ export default {
       "QuerySet",
       ($stateParams, Wait, GetBasePath, qs) => {
         const searchParam = $stateParams.deploytemplate_search;
-        const searchPath = GetBasePath("deploy_history") || 'api/v2/deploy_template/';
+        const searchPath = GetBasePath("deploy_template") || 'api/v2/deploy_template/';
         Wait("start");
         return qs.search(searchPath, searchParam).finally(() => Wait("stop"));
       }

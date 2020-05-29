@@ -92,7 +92,6 @@ export default function($rootScope, $scope, $element, Wait, $http) {
       url: '/api/v2/inventories/'
     }).then(response => {
       let inventories = response.data;
-      console.log('inv', inventories)
       $http({
         method: 'GET',
         url: `/api/v2/action/${$scope.action}/`

@@ -335,9 +335,12 @@
               <div>
                 Convert completed!
               </div>
-              <div class="DashboardGraphs" ng-show="commitData">
-                <div ng-repeat="str in commitData">
+              <div class="DashboardGraphs" ng-show="commitStrings" style="text-align: left; padding: 20px 10px; margin-bottom: 20px;">
+                <div ng-repeat="str in commitStrings">
                   {{str}}
+                </div>
+                <div ng-repeat="hash in commitHashStr">
+                  {{hash}}
                 </div>
               </div>
             </div>
