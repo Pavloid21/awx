@@ -147,13 +147,16 @@ app.get('/git/api/:repo/commits/', (req, res) => {
             commits.forEach(x => {
               globalCommits.push({
                 hash:  x.sha(),
-                msg: x.message().split('\n')[0],
+                message: x.message().split('\n')[0],
                 date: x.date(),
                 author: x.author().name(),
+                email: x.author().email(),
                 repo: repo
               });
             });
-            res.json(globalCommits)
+            res.json({
+              coommits: globalCommits
+            })
           });
         });
   } catch (e) {
@@ -196,9 +199,11 @@ app.get('/git/api/:repo/tags/', (req, res) => {
             tag: tags[idx].name(),
             hash: commit.sha(),
             date: commit.date(),
-            author: commit.author().name()
+            message: commit.message(),
+            author: commit.author().name(),
+            email: commit.author().email()
           }));
-          res.json(commitsData)
+          res.json({tags: commitsData})
         })
         .catch(e => {
           console.log(e)

@@ -104,85 +104,161 @@ export default [
     $scope.getDataEnv1 = function() {
       if ($scope.env1 !== null) {
         Wait("start");
-        var url = `/diff/environments/${$scope.env1}/`;
-        $http({ method: "GET", url: url }).then(
-          function success(response) {
-            $scope.env1Versions = response.data.versions;
-            $scope.env1Version = null;
-            $scope.diffErrorMessage = null;
-            $scope.compareData = null;
-            $scope.final = null;
-            Wait("stop");
-          },
-          function error(response) {
-            $scope.diffErrorMessage = "Error at "
-              .concat(url)
-              .concat(" : ")
-              .concat(response.statusText);
-            $scope.env1Versions = null;
-            $scope.env1Version = null;
-            $scope.compareData = null;
-            $scope.final = null;
-            $("html, body").animate({ scrollTop: 0 }, "slow");
-            Wait("stop");
-          }
-        );
-      }
-    };
-    $scope.getDataEnv2 = function() {
-      if ($scope.env2 !== null) {
-        Wait("start");
-        var url = `/diff/environments/${$scope.env2}/`;
-        $http({ method: "GET", url: url }).then(
-          function success(response) {
-            $scope.env2Versions = response.data.versions;
-            $scope.env2Version = null;
-            $scope.diffErrorMessage = null;
-            $scope.compareData = null;
-            $scope.final = null;
-            Wait("stop");
-          },
-          function error(response) {
-            $scope.diffErrorMessage = "Error at "
-              .concat(url)
-              .concat(" : ")
-              .concat(response.statusText);
-            $scope.env2Versions = null;
-            $scope.env2Version = null;
-            $scope.compareData = null;
-            $scope.final = null;
-            $("html, body").animate({ scrollTop: 0 }, "slow");
-            Wait("stop");
-          }
-        );
+        $http({
+          method: 'GET',
+          url: `/git/api/${$scope.env1.name}/commits/`
+        }).then(successResponse => {
+          $scope.env1Versions = [];
+          $scope.env1Versions.push(successResponse.data.coommits[0]);
+          $scope.env1Versions[0].tag = 'master';
+          $scope.env1Version = null;
+          $scope.diffErrorMessage = null;
+          $scope.compareData = null;
+          $scope.final = null;
+          $http({
+            method: 'GET',
+            url: `/git/api/${$scope.env1.name}/tags/`
+          }).then(successResponse => {
+            $scope.env1Versions = $scope.env1Versions.concat(successResponse.data.tags.map(tag => {
+              let t = tag;
+              t.tag = t.tag.replace('refs/tags/', '');
+              return t;
+            }))
+          })
+          console.log($scope.env1Versions)
+          Wait('stop')
+        })
+        // var url = `/diff/environments/${$scope.env1}/`;
+        // $http({ method: "GET", url: url }).then(
+        //   function success(response) {
+        //     $scope.env1Versions = response.data.versions;
+        //     $scope.env1Version = null;
+        //     $scope.diffErrorMessage = null;
+        //     $scope.compareData = null;
+        //     $scope.final = null;
+        //     Wait("stop");
+        //   },
+        //   function error(response) {
+        //     $scope.diffErrorMessage = "Error at "
+        //       .concat(url)
+        //       .concat(" : ")
+        //       .concat(response.statusText);
+        //     $scope.env1Versions = null;
+        //     $scope.env1Version = null;
+        //     $scope.compareData = null;
+        //     $scope.final = null;
+        //     $("html, body").animate({ scrollTop: 0 }, "slow");
+        //     Wait("stop");
+        //   }
+        // );
       }
     };
 
+    $scope.getDataEnv2 = function() {
+      if ($scope.env2 !== null) {
+        Wait("start");
+        $http({
+          method: 'GET',
+          url: `/git/api/${$scope.env2.name}/commits/`
+        }).then(successResponse => {
+          $scope.env2Versions = [];
+          $scope.env2Versions.push(successResponse.data.coommits[0]);
+          $scope.env2Versions[0].tag = 'master';
+          $scope.env2Version = null;
+          $scope.diffErrorMessage = null;
+          $scope.compareData = null;
+          $scope.final = null;
+          $http({
+            method: 'GET',
+            url: `/git/api/${$scope.env2.name}/tags/`
+          }).then(successResponse => {
+            $scope.env2Versions = $scope.env2Versions.concat(successResponse.data.tags.map(tag => {
+              let t = tag;
+              t.tag = t.tag.replace('refs/tags/', '');
+              return t;
+            }))
+          })
+          Wait('stop')
+        })
+      }
+    }
+    // $scope.getDataEnv2 = function() {
+    //   if ($scope.env2 !== null) {
+    //     Wait("start");
+    //     var url = `/diff/environments/${$scope.env2}/`;
+    //     $http({ method: "GET", url: url }).then(
+    //       function success(response) {
+    //         $scope.env2Versions = response.data.versions;
+    //         $scope.env2Version = null;
+    //         $scope.diffErrorMessage = null;
+    //         $scope.compareData = null;
+    //         $scope.final = null;
+    //         Wait("stop");
+    //       },
+    //       function error(response) {
+    //         $scope.diffErrorMessage = "Error at "
+    //           .concat(url)
+    //           .concat(" : ")
+    //           .concat(response.statusText);
+    //         $scope.env2Versions = null;
+    //         $scope.env2Version = null;
+    //         $scope.compareData = null;
+    //         $scope.final = null;
+    //         $("html, body").animate({ scrollTop: 0 }, "slow");
+    //         Wait("stop");
+    //       }
+    //     );
+    //   }
+    // };
+
     $scope.getEnvironmentDomain = () => {
       Wait("start");
-        var url = `/diff/commits/${$scope.environmentDomain.id}/`;
-        $http({ method: "GET", url: url }).then(
-          function success(response) {
-            $scope.domainVersions = response.data.commits;
-            $scope.domainVersion = null;
-            $scope.diffErrorMessage = null;
-            $scope.compareData = null;
-            $scope.final = null;
-            Wait("stop");
-          },
-          function error(response) {
-            $scope.diffErrorMessage = "Error at "
-              .concat(url)
-              .concat(" : ")
-              .concat(response.statusText);
-            $scope.domainVersions = null;
-            $scope.domainVersion = null;
-            $scope.compareData = null;
-            $scope.final = null;
-            $("html, body").animate({ scrollTop: 0 }, "slow");
-            Wait("stop");
-          }
-        );
+      $http({
+        method: 'GET',
+        url: `/git/api/${$scope.environmentDomain.name}/commits/`
+      }).then(successResponse => {
+        $scope.domainVersions = [];
+        $scope.domainVersions.push(successResponse.data.coommits[0]);
+        $scope.domainVersions[0].tag = 'master';
+        $scope.domainVersion = null;
+        $scope.diffErrorMessage = null;
+        $scope.compareData = null;
+        $scope.final = null;
+        $http({
+          method: 'GET',
+          url: `/git/api/${$scope.environmentDomain.name}/tags/`
+        }).then(successResponse => {
+          $scope.domainVersions = $scope.domainVersions.concat(successResponse.data.tags.map(tag => {
+            let t = tag;
+            t.tag = t.tag.replace('refs/tags/', '');
+            return t;
+          }))
+        })
+        Wait('stop')
+      })
+      // var url = `/diff/commits/${$scope.environmentDomain.id}/`;
+      // $http({ method: "GET", url: url }).then(
+      //   function success(response) {
+      //     $scope.domainVersions = response.data.commits;
+      //     $scope.domainVersion = null;
+      //     $scope.diffErrorMessage = null;
+      //     $scope.compareData = null;
+      //     $scope.final = null;
+      //     Wait("stop");
+      //   },
+      //   function error(response) {
+      //     $scope.diffErrorMessage = "Error at "
+      //       .concat(url)
+      //       .concat(" : ")
+      //       .concat(response.statusText);
+      //     $scope.domainVersions = null;
+      //     $scope.domainVersion = null;
+      //     $scope.compareData = null;
+      //     $scope.final = null;
+      //     $("html, body").animate({ scrollTop: 0 }, "slow");
+      //     Wait("stop");
+      //   }
+      // );
     }
 
     $scope.setCommit = () => {
@@ -292,7 +368,7 @@ export default [
       $scope.compareData = null;
       $scope.final = null;
       $scope.env1Versions.forEach(element => {
-        if (element.name === $scope.env1VersionChoosen) {
+        if (element.tag === $scope.env1VersionChoosen) {
           $scope.env1Version = element;
         }
       });
@@ -307,7 +383,7 @@ export default [
       $scope.compareData = null;
       $scope.final = null;
       $scope.env2Versions.forEach(element => {
-        if (element.name === $scope.env2VersionChoosen) {
+        if (element.tag === $scope.env2VersionChoosen) {
           $scope.env2Version = element;
         }
       });
@@ -326,19 +402,19 @@ export default [
         if ($scope.env2Version !== null) {
           // Wait("start");
           let env1 = $scope.diffEnvironments.versions.filter(version => {
-            if (version.id === $scope.env1) return version;
+            if (version.id === $scope.env1.id) return version;
           });
           $scope.uiEnv1 = env1[0].name;
           let env2 = $scope.diffEnvironments.versions.filter(version => {
-            if (version.id === $scope.env2) return version;
+            if (version.id === $scope.env2.id) return version;
           });
           $scope.uiEnv2 = env2[0].name;
-          var url = `/diff/compare/${$scope.env1Version.target}/${
-            $scope.env2Version.target
+          var url = `/diff/compare/${$scope.env1Version.hash}/${
+            $scope.env2Version.hash
           }/?env1=${env1[0].name}&env2=${env2[0].name}&v1=${
-            $scope.env1Version.name
+            $scope.env1Version.tag
           }&v2=${
-            $scope.env2Version.name
+            $scope.env2Version.tag
           }&composite=${!!$scope.confirmed}&isnode=undefined`;
           $http({ method: "GET", url: url, timeout: 60 * 1000 }).then(
             function success(response) {
