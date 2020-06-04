@@ -267,7 +267,7 @@
         <label for="{{commit.title}}">{{commit.message}}</label>
         <div>
           <div class="commit_info">
-            <p ng-bind="commit.committed_date | date:'dd-MM-yyyy HH:mm'"></p>
+            <p ng-bind="commit.date | date:'dd-MM-yyyy HH:mm'"></p>
             <p><i class="fa fa-user"></i> {{commit.author}}</p>
             <p><i class="fa fa-envelope"></i> {{commit.email}}</p>
             <p>{{commit.hash}}</p>

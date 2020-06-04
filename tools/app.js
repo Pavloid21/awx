@@ -199,7 +199,7 @@ app.get('/git/api/:repo/tags/', (req, res) => {
             tag: tags[idx].name(),
             hash: commit.sha(),
             date: commit.date(),
-            message: commit.message(),
+            message: commit.message().split('\n')[0],
             author: commit.author().name(),
             email: commit.author().email()
           }));

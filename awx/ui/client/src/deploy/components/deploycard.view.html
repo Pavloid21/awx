@@ -13,6 +13,14 @@
     <select style="width: 170px" ng-model="action" ng-change="setAction()">
       <option ng-repeat="act in actionsList" ng-value="act.id">{{act.name}}</option>
     </select>
+    <div>
+      <input id="picker" type="checkbox" ng-value="isPicker"/>
+      <label for="picker">Composer step</label>
+    </div>
+    <div>
+      <input id="setuper" type="checkbox" ng-value="isDeployer"/>
+      <label for="setuper">Deployer step</label>
+    </div>
     <div
       class="play-button"
       ng-class="{disabledButton: !domain || !$root.configFileName || prevStepNotComplited}"

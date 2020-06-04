@@ -16,5 +16,7 @@ class DeployHistory(CommonModel, ResourceMixin):
     )
     config = models.CharField(max_length=256, blank=True)
     domain = models.CharField(max_length=256)
+    setuper = models.BooleanField(default=None)
+    picker = models.BooleanField(default=None)
     action = models.ManyToManyField("Action", blank=True)
     prev_step_id = models.IntegerField(blank=True, null=True)

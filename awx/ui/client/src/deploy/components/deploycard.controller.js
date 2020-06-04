@@ -58,6 +58,8 @@ export default function($rootScope, $scope, $element, Wait, $http) {
       $scope.domain = $rootScope.isConfigUploaded[this.index].domain;
       $scope.action = $rootScope.isConfigUploaded[this.index].action[0];
       $scope.status = $rootScope.isConfigUploaded[this.index].status;
+      $scope.isPicker = $rootScope.isConfigUploaded[this.index].picker;
+      $scope.isDeployer = $rootScope.isConfigUploaded[this.index].setuper;
       if (
         $rootScope.isConfigUploaded.length > $scope.domainsList.length && this.allowRun
       ) {
@@ -173,6 +175,26 @@ export default function($rootScope, $scope, $element, Wait, $http) {
                         job: $scope.job
                       };
                       $rootScope.currentStep = response.data.prevStep;
+                      if ($scope.isPicker) {
+                        let deployerAction = $scope.actionsList.filter((action, index) => {
+                          if (action.isDeployer) {
+                            return true
+                          }
+                        });
+                        let extraVars = JSON.parse(deployerAction[0].extra_vars).awx_jobid = $scope.job.id;
+                        $http({
+                          method: 'PATCH',
+                          url: `/api/v2/action/${deployerAction[0].id}/`,
+                          data: {
+                            description: '',
+                            name: deployerAction[0].name,
+                            extra_vars: JSON.stringify(extraVars),
+                            job_templates: deployerAction[0].job_templates
+                          }
+                        })
+                      } else if ($scope.isDeployer) {
+
+                      }
                       Wait("stop");
                     }
                   });
