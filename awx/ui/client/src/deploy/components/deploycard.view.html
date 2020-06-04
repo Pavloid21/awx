@@ -14,11 +14,11 @@
       <option ng-repeat="act in actionsList" ng-value="act.id">{{act.name}}</option>
     </select>
     <div>
-      <input id="picker" type="checkbox" ng-value="isPicker"/>
+      <input id="picker" type="checkbox" ng-model="ispicker" ng-change="setPicker()"/>
       <label for="picker">Composer step</label>
     </div>
     <div>
-      <input id="setuper" type="checkbox" ng-value="isDeployer"/>
+      <input id="setuper" type="checkbox" ng-model="isdeployer" ng-change="setDeployer()"/>
       <label for="setuper">Deployer step</label>
     </div>
     <div

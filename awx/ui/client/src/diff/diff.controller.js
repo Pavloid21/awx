@@ -19,6 +19,7 @@ export default [
 
     $scope.diffView = "APP_CFG";
     $scope.displayView = 'compare';
+    $scope.isCalculating = false;
     $scope.dataset = Dataset.data;
     $scope.isList = true;
     $scope.$on("updateDataset", (e, dataset, queryset) => {
@@ -401,6 +402,7 @@ export default [
       if ($scope.env1Version !== null) {
         if ($scope.env2Version !== null) {
           // Wait("start");
+          $scope.isCalculating = true;
           let env1 = $scope.diffEnvironments.versions.filter(version => {
             if (version.id === $scope.env1.id) return version;
           });
@@ -463,6 +465,7 @@ export default [
                         $scope.isEmpty =
                           Object.keys($scope.final)[0] === undefined;
                         Wait("stop");
+                        $scope.isCalculating = false;
                       });
                     }
                   });

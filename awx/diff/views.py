@@ -95,7 +95,7 @@ class DiffView(View):
         if request.GET['isnode'] == 'production':
             path = 'http://localhost'
         
-        jobLaunchResponse = requests.post(path + '/api/v2/job_templates/13/launch/', json={
+        jobLaunchResponse = requests.post(path + '/api/v2/job_templates/'+ os.environ.get('DIFF_JOB_ID') +'/launch/', json={
             'extra_vars': {
                 'compare_domain_one': request.GET['env1'],
                 'compare_domain_two': request.GET['env2'],

@@ -58,8 +58,8 @@ export default function($rootScope, $scope, $element, Wait, $http) {
       $scope.domain = $rootScope.isConfigUploaded[this.index].domain;
       $scope.action = $rootScope.isConfigUploaded[this.index].action[0];
       $scope.status = $rootScope.isConfigUploaded[this.index].status;
-      $scope.isPicker = $rootScope.isConfigUploaded[this.index].picker;
-      $scope.isDeployer = $rootScope.isConfigUploaded[this.index].setuper;
+      $scope.ispicker = $rootScope.isConfigUploaded[this.index].picker;
+      $scope.isdeployer = $rootScope.isConfigUploaded[this.index].setuper;
       if (
         $rootScope.isConfigUploaded.length > $scope.domainsList.length && this.allowRun
       ) {
@@ -78,6 +78,15 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   $scope.setAction = () => {
     $rootScope.isConfigUploaded[$scope.index].action = [$scope.action];
   };
+
+  $scope.setPicker = () => {
+    console.log($rootScope.isConfigUploaded[$scope.index].picker, $scope.ispicker)
+    $rootScope.isConfigUploaded[$scope.index].picker = $scope.ispicker;
+  }
+
+  $scope.setDeployer = () => {
+    $rootScope.isConfigUploaded[$scope.index].setuper = $scope.isdeployer;
+  }
 
   $scope.handleDeleteCard = () => {
     $rootScope.isConfigUploaded.splice($scope.index, 1);
@@ -175,9 +184,9 @@ export default function($rootScope, $scope, $element, Wait, $http) {
                         job: $scope.job
                       };
                       $rootScope.currentStep = response.data.prevStep;
-                      if ($scope.isPicker) {
+                      if ($scope.ispicker) {
                         let deployerAction = $scope.actionsList.filter((action, index) => {
-                          if (action.isDeployer) {
+                          if (action.isdeployer) {
                             return true
                           }
                         });
@@ -192,7 +201,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
                             job_templates: deployerAction[0].job_templates
                           }
                         })
-                      } else if ($scope.isDeployer) {
+                      } else if ($scope.isdeployer) {
 
                       }
                       Wait("stop");

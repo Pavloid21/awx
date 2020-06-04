@@ -519,6 +519,11 @@ border: 1px solid #c3e6cb; padding-bottom: 20px;">
   <br />
 </div>
 
+<div class="loader_screen" ng-show="isCalculating">
+  <div class="lds-hourglass"></div>
+  <div class="message_loader">Please wait. Difference is calculating.</div>
+</div>
+
 <div
   ng-show="diffView==='DOMAIN_CFG' && compareData != null"
   class="DashboardGraphs"

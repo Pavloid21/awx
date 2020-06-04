@@ -135,6 +135,8 @@ export default [
         config: null,
         domain: null,
         name: null,
+        picker: false,
+        setuper: false,
         prev_step_id: $scope.parentIndex,
       });
     };
@@ -229,6 +231,8 @@ export default [
         config: null,
         name: null,
         domain: null,
+        picker: false,
+        setuper: false,
         action: [],
         prev_step_id: $scope.parentIndex,
       });
@@ -236,7 +240,6 @@ export default [
 
 
     $scope.handleSave = () => {
-      console.log($scope.isConfigUploaded)
       if (!$scope.templateName || $scope.templateName === "") {
         $scope.errors = {
           details: "Template name not specified.",
@@ -262,40 +265,53 @@ export default [
             return item;
           });
           $rootScope.isConfigUploaded = tempArr;
-          $http({
-            method: "POST",
-            url: "/deptemplate/save/",
-            data: {
-              list: $rootScope.isConfigUploaded,
-              name: $scope.templateName,
-            },
-          }).then(
-            function success() {
-              $scope.isAdding = false;
-              $http({
-                method: "GET",
-                url: "/api/v2/deploy_template/?order=-created",
-              }).then(
-                function success(response) {
-                  $scope.storedTemplates = response.data.results;
-                  $scope.dataset = response.data;
-                  Wait("stop");
+          console.log('tempArr :>> ', tempArr);
+          let prevStepId = null;
+          let ids = [];
+          for (let i = 0; i < tempArr.length; i++) {
+            tempArr[i].prev_step_id = prevStepId;
+            $http({
+              method: 'POST',
+              url: '/api/v2/deploy_history/',
+              data: tempArr[i]
+            }).then((successResponse) => {
+              ids.push(successResponse.data.id)
+              if (i === tempArr.length - 1) {
+                $http({
+                  method: 'POST',
+                  url: '/api/v2/deploy_template/',
+                  data: {
+                    name: $scope.templateName,
+                    deployHistoryIds: ids
+                  }
+                }).then(function success() {
+                  $scope.isAdding = false;
+                  $http({
+                    method: "GET",
+                    url: "/api/v2/deploy_template/?order=-created",
+                  }).then(
+                    function success(response) {
+                      $scope.storedTemplates = response.data.results;
+                      $scope.dataset = response.data;
+                      Wait("stop");
+                    },
+                    function error() {
+                      alert("Somethinng went wrong.");
+                      Wait("stop");
+                    }
+                  );
                 },
-                function error() {
-                  alert("Somethinng went wrong.");
-                  Wait("stop");
-                }
-              );
-            },
             function error() {
               alert("Somethinng went wrong.");
               Wait("stop");
             }
           );
         }
-      }
+      })
+    }
     };
-
+  }
+}
     $scope.handleSaveAction = () => {
       Wait('start');
       $http({
