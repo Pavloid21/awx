@@ -251,7 +251,7 @@ app.get('/git/api/:repo/:branch/files/:search/:path/:nopaginate/', (req, res) =>
         }
         if (search !== '*') {
           let findedList = fileList.filter(item => {
-            return item.indexOf(search) >= 0 && item.indexOf(basePath) >= 0 && item.replace(basePath, '').indexOf('/') < 0
+            return item.replace(basePath, '').indexOf(search) >= 0 && item.indexOf(basePath) >= 0 && item.replace(basePath + '/', '').indexOf('/') < 0
           })
           res.json({
             count: findedList.length,
