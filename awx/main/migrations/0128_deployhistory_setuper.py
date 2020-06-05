@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='deployhistory',
             name='setuper',
-            field=models.BooleanField(default=None),
+            field=models.BooleanField(default=False),
         ),
     ]
