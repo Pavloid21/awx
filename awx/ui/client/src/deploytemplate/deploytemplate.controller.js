@@ -148,13 +148,13 @@ export default [
     $scope.deleteTemplate = (id) => {
       Wait('start')
       $http({
-        method: 'GET',
-        url: `/deptemplate/delete/?id=${id}`
+        method: 'DELETE',
+        url: `/api/v2/deploy_template/${id}/`
       }).then(
         function success() {
           $http({
             method: "GET",
-            url: "/deptemplate/rows/",
+            url: "/api/v2/deploy_template/?order=-created",
           }).then(
             function success(response) {
               $scope.storedTemplates = response.data.results;
@@ -176,13 +176,13 @@ export default [
     $scope.deleteAction = (id) => {
       Wait('start')
       $http({
-        method: 'GET',
-        url: `/deptemplate/deleteaction/?id=${id}`
+        method: 'DELETE',
+        url: `/api/v2/action/${id}/`
       }).then(
         function success() {
           $http({
             method: "GET",
-            url: "/deptemplate/actions/",
+            url: "/api/v2/action/?order_by=-created",
           }).then(
             function success(response) {
               $scope.storedActions = response.data.results;
