@@ -6,24 +6,24 @@
   <hr/>
   <div style="margin-bottom: 10px;">
     <span>Choose domain:</span>
-    <select style="width: 170px" ng-model="domain" ng-change="setDomain()">
+    <select style="width: 170px" ng-disabled="isDisabledFields" ng-model="domain" ng-change="setDomain()">
       <option ng-repeat="(key, domain) in domainsList">{{domain}}</option>
     </select>
     <span>Choose action:</span>
-    <select style="width: 170px" ng-model="action" ng-change="setAction()">
+    <select style="width: 170px" ng-disabled="isDisabledFields" ng-model="action" ng-change="setAction()">
       <option ng-repeat="act in actionsList" ng-value="act.id">{{act.name}}</option>
     </select>
     <div>
-      <input id="picker" type="checkbox" ng-model="ispicker" ng-change="setPicker()"/>
+      <input id="picker" ng-disabled="isDisabledFields" type="checkbox" ng-model="ispicker" ng-change="setPicker()"/>
       <label for="picker">Composer step</label>
     </div>
     <div>
-      <input id="setuper" type="checkbox" ng-model="isdeployer" ng-change="setDeployer()"/>
+      <input id="setuper" ng-disabled="isDisabledFields" type="checkbox" ng-model="isdeployer" ng-change="setDeployer()"/>
       <label for="setuper">Deployer step</label>
     </div>
     <div
       class="play-button"
-      ng-class="{disabledButton: !domain || !$root.configFileName || prevStepNotComplited}"
+      ng-class="{disabledButton: !domain || prevStepNotComplited}"
       ng-if="final === undefined && status === 'start' && allowRun"
       ng-click="deployConfig($ctrl.index)"
     >

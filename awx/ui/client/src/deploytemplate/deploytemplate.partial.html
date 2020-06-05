@@ -314,7 +314,7 @@
       ng-options="item as item.name for item in storedTemplates track by item.id"
     >
     </select>
-    <form method="post" enctype="multipart/form-data">
+    <!-- <form method="post" enctype="multipart/form-data">
       <label for="cnff">Upload configuration file: </label>
       <input
         name="cnff"
@@ -323,7 +323,7 @@
         ng-model="config"
         file-change="setConfigFile"
       />
-    </form>
+    </form> -->
     <div class="pipeline">
       <deploy-card
         ng-repeat="(key, value) in $root.isConfigUploaded track by $index"

@@ -34,6 +34,7 @@ export default [
     $scope.actionsDataset = Action.data;
     $scope.errors = null;
     $scope.selected = {};
+    $rootScope.fieldsDisabled = false;
     $scope.$on("updateDataset", (e, dataset, queryset) => {
       if(e.targetScope.basePath.indexOf('deploy_template') > 0) {
         $scope.dataset = dataset;
@@ -104,21 +105,27 @@ export default [
       $scope.displayView = "templates";
       $scope.isAllowRun = false;
       $scope.isAllowDelete = true;
+      $rootScope.isConfigUploaded = [];
+      $rootScope.fieldsDisabled = false;
     };
     $scope.actionsClick = () => {
       $scope.displayView = "actions";
       $scope.isAllowRun = false;
       $scope.isAllowDelete = true;
+      $rootScope.isConfigUploaded = [];
     };
     $scope.pipelineClick = () => {
       $scope.displayView = "pipeline";
       $scope.isAllowRun = true;
       $scope.isAllowDelete = false;
+      $rootScope.isConfigUploaded = [];
+      $rootScope.fieldsDisabled = true;
     };
     $scope.historyClick = () => {
       $scope.displayView = "history";
       $scope.isAllowRun = false;
       $scope.isAllowDelete = false;
+      $rootScope.isConfigUploaded = [];
     };
 
     $scope.storedTemplates = Dataset.data.results;
@@ -137,6 +144,7 @@ export default [
         name: null,
         picker: false,
         setuper: false,
+        action:[],
         prev_step_id: $scope.parentIndex,
       });
     };
@@ -268,47 +276,53 @@ export default [
           console.log('tempArr :>> ', tempArr);
           let prevStepId = null;
           let ids = [];
-          for (let i = 0; i < tempArr.length; i++) {
-            tempArr[i].prev_step_id = prevStepId;
-            $http({
-              method: 'POST',
-              url: '/api/v2/deploy_history/',
-              data: tempArr[i]
-            }).then((successResponse) => {
-              ids.push(successResponse.data.id)
-              if (i === tempArr.length - 1) {
-                $http({
-                  method: 'POST',
-                  url: '/api/v2/deploy_template/',
-                  data: {
-                    name: $scope.templateName,
-                    deployHistoryIds: ids
-                  }
-                }).then(function success() {
-                  $scope.isAdding = false;
+          (function loop(i) {
+            if (i < tempArr.length) {
+              tempArr[i].prev_step_id = prevStepId;
+              console.log('fetch', prevStepId)
+              $http({
+                method: 'POST',
+                url: '/api/v2/deploy_history/',
+                data: tempArr[i]
+              }).then((successResponse) => {
+                ids.push(successResponse.data.id)
+                prevStepId = successResponse.data.id;
+                console.log('then', prevStepId)
+                if (i === tempArr.length - 1) {
                   $http({
-                    method: "GET",
-                    url: "/api/v2/deploy_template/?order=-created",
-                  }).then(
-                    function success(response) {
-                      $scope.storedTemplates = response.data.results;
-                      $scope.dataset = response.data;
-                      Wait("stop");
-                    },
-                    function error() {
-                      alert("Somethinng went wrong.");
-                      Wait("stop");
+                    method: 'POST',
+                    url: '/api/v2/deploy_template/',
+                    data: {
+                      name: $scope.templateName,
+                      deployHistoryIds: ids
                     }
-                  );
-                },
-            function error() {
-              alert("Somethinng went wrong.");
-              Wait("stop");
+                  }).then(function success() {
+                    $scope.isAdding = false;
+                    $http({
+                      method: "GET",
+                      url: "/api/v2/deploy_template/?order=-created",
+                    }).then(
+                      function success(response) {
+                        $scope.storedTemplates = response.data.results;
+                        $scope.dataset = response.data;
+                        Wait("stop");
+                      },
+                      function error() {
+                        alert("Somethinng went wrong.");
+                        Wait("stop");
+                      }
+                    );
+                  },
+              function error() {
+                alert("Somethinng went wrong.");
+                Wait("stop");
+              }
+            );
+          }
+          loop.call(null, i+1)
+        })
             }
-          );
-        }
-      })
-    }
+          })(0)
     };
   }
 }
@@ -356,21 +370,39 @@ export default [
     $scope.getSteps = () => {
       let cardList = [];
       Wait('start');
-      for (let item in $scope.selected.item.deployHistoryIds) {
-        let card = $http({
-          method: 'GET',
-          url: `/api/v2/deploy_history/${$scope.selected.item.deployHistoryIds[item]}/`
-        }).then(
-          function success(response) {
-            cardList.push(response.data)
-            Wait('stop');
-          },
-          function error(e) {
-            alert(e);
-            Wait('stop');
-          }
-        )
-      }
+      (function cards(id) {
+        if (id < $scope.selected.item.deployHistoryIds.length) {
+          $http({
+            method: 'GET',
+            url: `/api/v2/deploy_history/${$scope.selected.item.deployHistoryIds[id]}/`
+          }).then(
+            function success(response) {
+              cardList.push(response.data)
+              Wait('stop');
+              cards.call(null, id + 1);
+            },
+            function error(e) {
+              alert(e);
+              Wait('stop');
+            }
+          )
+        }
+      })(0)
+      // for (let item in $scope.selected.item.deployHistoryIds) {
+      //   $http({
+      //     method: 'GET',
+      //     url: `/api/v2/deploy_history/${$scope.selected.item.deployHistoryIds[item]}/`
+      //   }).then(
+      //     function success(response) {
+      //       cardList.push(response.data)
+      //       Wait('stop');
+      //     },
+      //     function error(e) {
+      //       alert(e);
+      //       Wait('stop');
+      //     }
+      //   )
+      // }
       $rootScope.isConfigUploaded = cardList;
     }
 

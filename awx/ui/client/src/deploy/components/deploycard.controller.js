@@ -3,6 +3,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   this.allowRun = null;
   this.allowDelete = null;
   $scope.domainsList = [];
+  $scope.isDisabledFields = $rootScope.fieldsDisabled;
   function makeid(length) {
     var result           = '';
     var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -54,6 +55,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
     $scope.index = this.index;
     $scope.allowRun = this.allowrun;
     $scope.allowDelete = this.allowdelete;
+    $scope.isDisabledFields = $rootScope.fieldsDisabled;
     if ($rootScope.isConfigUploaded.length) {
       $scope.domain = $rootScope.isConfigUploaded[this.index].domain;
       $scope.action = $rootScope.isConfigUploaded[this.index].action[0];
@@ -69,6 +71,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         $scope.parentIndex = $rootScope.isConfigUploaded[this.index - 1].id;
       }
     }
+    console.log($scope.isDisabledFields)
   };
 
   $scope.setDomain = () => {
