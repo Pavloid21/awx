@@ -55,7 +55,6 @@ export default [
       mode: 'code',
       onChangeText: (jsonString) => {
         $scope.actionExtraVars = jsonString;
-        // console.log(JSON.parse(jsonString))
       }
     }
     const editor = new JSONEditor(container, options)
@@ -120,6 +119,7 @@ export default [
       $scope.isAllowDelete = false;
       $rootScope.isConfigUploaded = [];
       $rootScope.fieldsDisabled = true;
+      $scope.selected.item = null;
     };
     $scope.historyClick = () => {
       $scope.displayView = "history";
@@ -136,6 +136,7 @@ export default [
 
     $scope.handleAddTemplate = () => {
       $scope.isAdding = true;
+      $scope.isEditing = false;
       $rootScope.isConfigUploaded.push({
         description: "",
         status: "start",
@@ -150,10 +151,26 @@ export default [
     };
 
     $scope.handleAddAction = () => {
+      $scope.actionName = null;
+      $scope.selected.action = null;
+      editor.set(initialJson);
       $scope.isAddingAction = true;
     }
 
-    $scope.deleteTemplate = (id) => {
+    $scope.editTemplate = (id) => {
+      $scope.currentEditTemplate = $scope.storedTemplates.filter(template => template.id === id)[0];
+      $scope.isAdding = true;
+      $scope.isEditing = true;
+      $scope.templateName = $scope.currentEditTemplate.name;
+      $scope.selected.item = $scope.currentEditTemplate;
+      $scope.getSteps();
+    }
+
+    $scope.handleEditTemplate = () => {
+      $scope.deleteTemplate($scope.currentEditTemplate.id, true)
+    }
+
+    $scope.deleteTemplate = (id, isUpdate) => {
       Wait('start')
       $http({
         method: 'DELETE',
@@ -168,6 +185,9 @@ export default [
               $scope.storedTemplates = response.data.results;
               $scope.dataset = response.data;
               Wait("stop");
+              if (isUpdate) {
+                $scope.handleSave();
+              }
             },
             function error() {
               alert("Somethinng went wrong.");
@@ -209,6 +229,16 @@ export default [
       )
     }
 
+    $scope.editAction = (id) => {
+      $scope.currentEditAction = $scope.storedActions.filter(action => action.id === id)[0];
+      $scope.isAddingAction = true;
+      $scope.isAdding = true;
+      $scope.isEditing = true;
+      $scope.actionName = $scope.currentEditAction.name;
+      $scope.selected.action = $scope.storedJobTemplates.filter(template => template.id === $scope.currentEditAction.job_templates[0])[0];
+      editor.set(JSON.parse($scope.currentEditAction.extra_vars))
+    }
+
     $scope.setConfigFile = (files) => {
       $scope.fileObj = files[0];
       handleFilesConfig(files[0]);
@@ -225,6 +255,7 @@ export default [
     $scope.handleCancel = () => {
       $scope.isAdding = false;
       $scope.isAddingAction = false;
+      $scope.isEditing = false;
       $scope.cards = [];
       $rootScope.isConfigUploaded = [];
       $scope.templateName = null;
@@ -273,13 +304,11 @@ export default [
             return item;
           });
           $rootScope.isConfigUploaded = tempArr;
-          console.log('tempArr :>> ', tempArr);
           let prevStepId = null;
           let ids = [];
           (function loop(i) {
             if (i < tempArr.length) {
               tempArr[i].prev_step_id = prevStepId;
-              console.log('fetch', prevStepId)
               $http({
                 method: 'POST',
                 url: '/api/v2/deploy_history/',
@@ -287,7 +316,6 @@ export default [
               }).then((successResponse) => {
                 ids.push(successResponse.data.id)
                 prevStepId = successResponse.data.id;
-                console.log('then', prevStepId)
                 if (i === tempArr.length - 1) {
                   $http({
                     method: 'POST',
@@ -313,14 +341,14 @@ export default [
                       }
                     );
                   },
-              function error() {
-                alert("Somethinng went wrong.");
-                Wait("stop");
-              }
-            );
-          }
-          loop.call(null, i+1)
-        })
+                  function error() {
+                    alert("Somethinng went wrong.");
+                    Wait("stop");
+                  }
+                );
+                }
+                loop.call(null, i+1)
+              })
             }
           })(0)
     };
@@ -338,6 +366,31 @@ export default [
         }
       }).then(function success(){
         $scope.isAddingAction = false;
+        $scope.isAdding = false;
+        $http({
+          method: 'GET',
+          url: '/api/v2/action/?order_by=-created'
+        }).then(function success(result) {
+          $scope.storedActions = result.data.results;
+          Wait('stop')
+        })
+      })
+    }
+
+    $scope.handleEditAction = () => {
+      Wait('start');
+      $http({
+        method: 'PATCH',
+        url: `/api/v2/action/${$scope.currentEditAction.id}/`,
+        data: {
+          extra_vars: $scope.actionExtraVars,
+          name: $scope.actionName,
+          job_templates: [$scope.selected.action.id]
+        }
+      }).then(function success(){
+        $scope.isAddingAction = false;
+        $scope.isAdding = false;
+        $scope.isEditing = false;
         $http({
           method: 'GET',
           url: '/api/v2/action/?order_by=-created'
@@ -388,21 +441,6 @@ export default [
           )
         }
       })(0)
-      // for (let item in $scope.selected.item.deployHistoryIds) {
-      //   $http({
-      //     method: 'GET',
-      //     url: `/api/v2/deploy_history/${$scope.selected.item.deployHistoryIds[item]}/`
-      //   }).then(
-      //     function success(response) {
-      //       cardList.push(response.data)
-      //       Wait('stop');
-      //     },
-      //     function error(e) {
-      //       alert(e);
-      //       Wait('stop');
-      //     }
-      //   )
-      // }
       $rootScope.isConfigUploaded = cardList;
     }
 
@@ -410,7 +448,6 @@ export default [
       $scope.displayView = 'pipeline';
       $rootScope.isConfigUploaded = [];
       $rootScope.isConfigUploaded.push(item);
-      console.log(item)
       let getNextStep = (prevStepId) => {
         $http({
           method: 'GET',

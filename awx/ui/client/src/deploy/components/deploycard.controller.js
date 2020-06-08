@@ -71,7 +71,6 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         $scope.parentIndex = $rootScope.isConfigUploaded[this.index - 1].id;
       }
     }
-    console.log($scope.isDisabledFields)
   };
 
   $scope.setDomain = () => {
@@ -83,7 +82,6 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   };
 
   $scope.setPicker = () => {
-    console.log($rootScope.isConfigUploaded[$scope.index].picker, $scope.ispicker)
     $rootScope.isConfigUploaded[$scope.index].picker = $scope.ispicker;
   }
 
@@ -97,9 +95,6 @@ export default function($rootScope, $scope, $element, Wait, $http) {
 
   $scope.deployConfig = index => {
     $scope.final = null;
-    let fileName = $rootScope.configFileName ?
-      $rootScope.configFileName.url.replace("/media/", "") :
-      $rootScope.isConfigUploaded[this.index - 1].config;
     let action = null;
     $http({
       method: 'GET',
@@ -114,7 +109,6 @@ export default function($rootScope, $scope, $element, Wait, $http) {
           if (inventory.name === $scope.domain) {
             action = response.data;
             let extraVars = JSON.parse(action.extra_vars);
-            extraVars.deploy_file = fileName;
             $http({
               method: 'POST',
               url: `/api/v2/job_templates/${action.job_templates[0]}/launch/`,
@@ -132,7 +126,6 @@ export default function($rootScope, $scope, $element, Wait, $http) {
                   status: 'pending',
                   name: makeid(10),
                   description: '',
-                  config: fileName,
                   domain: $scope.domain,
                   action: [action.id],
                   prev_step_id: $scope.parentIndex || null
@@ -170,17 +163,6 @@ export default function($rootScope, $scope, $element, Wait, $http) {
                       $rootScope.isConfigUploaded[$scope.index].id = $scope.recordId;
                       Wait("stop");
                     } else {
-                      if (
-                        $rootScope.isConfigUploaded.length < $scope.domainsList.length
-                      ) {
-                        $rootScope.isConfigUploaded.push({
-                          description: "",
-                          status: "start",
-                          config: null,
-                          domain: null,
-                          prev_step_id: $scope.parentIndex
-                        });
-                      }
                       $scope.status = "successful";
                       $scope.final = {
                         status: "success",

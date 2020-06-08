@@ -57,7 +57,8 @@
       </div>
     </div>
     <div class="pipeline" style="padding-top: 20px;">
-      <button class="btn btn-success" ng-click="handleSave()">Save</button>
+      <button class="btn btn-success" ng-click="handleSave()" ng-if="!isEditing">Save</button>
+      <button class="btn btn-success" ng-click="handleEditTemplate()" ng-if="isEditing">Edit</button>
       <button class="btn" ng-click="handleCancel()">Cancel</button>
     </div>
     <div
@@ -87,7 +88,8 @@
     <p style="font-weight: bold;">Extra variables:</p>
     <div id="jsoneditor" style="width: 400px; height: 400px;"></div>
     <div class="pipeline" style="padding-top: 20px;">
-      <button class="btn btn-success" ng-click="handleSaveAction()">Save</button>
+      <button class="btn btn-success" ng-click="handleSaveAction()" ng-if="!isEditing">Save</button>
+      <button class="btn btn-success" ng-click="handleEditAction()" ng-if="isEditing">Edit</button>
       <button class="btn" ng-click="handleCancel()">Cancel</button>
     </div>
   </div>
@@ -130,8 +132,13 @@
               </at-row-item>
               <div class="at-Row-actions">
                 <at-row-action
+                  icon="fa-pencil"
+                  ng-click="editTemplate(project.id)"
+                >
+                </at-row-action>
+                <at-row-action
                   icon="fa-trash"
-                  ng-click="deleteTemplate(project.id)"
+                  ng-click="deleteTemplate(project.id, false)"
                 >
                 </at-row-action>
               </div>
@@ -219,6 +226,11 @@
               >
               </at-row-item>
               <div class="at-Row-actions">
+                <at-row-action
+                  icon="fa-pencil"
+                  ng-click="editAction(project.id)"
+                >
+                </at-row-action>
                 <at-row-action
                   icon="fa-trash"
                   ng-click="deleteAction(project.id)"
@@ -314,16 +326,6 @@
       ng-options="item as item.name for item in storedTemplates track by item.id"
     >
     </select>
-    <!-- <form method="post" enctype="multipart/form-data">
-      <label for="cnff">Upload configuration file: </label>
-      <input
-        name="cnff"
-        type="file"
-        id="cnff"
-        ng-model="config"
-        file-change="setConfigFile"
-      />
-    </form> -->
     <div class="pipeline">
       <deploy-card
         ng-repeat="(key, value) in $root.isConfigUploaded track by $index"
