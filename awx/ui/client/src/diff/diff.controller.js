@@ -63,28 +63,6 @@ export default [
       Wait('stop')
     })
 
-    // $http({ method: "GET", url: "/diff/environments/" }).then(
-    //   function success(response) {
-    //     $scope.URL = "/diff/environments/";
-    //     $scope.diffEnvironments = {
-    //       model: null,
-    //       versions: response.data.versions.map(version => {
-    //         return { id: version.id, name: version.name };
-    //       })
-    //     };
-    //     $scope.diffErrorMessage = null;
-    //     Wait("stop");
-    //   },
-    //   function error(response) {
-    //     $scope.diffErrorMessage = "Error at "
-    //       .concat("url")
-    //       .concat(" : ")
-    //       .concat(response.statusText);
-    //     $("html, body").animate({ scrollTop: 0 }, "slow");
-    //     Wait("stop");
-    //   }
-    // );
-
     $scope.env1Versions = null;
     $scope.env2Versions = null;
     $scope.version_commit = "v_0.9 16.03.2020";
@@ -129,29 +107,6 @@ export default [
           console.log($scope.env1Versions)
           Wait('stop')
         })
-        // var url = `/diff/environments/${$scope.env1}/`;
-        // $http({ method: "GET", url: url }).then(
-        //   function success(response) {
-        //     $scope.env1Versions = response.data.versions;
-        //     $scope.env1Version = null;
-        //     $scope.diffErrorMessage = null;
-        //     $scope.compareData = null;
-        //     $scope.final = null;
-        //     Wait("stop");
-        //   },
-        //   function error(response) {
-        //     $scope.diffErrorMessage = "Error at "
-        //       .concat(url)
-        //       .concat(" : ")
-        //       .concat(response.statusText);
-        //     $scope.env1Versions = null;
-        //     $scope.env1Version = null;
-        //     $scope.compareData = null;
-        //     $scope.final = null;
-        //     $("html, body").animate({ scrollTop: 0 }, "slow");
-        //     Wait("stop");
-        //   }
-        // );
       }
     };
 
@@ -183,34 +138,6 @@ export default [
         })
       }
     }
-    // $scope.getDataEnv2 = function() {
-    //   if ($scope.env2 !== null) {
-    //     Wait("start");
-    //     var url = `/diff/environments/${$scope.env2}/`;
-    //     $http({ method: "GET", url: url }).then(
-    //       function success(response) {
-    //         $scope.env2Versions = response.data.versions;
-    //         $scope.env2Version = null;
-    //         $scope.diffErrorMessage = null;
-    //         $scope.compareData = null;
-    //         $scope.final = null;
-    //         Wait("stop");
-    //       },
-    //       function error(response) {
-    //         $scope.diffErrorMessage = "Error at "
-    //           .concat(url)
-    //           .concat(" : ")
-    //           .concat(response.statusText);
-    //         $scope.env2Versions = null;
-    //         $scope.env2Version = null;
-    //         $scope.compareData = null;
-    //         $scope.final = null;
-    //         $("html, body").animate({ scrollTop: 0 }, "slow");
-    //         Wait("stop");
-    //       }
-    //     );
-    //   }
-    // };
 
     $scope.getEnvironmentDomain = () => {
       Wait("start");
@@ -237,29 +164,6 @@ export default [
         })
         Wait('stop')
       })
-      // var url = `/diff/commits/${$scope.environmentDomain.id}/`;
-      // $http({ method: "GET", url: url }).then(
-      //   function success(response) {
-      //     $scope.domainVersions = response.data.commits;
-      //     $scope.domainVersion = null;
-      //     $scope.diffErrorMessage = null;
-      //     $scope.compareData = null;
-      //     $scope.final = null;
-      //     Wait("stop");
-      //   },
-      //   function error(response) {
-      //     $scope.diffErrorMessage = "Error at "
-      //       .concat(url)
-      //       .concat(" : ")
-      //       .concat(response.statusText);
-      //     $scope.domainVersions = null;
-      //     $scope.domainVersion = null;
-      //     $scope.compareData = null;
-      //     $scope.final = null;
-      //     $("html, body").animate({ scrollTop: 0 }, "slow");
-      //     Wait("stop");
-      //   }
-      // );
     }
 
     $scope.setCommit = () => {
@@ -424,6 +328,7 @@ export default [
               if (response.data.status === "failed") {
                 $scope.final = { status: "failed", job: response.data.job };
                 $scope.compareData = response.data;
+                $scope.isCalculating = false;
               } else {
                 $scope.job = response.data;
                 let requestJob = () => {
@@ -441,6 +346,7 @@ export default [
                         status: "failed",
                         job: $scope.job.id
                       };
+                      $scope.isCalculating = false;
                       Wait("stop");
                     } else {
                       $http({
