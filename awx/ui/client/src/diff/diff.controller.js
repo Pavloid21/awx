@@ -322,7 +322,7 @@ export default [
           }&v2=${
             $scope.env2Version.tag
           }&composite=${!!$scope.confirmed}&isnode=undefined`;
-          $http({ method: "GET", url: url, timeout: 60 * 1000 }).then(
+          $http({ method: "GET", url: url }).then(
             function success(response) {
               $scope.compareData = {};
               if (response.data.status === "failed") {
@@ -356,7 +356,7 @@ export default [
                         $scope.compareData = response.data.compare.results.find(
                           res => {
                             if (
-                              res.task.indexOf("сompare v_one and v_two") >=
+                              res.task.indexOf("Comparing...") >=
                                 0 &&
                               !!res.event_data.res
                             ) {
