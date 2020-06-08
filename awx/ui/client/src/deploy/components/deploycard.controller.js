@@ -132,38 +132,35 @@ export default function($rootScope, $scope, $element, Wait, $http) {
                 }
               })
               .then(resp => {
+                $scope.recordId = resp.data.id;
                 let requestJob = () => {
                   $http({
                     method: "GET",
                     url: `/api/v2/jobs/${$scope.job}/`
-                  }).then(function success(response) {
+                  }).then((response) => {
                     if (
                       response.data.status !== "successful" &&
                       response.data.status !== "failed"
                     ) {
                       $scope.status = "pending";
-                      setTimeout(() => requestJob(), 30 * 1000);
+                      setTimeout(() => requestJob(), 10 * 1000);
                     } else if (response.data.status === "failed") {
-                      if (
-                        $rootScope.isConfigUploaded.length < $scope.domainsList.length
-                      ) {
-                        $rootScope.isConfigUploaded.push({
-                          description: "",
-                          status: "start",
-                          config: null,
-                          domain: null,
-                          prev_step_id: $scope.parentIndex
-                        });
-                      }
                       $scope.status = "failed";
                       $scope.final = {
                         status: "failed",
                         job: $scope.job.id
                       };
-                      $rootScope.isConfigUploaded[$scope.index].id = $scope.recordId;
+                      $rootScope.isConfigUploaded[$scope.index].status = "failed";
+                      delete $rootScope.isConfigUploaded[$scope.index].name;
+                      $http({
+                        method: 'PATCH',
+                        url: `/api/v2/deploy_history/${$scope.recordId}/`,
+                        data: $rootScope.isConfigUploaded[$scope.index]
+                      })
                       Wait("stop");
                     } else {
                       $scope.status = "successful";
+                      $rootScope.isConfigUploaded[$scope.index].status = "successful";
                       $scope.final = {
                         status: "success",
                         job: $scope.job
@@ -175,7 +172,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
                             return true
                           }
                         });
-                        let extraVars = JSON.parse(deployerAction[0].extra_vars).awx_jobid = $scope.job.id;
+                        let extraVars = JSON.parse(deployerAction[0].extra_vars).deploy_file = `${$scope.job.id}.dp`;
                         $http({
                           method: 'PATCH',
                           url: `/api/v2/action/${deployerAction[0].id}/`,
@@ -201,75 +198,5 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         })
       })
     })
-    // Wait("start");
-    // $http({
-    //   method: "GET",
-    //   url: `/deploy/launch/?inventory=${
-    //     $scope.domain
-    //   }&file=${$rootScope.configFileName ? $rootScope.configFileName.url.replace("/media/", "") : $rootScope.isConfigUploaded[this.index - 1].config}&domain=${
-    //     $scope.domain
-    //   }&prevstep=${$scope.parentIndex || null}&action=${$scope.action}`
-    // }).then(function success(response) {
-    //   if (response.data.status === "failed") {
-    //     $scope.final = { status: "failed", job: response.data.job.job };
-    //     $scope.recordId = response.data.prevStep;
-    //   } else {
-    //     $scope.job = response.data.job;
-    //     $scope.recordId = response.data.prevStep;
-    //     let requestJob = () => {
-    //       $http({
-    //         method: "GET",
-    //         url: `/diff/results/?job=${$scope.job.id}`
-    //       }).then(function success(response) {
-    //         if (
-    //           response.data.status !== "successful" &&
-    //           response.data.status !== "failed"
-    //         ) {
-    //           $scope.status = "pending";
-    //           setTimeout(() => requestJob(), 30 * 1000);
-    //         } else if (response.data.status === "failed") {
-    //           if (
-    //             $rootScope.isConfigUploaded.length < $scope.domainsList.length
-    //           ) {
-    //             $rootScope.isConfigUploaded.push({
-    //               description: "",
-    //               status: "start",
-    //               config: null,
-    //               domain: null,
-    //               prev_step_id: $scope.parentIndex
-    //             });
-    //           }
-    //           $scope.status = "failed";
-    //           $scope.final = {
-    //             status: "failed",
-    //             job: $scope.job.id
-    //           };
-    //           $rootScope.isConfigUploaded[$scope.index].id = $scope.recordId;
-    //           Wait("stop");
-    //         } else {
-    //           if (
-    //             $rootScope.isConfigUploaded.length < $scope.domainsList.length
-    //           ) {
-    //             $rootScope.isConfigUploaded.push({
-    //               description: "",
-    //               status: "start",
-    //               config: null,
-    //               domain: null,
-    //               prev_step_id: $scope.parentIndex
-    //             });
-    //           }
-    //           $scope.status = "successful";
-    //           $scope.final = {
-    //             status: "success",
-    //             job: $scope.job.id
-    //           };
-    //           $rootScope.currentStep = response.data.prevStep;
-    //           Wait("stop");
-    //         }
-    //       });
-    //     };
-    //     requestJob();
-    //   }
-    // });
   };
 }

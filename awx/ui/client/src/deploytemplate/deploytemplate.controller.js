@@ -451,7 +451,7 @@ export default [
       let getNextStep = (prevStepId) => {
         $http({
           method: 'GET',
-          url: `/deploy/next_step/?id=${prevStepId}`
+          url: `/api/v2/deploy_history/?prev_step_id=${prevStepId}`
         }).then(
           function success(response) {
             if (response.data.results.length) {
