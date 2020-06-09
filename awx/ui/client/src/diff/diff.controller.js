@@ -375,18 +375,14 @@ export default [
                         try {
                           (function collapse(k) {
                             var tds = document.querySelectorAll('.pathto')
-                            console.log('length', k, tds.length + 1)
-                            if (k <= tds.length + 11000) {
                                 tds.forEach((item, index) => {
                               if (index > 0 && item.innerHTML === tds[index -1].innerHTML) {
-                                console.log(tds[index-1].innerHTML)
                                 tds[index - 1].rowSpan += 1;
                                 item.remove();
-                                collapse.call(null, k+1)
+                                collapse.call({prevLength: tds.length}, k+1)
                                 throw {};
                               }
                             })
-                            }
                           })(0)
                         } catch(e){
                           console.log(e)
