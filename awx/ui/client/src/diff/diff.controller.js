@@ -372,6 +372,14 @@ export default [
                           Object.keys($scope.final)[0] === undefined;
                         Wait("stop");
                         $scope.isCalculating = false;
+                        var tds = document.querySelectorAll('.pathto')
+                        tds.forEach((item, index) => {
+                            if (index > 0 && item.innerHTML === tds[index -1].innerHTML) {
+                                console.log(tds[index-1].innerHTML)
+                                tds[index - 1].rowSpan += 1;
+                                item.remove();
+                            }
+                        })
                       });
                     }
                   });

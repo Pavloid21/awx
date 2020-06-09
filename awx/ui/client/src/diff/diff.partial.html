@@ -345,7 +345,7 @@ border: 1px solid #c3e6cb; padding-bottom: 20px;">
                     <td class="td_parameter">{{item.parameter}}</td>
                     <td class="td_parameter">{{item.first_diff_value}}</td>
                     <td class="td_parameter">{{item.second_diff_value}}</td>
-                    <td class="td_parameter">{{item.path_to_parameter}}</td>
+                    <td rowspan="1" class="td_parameter pathto">{{item.path_to_parameter}}</td>
                   </tr>
                   <!-- DELETED AND ADDED OBJECTS -->
                   <tr ng-if="key === 'object_deleted_from_second' || key === 'object_added_in_second'">
