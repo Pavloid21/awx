@@ -420,7 +420,7 @@ export default [
       );
     };
 
-    $scope.getSteps = () => {
+    $scope.getSteps = (idx, spentItem) => {
       let cardList = [];
       Wait('start');
       (function cards(id) {
@@ -430,7 +430,11 @@ export default [
             url: `/api/v2/deploy_history/${$scope.selected.item.deployHistoryIds[id]}/`
           }).then(
             function success(response) {
-              cardList.push(response.data)
+              if (idx !== undefined && spentItem && idx === id) {
+                cardList[idx] = spentItem;
+              } else {
+                cardList.push(response.data)
+              }
               Wait('stop');
               cards.call(null, id + 1);
             },
@@ -443,6 +447,8 @@ export default [
       })(0)
       $rootScope.isConfigUploaded = cardList;
     }
+
+    $rootScope.getSteps = $scope.getSteps;
 
     $scope.historyRowClick = (item) => {
       $scope.displayView = 'pipeline';
