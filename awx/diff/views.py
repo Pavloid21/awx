@@ -197,7 +197,7 @@ class DownloadPDF(View):
 
 class ReadDiffJSON(View):
     def get(self, request, *args, **kwargs):
-        file_path = os.path.join(settings.MEDIA_ROOT + '/' + request.GET['job'] + '/', 'changes.json')
+        file_path = os.path.join(settings.MEDIA_ROOT + '/' + request.GET['job'] + '/', request.GET['file'])
         if os.path.exists(file_path):
                 fh = open(file_path, 'rb')
                 file_data = fh.read()

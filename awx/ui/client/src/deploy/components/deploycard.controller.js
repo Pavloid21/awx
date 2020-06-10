@@ -108,7 +108,6 @@ export default function($rootScope, $scope, $element, Wait, $http) {
 
   let throwJobId = () => {
     let complitedItem = $rootScope.isConfigUploaded[$scope.index];
-    $rootScope.getSteps($scope.index, complitedItem);
     if ($scope.ispicker) {
       let deployerStep = $scope.deployList[0];
       $http({
@@ -126,11 +125,38 @@ export default function($rootScope, $scope, $element, Wait, $http) {
             extra_vars: JSON.stringify(extraVars),
             job_templates: responseAction.data.job_templates
           }
+        }).then(successPatch => {
+          $http({
+            method: 'GET',
+            url: `/diff/read_json/?job=${$rootScope.job}&file=forDeploy.json`
+          }).then(successJsonData => {
+            $scope.commitStrings = JSON.stringify(successJsonData.data.results).split('\n');
+            $scope.showPopup = true;
+          })
         })
       })
     } else if ($scope.isdeployer) {
 
     }
+    $scope.showPopup = true;
+  }
+
+  $scope.closePopup = () => {
+    $scope.showPopup = false;
+    let complitedItem = $rootScope.isConfigUploaded[$scope.index];
+    $rootScope.getSteps($scope.index, complitedItem);
+  }
+
+  $scope.confirmChanges = () => {
+    $scope.showPopup = false;
+    let complitedItem = $rootScope.isConfigUploaded[$scope.index];
+    $rootScope.getSteps($scope.index, complitedItem);
+  }
+
+  $scope.declaimChanges = () => {
+    $scope.showPopup = false;
+    let complitedItem = $rootScope.isConfigUploaded[$scope.index];
+    $rootScope.getSteps($scope.index, complitedItem);
   }
 
   $scope.deployConfig = index => {

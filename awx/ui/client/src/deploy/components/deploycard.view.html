@@ -49,4 +49,31 @@
       ng-if="final === null && status !== 'failed' && status !== 'successful' || status === 'pending'"
     ></div>
   </div>
+  <div class="popup" ng-show="showPopup">
+    <div class="popup-content" style="width: 86%;">
+      <div class="popup-header">
+        <span class="close" ng-click="closePopup()">&times;</span>
+        <h4>Upcoming changes</h4>
+      </div>
+      <div class="popup-body">
+        <div style="overflow: auto; max-height: 400px;">
+          <div class="DashboardGraphs" ng-show="commitStrings" style="text-align: left; padding: 20px 10px; margin-bottom: 20px;">
+            <div ng-repeat="str in commitStrings">
+              {{str}}
+            </div>
+            <div ng-repeat="hash in commitHashStr">
+              {{hash}}
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary" ng-click="confirmChanges()">
+          <i class="fa fa-play-circle"></i>
+          <span>Apply</span>
+        </button>
+        <button class="btn" ng-click="declaimChanges()" ng-if="!showCompleted">
+          <span>Cancel</span>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

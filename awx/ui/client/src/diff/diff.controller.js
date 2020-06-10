@@ -377,7 +377,7 @@ export default [
                     } else {
                       $http({
                         method: "GET",
-                        url: `/diff/read_json/?job=${$scope.job.id}`
+                        url: `/diff/read_json/?job=${$scope.job.id}&file=changes.json`
                       }).then(function success(response) {
                         $scope.compareData = response.data
                         $scope.final = $scope.compareData.results;
@@ -480,20 +480,6 @@ export default [
         document.body.removeChild(link);
         Wait('stop')
       })
-      // Wait("start");
-      // let quotes = document.getElementById("printContainer");
-      // let pdf = new jsPDF("p", "pt", "letter");
-      // pdf.html(quotes, {
-      //   html2canvas: {
-      //     width: 500,
-      //     windowWidth: 500,
-      //     scale: 0.62
-      //   },
-      //   callback: () => {
-      //     pdf.save();
-      //     Wait("stop");
-      //   }
-      // });
     };
 
     $scope.PrintDiv = () => {
