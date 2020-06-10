@@ -29,6 +29,32 @@ export default [
 
     $scope.storedJobs = Dataset.data.results;
     $scope.allowCompareVersions = false;
+    
+    var config = { attributes: true, subtree: true };
+    
+    var callback = function(mutations) {
+      console.log('CHANGES HOOK:>> ', mutations);
+      function union() {
+        var tds = document.querySelectorAll(`.${this.class}`)
+        tds.forEach((item, index) => {
+          if (index > 0 && item.innerHTML === tds[index -1].innerHTML) {
+            tds[index - 1].rowSpan += 1;
+            item.remove();
+            union.call(this)
+            throw {}
+          }
+        })
+      }
+      try {
+        let pathto = union.bind({class: 'pathto'});
+        pathto();
+      } catch (e) {
+        console.log(e)
+      }
+    }
+
+    var observer = new MutationObserver(callback);
+    observer.observe(document, config);
 
     //CLONE REPOS
     $http({
@@ -351,23 +377,10 @@ export default [
                     } else {
                       $http({
                         method: "GET",
-                        url: `/diff/final/?job=${$scope.job.id}&status=successful`
+                        url: `/diff/read_json/?job=${$scope.job.id}`
                       }).then(function success(response) {
-                        $scope.compareData = response.data.compare.results.find(
-                          res => {
-                            if (
-                              res.task.indexOf("Comparing...") >=
-                                0 &&
-                              !!res.event_data.res
-                            ) {
-                              return true;
-                            }
-                            return false;
-                          }
-                        );
-                        $scope.final = JSON.parse(
-                          $scope.compareData.event_data.res.stdout
-                        );
+                        $scope.compareData = response.data
+                        $scope.final = $scope.compareData.results;
                         $scope.isEmpty =
                           Object.keys($scope.final)[0] === undefined;
                         Wait("stop");
@@ -453,20 +466,34 @@ export default [
     };
 
     $scope.exportPDF = function() {
-      Wait("start");
-      let quotes = document.getElementById("printContainer");
-      let pdf = new jsPDF("p", "pt", "letter");
-      pdf.html(quotes, {
-        html2canvas: {
-          width: 500,
-          windowWidth: 500,
-          scale: 0.62
-        },
-        callback: () => {
-          pdf.save();
-          Wait("stop");
-        }
-      });
+      Wait('start')
+      $http({
+        method: 'GET',
+        url: `/diff/download_pdf/?job=${$scope.job.id}`
+      }).then(function success(response) {
+        console.log(response)
+        var link = document.createElement("a");
+        link.download = name;
+        link.href = `/diff/download_pdf/?job=${$scope.job.id}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        Wait('stop')
+      })
+      // Wait("start");
+      // let quotes = document.getElementById("printContainer");
+      // let pdf = new jsPDF("p", "pt", "letter");
+      // pdf.html(quotes, {
+      //   html2canvas: {
+      //     width: 500,
+      //     windowWidth: 500,
+      //     scale: 0.62
+      //   },
+      //   callback: () => {
+      //     pdf.save();
+      //     Wait("stop");
+      //   }
+      // });
     };
 
     $scope.PrintDiv = () => {

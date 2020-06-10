@@ -106,6 +106,33 @@ export default function($rootScope, $scope, $element, Wait, $http) {
     $rootScope.isConfigUploaded.splice($scope.index, 1);
   }
 
+  let throwJobId = () => {
+    let complitedItem = $rootScope.isConfigUploaded[$scope.index];
+    $rootScope.getSteps($scope.index, complitedItem);
+    if ($scope.ispicker) {
+      let deployerStep = $scope.deployList[0];
+      $http({
+        method: 'GET',
+        url: `/api/v2/action/${deployerStep.action[0]}/`
+      }).then(responseAction => {
+        let extraVars = JSON.parse(responseAction.data.extra_vars);
+        extraVars.deploy_vars = $rootScope.job;
+        $http({
+          method: 'PATCH',
+          url: `/api/v2/action/${responseAction.data.id}/`,
+          data: {
+            description: '',
+            name: responseAction.data.name,
+            extra_vars: JSON.stringify(extraVars),
+            job_templates: responseAction.data.job_templates
+          }
+        })
+      })
+    } else if ($scope.isdeployer) {
+
+    }
+  }
+
   $scope.deployConfig = index => {
     $scope.final = null;
     let action = null;
@@ -171,30 +198,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
                         url: `/api/v2/deploy_history/${$scope.recordId}/`,
                         data: $rootScope.isConfigUploaded[$scope.index]
                       }).then((patchPesponse) => {
-                        let complitedItem = $rootScope.isConfigUploaded[$scope.index];
-                        $rootScope.getSteps($scope.index, complitedItem);
-                        if ($scope.ispicker) {
-                          let deployerStep = $scope.deployList[0];
-                          $http({
-                            method: 'GET',
-                            url: `/api/v2/action/${deployerStep.action[0]}/`
-                          }).then(responseAction => {
-                            let extraVars = JSON.parse(responseAction.data.extra_vars);
-                            extraVars.deploy_file = `${$rootScope.job}.dp`;
-                            $http({
-                              method: 'PATCH',
-                              url: `/api/v2/action/${responseAction.data.id}/`,
-                              data: {
-                                description: '',
-                                name: responseAction.data.name,
-                                extra_vars: JSON.stringify(extraVars),
-                                job_templates: responseAction.data.job_templates
-                              }
-                            })
-                          })
-                        } else if ($scope.isdeployer) {
-  
-                        }
+                        throwJobId();
                       })
                       Wait("stop");
                     } else {
@@ -211,30 +215,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
                         url: `/api/v2/deploy_history/${$scope.recordId}/`,
                         data: $rootScope.isConfigUploaded[$scope.index]
                       }).then((patchPesponse) => {
-                        let complitedItem = $rootScope.isConfigUploaded[$scope.index];
-                        $rootScope.getSteps($scope.index, complitedItem);
-                        if ($scope.ispicker) {
-                          let deployerStep = $scope.deployList[0];
-                          $http({
-                            method: 'GET',
-                            url: `/api/v2/action/${deployerStep.action[0]}/`
-                          }).then(responseAction => {
-                            let extraVars = JSON.parse(responseAction.data.extra_vars);
-                            extraVars.deploy_file = `${$rootScope.job}.dp`;
-                            $http({
-                              method: 'PATCH',
-                              url: `/api/v2/action/${responseAction.data.id}/`,
-                              data: {
-                                description: '',
-                                name: responseAction.data.name,
-                                extra_vars: JSON.stringify(extraVars),
-                                job_templates: responseAction.data.job_templates
-                              }
-                            })
-                          })
-                        } else if ($scope.isdeployer) {
-  
-                        }
+                        throwJobId();
                       })
                       Wait("stop");
                     }

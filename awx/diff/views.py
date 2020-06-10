@@ -81,7 +81,7 @@ class VersionList(View):
 
 class DiffView(View):
     def getJob(self, obj):
-        getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + str(obj['job']), auth=(LOGIN, PASS))
+        getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + str(obj['job']) + '/', auth=(LOGIN, PASS), verify=False)
         temp = json.dumps(getResponse.json())
         result = json.loads(temp)
         global JOB_LAUNCHED
@@ -91,9 +91,11 @@ class DiffView(View):
 
     def get(self, request, *args, **kwargs):
         path = AWX_API_PATH
-        invId = 3
+        invId = 2
         if request.GET['isnode'] == 'production':
             path = 'http://localhost'
+
+        print(path + '/api/v2/job_templates/'+ os.environ.get('DIFF_JOB_ID') +'/launch/')
         
         jobLaunchResponse = requests.post(path + '/api/v2/job_templates/'+ os.environ.get('DIFF_JOB_ID') +'/launch/', json={
             'extra_vars': {
@@ -105,7 +107,8 @@ class DiffView(View):
             },
             'inventory': invId
         },
-        auth=(LOGIN, PASS))
+        auth=(LOGIN, PASS),
+        verify=False)
         jsonObj = jobLaunchResponse.json()
         jsonDump = json.dumps(jsonObj)
         obj = json.loads(jsonDump)
@@ -116,7 +119,7 @@ class DiffView(View):
         
 class DiffResultView(View):
     def get(self, request, *args, **kwargs):
-        getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + request.GET['job'], auth=(LOGIN, PASS))
+        getResponse = requests.get(AWX_API_PATH + '/api/v2/jobs/' + request.GET['job'] + '/', auth=(LOGIN, PASS), verify=False)
         temp = json.dumps(getResponse.json())
         result = json.loads(temp)
         return JsonResponse(result)
@@ -124,7 +127,6 @@ class DiffResultView(View):
 class DiffFinalView(View):
     def get(self, request, *args, **kwargs):
         page = 1
-        print(request.GET.keys())
         if 'page' in request.GET.keys():
             page = request.GET['page']
         else:
@@ -179,8 +181,28 @@ class Download(View):
                 file_data = fh.read()
                 response = HttpResponse(file_data, content_type='application/octet-stream')
                 response['Content-Disposition'] = 'attachment; filename=' + request.GET['file']
-                # response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
                 return response
+        raise Http404
+
+class DownloadPDF(View):
+    def get(self, request, *args, **kwargs):
+        file_path = os.path.join(settings.MEDIA_ROOT + '/' + request.GET['job'] + '/', 'changes.pdf')
+        if os.path.exists(file_path):
+                fh = open(file_path, 'rb')
+                file_data = fh.read()
+                response = HttpResponse(file_data, content_type='application/octet-stream')
+                response['Content-Disposition'] = 'attachment; filename=changes.pdf'
+                return response
+        raise Http404
+
+class ReadDiffJSON(View):
+    def get(self, request, *args, **kwargs):
+        file_path = os.path.join(settings.MEDIA_ROOT + '/' + request.GET['job'] + '/', 'changes.json')
+        if os.path.exists(file_path):
+                fh = open(file_path, 'rb')
+                file_data = fh.read()
+                print(file_data)
+                return JsonResponse({'results': json.loads(file_data)})
         raise Http404
 
 class DownloadDSL(View):
