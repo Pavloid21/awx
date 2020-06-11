@@ -390,23 +390,8 @@ export default [
                           Object.keys($scope.final)[0] === undefined;
                         Wait("stop");
                         $scope.isCalculating = false;
-                        function union() {
-                          var tds = document.querySelectorAll(`.${this.class}`)
-                          tds.forEach((item, index) => {
-                            if (index > 0 && item.innerHTML === tds[index -1].innerHTML) {
-                              tds[index - 1].rowSpan += 1;
-                              item.remove();
-                              union.call(this)
-                              throw {}
-                            }
-                          })
-                        }
-                        try {
-                          let pathto = union.bind({class: 'pathto'});
-                          pathto();
-                        } catch (e) {
-                          console.log(e)
-                        }
+                      }, () => {
+                        $scope.isEmpty = true;
                       });
                     }
                   });
