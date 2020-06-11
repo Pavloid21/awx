@@ -203,7 +203,7 @@
                     <div>{{parse(project.extra_vars).compare_version_two}}</div>
                   </div>
                 </div>
-                
+                <div ng-bind="project.created | date:'dd-MM-yyyy HH:mm:ss'"></div>                
               </div>
               <!-- <at-truncate
                 string="{{ project.scm_revision }}"
@@ -240,7 +240,7 @@
       collection="storedJobs"
       dataset="dataset"
       iterator="diff"
-      base-path="diff/jobs"
+      base-path="/api/v2/jobs"
     >
     </paginate>
   </div>

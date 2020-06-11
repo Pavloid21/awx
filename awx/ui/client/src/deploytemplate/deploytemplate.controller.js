@@ -123,7 +123,7 @@ export default [
     };
     $scope.historyClick = () => {
       $scope.displayView = "history";
-      $scope.isAllowRun = false;
+      // $scope.isAllowRun = false;
       $scope.isAllowDelete = false;
       $rootScope.isConfigUploaded = [];
     };
@@ -420,8 +420,9 @@ export default [
       );
     };
 
-    $scope.getSteps = (idx, spentItem) => {
+    $scope.getSteps = (idx, spentItem, nextItem) => {
       let cardList = [];
+      let skip = null;
       Wait('start');
       (function cards(id) {
         if (id < $scope.selected.item.deployHistoryIds.length) {
@@ -430,9 +431,11 @@ export default [
             url: `/api/v2/deploy_history/${$scope.selected.item.deployHistoryIds[id]}/`
           }).then(
             function success(response) {
-              if (idx !== undefined && spentItem && idx === id) {
+              if (idx !== undefined && spentItem && nextItem && idx === id) {
                 cardList[idx] = spentItem;
-              } else {
+                cardList[idx + 1] = nextItem;
+                skip = idx + 1;
+              } else if (id !== skip) {
                 cardList.push(response.data)
               }
               Wait('stop');
@@ -454,6 +457,7 @@ export default [
       $scope.displayView = 'pipeline';
       $rootScope.isConfigUploaded = [];
       $rootScope.isConfigUploaded.push(item);
+      $rootScope.fieldsDisabled = true;
       let getNextStep = (prevStepId) => {
         $http({
           method: 'GET',

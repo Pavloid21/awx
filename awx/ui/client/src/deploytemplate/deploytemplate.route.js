@@ -23,7 +23,8 @@ export default {
       value: {
         page_size: 10,
         order_by: '-created',
-        not__status: 'start'
+        not__status: 'start',
+        prev_step_id__isnull: 1
       }
     },
     action_search: {

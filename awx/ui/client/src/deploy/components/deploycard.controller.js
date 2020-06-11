@@ -50,7 +50,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   $scope.watcher = $rootScope.isConfigUploaded;
   this.$onInit = function() {
     // Init from history if exists
-    console.log("INIT", this.index, $rootScope.isConfigUploaded[this.index].status)
+    console.log("INIT", this.index, $rootScope.isConfigUploaded[this.index].status, $rootScope.isConfigUploaded[this.index].id)
     if (this.index > 0) {
       if ($rootScope.isConfigUploaded[this.index - 1].status !== 'start' &&
           $rootScope.isConfigUploaded[this.index - 1].status !== 'pending') {
@@ -86,6 +86,55 @@ export default function($rootScope, $scope, $element, Wait, $http) {
     }
   };
 
+  let requestJob = () => {
+    $http({
+      method: "GET",
+      url: `/api/v2/jobs/${$scope.job}/`
+    }).then((response) => {
+      if (
+        response.data.status !== "successful" &&
+        response.data.status !== "failed"
+      ) {
+        $scope.status = "pending";
+        setTimeout(() => requestJob(), 10 * 1000);
+      } else if (response.data.status === "failed") {
+        $scope.status = "failed";
+        $scope.final = {
+          status: "failed",
+          job: $scope.job.id
+        };
+        $rootScope.isConfigUploaded[$scope.index].status = "failed";
+        delete $rootScope.isConfigUploaded[$scope.index].name;
+        $http({
+          method: 'PATCH',
+          url: `/api/v2/deploy_history/${$scope.recordId}/`,
+          data: $rootScope.isConfigUploaded[$scope.index]
+        }).then((patchPesponse) => {
+          throwJobId(patchPesponse.data.id);
+        })
+        Wait("stop");
+      } else {
+        $scope.status = "successful";
+        $scope.final = {
+          status: "success",
+          job: $scope.job
+        };
+        $rootScope.isConfigUploaded[$scope.index].status = "successful";
+        delete $rootScope.isConfigUploaded[$scope.index].name;
+        $rootScope.currentStep = response.data.prevStep;
+        $http({
+          method: 'PATCH',
+          url: `/api/v2/deploy_history/${$scope.recordId}/`,
+          data: $rootScope.isConfigUploaded[$scope.index]
+        }).then((patchPesponse) => {
+          $rootScope.isConfigUploaded[$scope.index]= patchPesponse.data;
+          throwJobId(patchPesponse.data.id);
+        })
+        Wait("stop");
+      }
+    });
+  };
+
   $scope.setDomain = () => {
     $rootScope.isConfigUploaded[$scope.index].domain = $scope.domain;
   };
@@ -106,8 +155,12 @@ export default function($rootScope, $scope, $element, Wait, $http) {
     $rootScope.isConfigUploaded.splice($scope.index, 1);
   }
 
-  let throwJobId = () => {
-    let complitedItem = $rootScope.isConfigUploaded[$scope.index];
+  let throwJobId = (historyRecordId) => {
+    if ($scope.index + 1 < $rootScope.isConfigUploaded.length) {
+      $scope.afterComplitedItem = $rootScope.isConfigUploaded[$scope.index + 1];
+      $scope.afterComplitedItem.prev_step_id = historyRecordId;
+      $scope.afterComplitedItem.status = 'start';
+    }
     if ($scope.ispicker) {
       let deployerStep = $scope.deployList[0];
       $http({
@@ -136,7 +189,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         })
       })
     } else if ($scope.isdeployer) {
-
+      
     }
     $scope.showPopup = true;
   }
@@ -150,7 +203,23 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   $scope.confirmChanges = () => {
     $scope.showPopup = false;
     let complitedItem = $rootScope.isConfigUploaded[$scope.index];
-    $rootScope.getSteps($scope.index, complitedItem);
+    delete $scope.afterComplitedItem.id;
+    console.log('$scope.afterComplitedItem :>> ', $scope.afterComplitedItem);
+    if ($scope.afterComplitedItem) {
+      $scope.afterComplitedItem.name = Math.random().toString(36).substring(7);
+      Wait('start')
+      $http({
+        method: 'POST',
+        url: `/api/v2/deploy_history/`,
+        data: $scope.afterComplitedItem
+      }).then((patchedNextItem) => {
+        Wait('stop')
+        $rootScope.isConfigUploaded[$scope.index + 1] = patchedNextItem.data;
+        $rootScope.getSteps($scope.index, complitedItem, $rootScope.isConfigUploaded[$scope.index + 1]);
+      })
+    } else {
+      $rootScope.getSteps($scope.index, complitedItem, $rootScope.isConfigUploaded[$scope.index + 1]);
+    }
   }
 
   $scope.declaimChanges = () => {
@@ -186,70 +255,27 @@ export default function($rootScope, $scope, $element, Wait, $http) {
             .then(launchResponse => {
               $scope.job = launchResponse.data.job;
               $rootScope.job = launchResponse.data.job;
-              $http({
-                method: 'POST',
-                url: '/api/v2/deploy_history/',
-                data: {
-                  status: 'pending',
-                  name: makeid(10),
-                  description: '',
-                  domain: $scope.domain,
-                  action: [action.id],
-                  prev_step_id: $scope.parentIndex || null
-                }
-              })
-              .then(resp => {
-                $scope.recordId = resp.data.id;
-                let requestJob = () => {
-                  $http({
-                    method: "GET",
-                    url: `/api/v2/jobs/${$scope.job}/`
-                  }).then((response) => {
-                    if (
-                      response.data.status !== "successful" &&
-                      response.data.status !== "failed"
-                    ) {
-                      $scope.status = "pending";
-                      setTimeout(() => requestJob(), 10 * 1000);
-                    } else if (response.data.status === "failed") {
-                      $scope.status = "failed";
-                      $scope.final = {
-                        status: "failed",
-                        job: $scope.job.id
-                      };
-                      $rootScope.isConfigUploaded[$scope.index].status = "failed";
-                      delete $rootScope.isConfigUploaded[$scope.index].name;
-                      $http({
-                        method: 'PATCH',
-                        url: `/api/v2/deploy_history/${$scope.recordId}/`,
-                        data: $rootScope.isConfigUploaded[$scope.index]
-                      }).then((patchPesponse) => {
-                        throwJobId();
-                      })
-                      Wait("stop");
-                    } else {
-                      $scope.status = "successful";
-                      $scope.final = {
-                        status: "success",
-                        job: $scope.job
-                      };
-                      $rootScope.isConfigUploaded[$scope.index].status = "successful";
-                      delete $rootScope.isConfigUploaded[$scope.index].name;
-                      $rootScope.currentStep = response.data.prevStep;
-                      $http({
-                        method: 'PATCH',
-                        url: `/api/v2/deploy_history/${$scope.recordId}/`,
-                        data: $rootScope.isConfigUploaded[$scope.index]
-                      }).then((patchPesponse) => {
-                        throwJobId();
-                      })
-                      Wait("stop");
-                    }
-                  });
-                };
+              if (index === 0) {
+                $http({
+                  method: 'POST',
+                  url: '/api/v2/deploy_history/',
+                  data: {
+                    status: 'pending',
+                    name: makeid(10),
+                    description: '',
+                    domain: $scope.domain,
+                    action: [action.id],
+                    prev_step_id: Number.isNaN($scope.parentIndex) ? null : $scope.parentIndex
+                  }
+                })
+                .then(resp => {
+                  $scope.recordId = resp.data.id;
+                  requestJob();
+                })                
+              } else {
+                $scope.recordId = $rootScope.isConfigUploaded[index].id
                 requestJob();
-              })
-
+              }
             })
           }
         })

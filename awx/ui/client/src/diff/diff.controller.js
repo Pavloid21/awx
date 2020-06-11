@@ -99,6 +99,11 @@ export default [
     };
 
     $scope.switchView = (chapter) => {
+      if (chapter === 'compare') {
+        observer.observe(document, config)
+      } else {
+        observer.disconnect()
+      }
       $scope.displayView = chapter
     }
     
@@ -432,29 +437,17 @@ export default [
     $scope.downloadPDFfile = (jobID) => {
       Wait('start')
       $http({
-        method: "GET",
-        url: `/diff/final/?job=${jobID}&status=successful`
+        method: 'GET',
+        url: `/diff/download_pdf/?job=${jobID}`
       }).then(function success(response) {
-        $scope.compareData = response.data.compare.results.find(
-          res => {
-            if (
-              res.task.indexOf("сompare v_one and v_two") >=
-                0 &&
-              !!res.event_data.res
-            ) {
-              return true;
-            }
-            return false;
-          }
-        );
-        $scope.final = JSON.parse(
-          $scope.compareData.event_data.res.stdout
-        );
-        $scope.isEmpty =
-          Object.keys($scope.final)[0] === undefined;
-        Wait("stop");
-        $scope.isList = false;
-      });
+        var link = document.createElement("a");
+        link.download = name;
+        link.href = `/diff/download_pdf/?job=${jobID}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        Wait('stop')
+      })
     }
 
     $scope.collapseView = function(chapter) {
