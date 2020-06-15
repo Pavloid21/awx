@@ -29,6 +29,7 @@ export default [
 
     $scope.storedJobs = Dataset.data.results;
     $scope.allowCompareVersions = false;
+    $scope.confirmed = false;
     
     var config = { attributes: true, subtree: true };
     
@@ -302,6 +303,7 @@ export default [
     }
 
     const browseExistingCompareResults = () => {
+      $scope.final = null;
       let env1 = $scope.diffEnvironments.versions.filter(version => {
         if (version.id === $scope.env1.id) return version;
       });
@@ -310,30 +312,39 @@ export default [
         if (version.id === $scope.env2.id) return version;
       });
       $scope.uiEnv2 = env2[0].name;
-      $scope.storedJobs.filter(job => {
-        if (JSON.parse(job.extra_vars).compare_hash_one === $scope.env1Version.hash &&
-            JSON.parse(job.extra_vars).compare_hash_two === $scope.env2Version.hash) {
-              $scope.job = job;
-              $("#diffCompareButton").css("cursor", "not-allowed");
-              Wait('start');
-              $http({
-                method: "GET",
-                url: `/diff/read_json/?job=${job.id}&file=changes.json`
-              }).then(function success(response) {
-                $scope.compareData = response.data
-                $scope.final = $scope.compareData.results;
-                $scope.isEmpty =
-                  Object.keys($scope.final)[0] === undefined;
-                Wait("stop");
-                $scope.isCalculating = false;
-              }, () => {
-                Wait('stop')
-                $scope.isEmpty = true;
-              });
+      let lastFoundJob = $scope.storedJobs.filter(job => {
+        console.log(JSON.parse(job.extra_vars).composite);
+        let extraVars = JSON.parse(job.extra_vars);
+        if (extraVars.compare_hash_one === $scope.env1Version.hash &&
+            extraVars.compare_hash_two === $scope.env2Version.hash &&
+            extraVars.composite === $scope.confirmed.toString()) {
               return true;
         }
         return false;
-      })
+      });
+      if (lastFoundJob.length) {
+        $scope.job = lastFoundJob[0];
+            $("#diffCompareButton").css("cursor", "not-allowed");
+            $("#diffCompareButton").css("pointer-events", "none");
+            Wait('start');
+            $http({
+              method: "GET",
+              url: `/diff/read_json/?job=${$scope.job.id}&file=changes.json`
+            }).then(function success(response) {
+              $scope.compareData = response.data
+              $scope.final = $scope.compareData.results;
+              $scope.isEmpty =
+                Object.keys($scope.final)[0] === undefined;
+              Wait("stop");
+              $scope.isCalculating = false;
+            }, () => {
+              Wait('stop')
+              $scope.isEmpty = true;
+            });
+      } else {
+        $("#diffCompareButton").css("cursor", "pointer");
+        $("#diffCompareButton").css("pointer-events", "auto");
+      }
     }
 
     $scope.setVersionEnv1 = function() {
@@ -479,6 +490,7 @@ export default [
 
     $scope.setCompareComposite = function() {
       console.log("CHECKBOX", $scope.confirmed);
+      browseExistingCompareResults();
     };
 
     $scope.exportPDF = function() {
