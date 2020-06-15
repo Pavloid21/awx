@@ -121,7 +121,7 @@
         <p ng-show="env1Version.tag === 'current'"><strong>Current</strong></p>
       </div>
       <div class="commit_info">
-        <p ng-bind="env1Version.commit.committed_date | date:'dd-MM-yyyy HH:mm'"></p>
+        <p ng-bind="env1Version.date | date:'dd-MM-yyyy HH:mm'"></p>
         <p><i class="fa fa-user"></i> {{env1Version.author}}</p>
         <p><i class="fa fa-envelope"></i> {{env1Version.email}}</p>
         <p>{{env1Version.target}}</p>
@@ -142,27 +142,6 @@
     </div>
   </div>
 
-  <!-- {{env1Data}}
-{{env2Data}} -->
-
-  <!-- <p><b>Filter</b>
-<input type="text" size="40" ng-model="diffFilter">
-</p> -->
-
-  <!-- <br> -->
-
-  <!-- <p>
-<input type="checkbox" size="40" ng-model="showDiffOnly">
-<b>Show only differencies</b>
-</p>
-
-<p>
-<input type="checkbox" size="40" ng-model="showDiffTables">
-<b>Show as tables</b>
-</p>
-<br>
-<button id="diffReportButton" class="SmartSearch-keyToggle btn" ng-click="generatePDF()">Report</button>    
-<br><br> -->
   </div>
   <!-- VIEW HISTORY -->
   <div class="DashboardGraphs" ng-show="displayView === 'history' && !!isList">
@@ -205,10 +184,6 @@
                 </div>
                 <div ng-bind="project.created | date:'dd-MM-yyyy HH:mm:ss'"></div>                
               </div>
-              <!-- <at-truncate
-                string="{{ project.scm_revision }}"
-                maxLength="7"
-              ></at-truncate> -->
             </div>
             <at-row-item
               label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_DESCRIPTION')}}"
@@ -304,11 +279,11 @@ border: 1px solid #c3e6cb; padding-bottom: 20px;">
     >
       <tr ng-click="collapseView(key)" class="clps">
         <td ng-if="key === 'new_value'">New values</td>
-        <td ng-if="key === 'deleted_from_second'" ng-bind-template="Deleted from {{uiEnv2}} ({{env2Version.name}})"></td>
-        <td ng-if="key === 'added_in_second'" ng-bind-template="Added to {{uiEnv2}} ({{env2Version.name}})"></td>
+        <td ng-if="key === 'deleted_from_second'" ng-bind-template="Deleted from {{uiEnv2}} ({{env2Version.tag}})"></td>
+        <td ng-if="key === 'added_in_second'" ng-bind-template="Added to {{uiEnv2}} ({{env2Version.tag}})"></td>
         <td ng-if="key === 'changes'">Changes</td>
-        <td ng-if="key === 'object_deleted_from_second'" ng-bind-template="Objects deleted from {{uiEnv2}} ({{env2Version.name}})"></td>
-        <td ng-if="key === 'object_added_in_second'" ng-bind-template="Objects added to {{uiEnv2}} ({{env2Version.name}})"></td>
+        <td ng-if="key === 'object_deleted_from_second'" ng-bind-template="Objects deleted from {{uiEnv2}} ({{env2Version.tag}})"></td>
+        <td ng-if="key === 'object_added_in_second'" ng-bind-template="Objects added to {{uiEnv2}} ({{env2Version.tag}})"></td>
       </tr>
       <tr ng_class="hide_{{key}}" ng-hide="isCollapse['{{key}}'] === true">
         <td>
@@ -337,8 +312,8 @@ border: 1px solid #c3e6cb; padding-bottom: 20px;">
                   <!-- CHANGES & NEW VALUES -->
                   <tr ng-if="key === 'changes' || key === 'new_value'">
                     <td><strong>parameter</strong></td>
-                    <td><strong ng-bind-template="{{uiEnv1}} ({{env1Version.name}})"></strong></td>
-                    <td><strong ng-bind-template="{{uiEnv2}} ({{env2Version.name}})"></strong></td>
+                    <td><strong ng-bind-template="{{uiEnv1}} ({{env1Version.tag}})"></strong></td>
+                    <td><strong ng-bind-template="{{uiEnv2}} ({{env2Version.tag}})"></strong></td>
                     <td><strong>path to parameter</strong></td>
                   </tr>
                   <tr ng-repeat="item in final[key][k][k1]" ng-if="key === 'changes' || key === 'new_value'">

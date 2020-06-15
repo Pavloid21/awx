@@ -1,5 +1,5 @@
-import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import _ from "lodash";
 window.html2canvas = html2canvas;
 
 export default [
@@ -192,6 +192,7 @@ export default [
             t.tag = t.tag.replace('refs/tags/', '');
             return t;
           }))
+          $scope.domainVersions = _.uniqBy($scope.domainVersions, 'hash')
         })
         Wait('stop')
       })
@@ -300,6 +301,41 @@ export default [
       );
     }
 
+    const browseExistingCompareResults = () => {
+      let env1 = $scope.diffEnvironments.versions.filter(version => {
+        if (version.id === $scope.env1.id) return version;
+      });
+      $scope.uiEnv1 = env1[0].name;
+      let env2 = $scope.diffEnvironments.versions.filter(version => {
+        if (version.id === $scope.env2.id) return version;
+      });
+      $scope.uiEnv2 = env2[0].name;
+      $scope.storedJobs.filter(job => {
+        if (JSON.parse(job.extra_vars).compare_hash_one === $scope.env1Version.hash &&
+            JSON.parse(job.extra_vars).compare_hash_two === $scope.env2Version.hash) {
+              $scope.job = job;
+              $("#diffCompareButton").css("cursor", "not-allowed");
+              Wait('start');
+              $http({
+                method: "GET",
+                url: `/diff/read_json/?job=${job.id}&file=changes.json`
+              }).then(function success(response) {
+                $scope.compareData = response.data
+                $scope.final = $scope.compareData.results;
+                $scope.isEmpty =
+                  Object.keys($scope.final)[0] === undefined;
+                Wait("stop");
+                $scope.isCalculating = false;
+              }, () => {
+                Wait('stop')
+                $scope.isEmpty = true;
+              });
+              return true;
+        }
+        return false;
+      })
+    }
+
     $scope.setVersionEnv1 = function() {
       $scope.compareData = null;
       $scope.final = null;
@@ -310,6 +346,7 @@ export default [
       });
       if ($scope.env1Version !== null && $scope.env2Version !== null) {
         $("#diffCompareButton").css("cursor", "pointer");
+        browseExistingCompareResults();
       } else {
         $("#diffCompareButton").css("cursor", "not-allowed");
       }
@@ -325,6 +362,7 @@ export default [
       });
       if ($scope.env1Version !== null && $scope.env2Version !== null) {
         $("#diffCompareButton").css("cursor", "pointer");
+        browseExistingCompareResults();
       } else {
         $("#diffCompareButton").css("cursor", "not-allowed");
       }
