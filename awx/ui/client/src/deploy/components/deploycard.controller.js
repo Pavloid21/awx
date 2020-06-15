@@ -4,6 +4,11 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   this.allowDelete = null;
   $scope.domainsList = [];
   $scope.isDisabledFields = $rootScope.fieldsDisabled;
+  $scope.isCollapse = {
+    changes: false,
+    added: false,
+    deleted: false
+  };
   function makeid(length) {
     var result           = '';
     var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -86,6 +91,17 @@ export default function($rootScope, $scope, $element, Wait, $http) {
     }
   };
 
+  let patchStep = () => {
+    $http({
+      method: 'PATCH',
+      url: `/api/v2/deploy_history/${$scope.recordId}/`,
+      data: $rootScope.isConfigUploaded[$scope.index]
+    }).then((patchPesponse) => {
+      $rootScope.isConfigUploaded[$scope.index]= patchPesponse.data;
+      throwJobId(patchPesponse.data.id);
+    })
+  }
+
   let requestJob = () => {
     $http({
       method: "GET",
@@ -105,13 +121,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         };
         $rootScope.isConfigUploaded[$scope.index].status = "failed";
         delete $rootScope.isConfigUploaded[$scope.index].name;
-        $http({
-          method: 'PATCH',
-          url: `/api/v2/deploy_history/${$scope.recordId}/`,
-          data: $rootScope.isConfigUploaded[$scope.index]
-        }).then((patchPesponse) => {
-          throwJobId(patchPesponse.data.id);
-        })
+        patchStep();
         Wait("stop");
       } else {
         $scope.status = "successful";
@@ -122,14 +132,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         $rootScope.isConfigUploaded[$scope.index].status = "successful";
         delete $rootScope.isConfigUploaded[$scope.index].name;
         $rootScope.currentStep = response.data.prevStep;
-        $http({
-          method: 'PATCH',
-          url: `/api/v2/deploy_history/${$scope.recordId}/`,
-          data: $rootScope.isConfigUploaded[$scope.index]
-        }).then((patchPesponse) => {
-          $rootScope.isConfigUploaded[$scope.index]= patchPesponse.data;
-          throwJobId(patchPesponse.data.id);
-        })
+        patchStep();
         Wait("stop");
       }
     });
@@ -184,15 +187,22 @@ export default function($rootScope, $scope, $element, Wait, $http) {
             url: `/diff/read_json/?job=${$rootScope.job}&file=forDeploy.json`
           }).then(successJsonData => {
             $scope.commitStrings = JSON.stringify(successJsonData.data.results).split('\n');
+            $scope.tableData = successJsonData.data.results;
             $scope.showPopup = true;
           })
         })
       })
     } else if ($scope.isdeployer) {
-      
+      $scope.confirmChanges();
+    } else {
+      $scope.confirmChanges();
     }
-    $scope.showPopup = true;
+    // $scope.showPopup = true;
   }
+
+  $scope.collapseView = function(chapter) {
+    $scope.isCollapse[chapter] = !$scope.isCollapse[chapter];
+  };
 
   $scope.closePopup = () => {
     $scope.showPopup = false;
