@@ -103,6 +103,8 @@ class DiffView(View):
                 'compare_domain_two': request.GET['env2'],
                 'compare_version_one': request.GET['v1'],
                 'compare_version_two': request.GET['v2'],
+                'compare_hash_one': self.kwargs['left_version_id'],
+                'compare_hash_two': self.kwargs['right_version_id'],
                 'composite': request.GET['composite']
             },
             'inventory': invId
