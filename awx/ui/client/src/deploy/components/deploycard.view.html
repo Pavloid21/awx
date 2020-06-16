@@ -21,6 +21,10 @@
       <input id="setuper" ng-disabled="isDisabledFields" type="checkbox" ng-model="isdeployer" ng-change="setDeployer()"/>
       <label for="setuper">Deployer step</label>
     </div>
+    <div class="log" ng-if="current.job">
+      <i class="fa fa-eye"></i>
+      <span class="log_view" ng-click="handleViewLog()">View log</span>
+    </div>
     <div
       class="play-button"
       ng-class="{disabledButton: !domain || prevStepNotComplited}"
@@ -142,7 +146,7 @@
             </div>
           </div>
         </div>
-        <button class="btn btn-primary" ng-click="confirmChanges()">
+        <button class="btn btn-primary" ng-click="confirmChanges()" ng-show="!canNotApply">
           <i class="fa fa-play-circle"></i>
           <span>Apply</span>
         </button>

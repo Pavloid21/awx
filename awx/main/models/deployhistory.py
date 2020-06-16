@@ -18,5 +18,13 @@ class DeployHistory(CommonModel, ResourceMixin):
     domain = models.CharField(max_length=256)
     setuper = models.BooleanField(default=None)
     picker = models.BooleanField(default=None)
+    job = models.ForeignKey(
+        'Job',
+        related_name='%(class)ss',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
     action = models.ManyToManyField("Action", blank=True)
     prev_step_id = models.IntegerField(blank=True, null=True)

@@ -55,7 +55,6 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   $scope.watcher = $rootScope.isConfigUploaded;
   this.$onInit = function() {
     // Init from history if exists
-    console.log("INIT", this.index, $rootScope.isConfigUploaded[this.index].status, $rootScope.isConfigUploaded[this.index].id)
     if (this.index > 0) {
       if ($rootScope.isConfigUploaded[this.index - 1].status !== 'start' &&
           $rootScope.isConfigUploaded[this.index - 1].status !== 'pending') {
@@ -89,6 +88,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         $scope.parentIndex = $rootScope.isConfigUploaded[this.index - 1].id;
       }
     }
+    $scope.current = $rootScope.isConfigUploaded[this.index];
   };
 
   let patchStep = () => {
@@ -120,6 +120,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
           job: $scope.job.id
         };
         $rootScope.isConfigUploaded[$scope.index].status = "failed";
+        $rootScope.isConfigUploaded[$scope.index].job = $scope.job;
         delete $rootScope.isConfigUploaded[$scope.index].name;
         patchStep();
         Wait("stop");
@@ -130,6 +131,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
           job: $scope.job
         };
         $rootScope.isConfigUploaded[$scope.index].status = "successful";
+        $rootScope.isConfigUploaded[$scope.index].job = $scope.job;
         delete $rootScope.isConfigUploaded[$scope.index].name;
         $rootScope.currentStep = response.data.prevStep;
         patchStep();
@@ -137,6 +139,32 @@ export default function($rootScope, $scope, $element, Wait, $http) {
       }
     });
   };
+
+  $scope.handleViewLog = () => {
+    if ($scope.ispicker) {
+      $http({
+        method: 'GET',
+        url: `/diff/read_json/?job=${$scope.current.job}&file=forDeploy.json`
+      }).then(successJsonData => {
+        $scope.commitStrings = JSON.stringify(successJsonData.data.results).split('\n');
+        $scope.tableData = successJsonData.data.results;
+        $scope.canNotApply = true;
+        $scope.showPopup = true;
+      })
+    } else if ($scope.isdeployer) {
+      $http({
+        method: 'GET',
+        url: `/diff/read_json/?job=${$scope.current.job}&file=json2rest.log`
+      }).then(successJsonData => {
+        $scope.commitStrings = successJsonData.data.results.split('\n');
+        $scope.tableData = successJsonData.data.results;
+        $scope.showPopup = true;
+        $scope.canNotApply = true;
+      })
+    } else {
+
+    }
+  }
 
   $scope.setDomain = () => {
     $rootScope.isConfigUploaded[$scope.index].domain = $scope.domain;
@@ -162,6 +190,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
     if ($scope.index + 1 < $rootScope.isConfigUploaded.length) {
       $scope.afterComplitedItem = $rootScope.isConfigUploaded[$scope.index + 1];
       $scope.afterComplitedItem.prev_step_id = historyRecordId;
+      $scope.afterComplitedItem.job = null;
       $scope.afterComplitedItem.status = 'start';
     }
     if ($scope.ispicker) {
@@ -193,7 +222,14 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         })
       })
     } else if ($scope.isdeployer) {
-      $scope.confirmChanges();
+      $http({
+        method: 'GET',
+        url: `/diff/read_json/?job=${$rootScope.job}&file=json2rest.log`
+      }).then(successJsonData => {
+        $scope.commitStrings = successJsonData.data.results.split('\n');
+        $scope.tableData = successJsonData.data.results;
+        $scope.showPopup = true;
+      })
     } else {
       $scope.confirmChanges();
     }
@@ -207,7 +243,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   $scope.closePopup = () => {
     $scope.showPopup = false;
     let complitedItem = $rootScope.isConfigUploaded[$scope.index];
-    $rootScope.getSteps($scope.index, complitedItem);
+    $rootScope.getSteps($scope.index, complitedItem, $rootScope.isConfigUploaded[$scope.index + 1]);
   }
 
   $scope.confirmChanges = () => {
@@ -235,7 +271,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   $scope.declaimChanges = () => {
     $scope.showPopup = false;
     let complitedItem = $rootScope.isConfigUploaded[$scope.index];
-    $rootScope.getSteps($scope.index, complitedItem);
+    $rootScope.getSteps($scope.index, complitedItem, $rootScope.isConfigUploaded[$scope.index + 1]);
   }
 
   $scope.deployConfig = index => {
@@ -275,6 +311,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
                     description: '',
                     domain: $scope.domain,
                     action: [action.id],
+                    job: $scope.job,
                     prev_step_id: Number.isNaN($scope.parentIndex) ? null : $scope.parentIndex
                   }
                 })

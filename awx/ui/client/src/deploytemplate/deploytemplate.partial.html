@@ -4,6 +4,7 @@
       class="btn btn-xs"
       ng-class="{'btn-primary': displayView === 'templates', 'Button-primary--hollow': displayView !== 'templates'}"
       ng-click="templatesClick()"
+      ng-show="isCICDManMember || isSuperUser"
     >
       Templates
     </button>
@@ -11,6 +12,7 @@
       class="btn btn-xs"
       ng-class="{'btn-primary': displayView === 'actions', 'Button-primary--hollow': displayView !== 'actions'}"
       ng-click="actionsClick()"
+      ng-show="isCICDManMember || isSuperUser"
     >
       Actions
     </button>
@@ -18,6 +20,7 @@
       class="btn btn-xs"
       ng-class="{'btn-primary': displayView === 'pipeline', 'Button-primary--hollow': displayView !== 'pipeline'}"
       ng-click="pipelineClick()"
+      ng-show="isCICDmember || isSuperUser"
     >
       Pipeline
     </button>
@@ -25,6 +28,7 @@
       class="btn btn-xs"
       ng-class="{'btn-primary': displayView === 'history', 'Button-primary--hollow': displayView !== 'history'}"
       ng-click="historyClick()"
+      ng-show="isCICDmember || isSuperUser"
     >
       History
     </button>
@@ -95,7 +99,7 @@
   </div>
 
   <!-- VIEW TEMPLATES-->
-  <div style="padding: 20px 0px" ng-show="displayView === 'templates'">
+  <div style="padding: 20px 0px" ng-show="displayView === 'templates' && (isCICDManMember || isSuperUser)">
     <at-panel-body>
       <div class="at-List-toolbarAction">
         <button
@@ -190,7 +194,7 @@
   </paginate>
 
   <!-- VIEW ACTIONS -->
-  <div style="padding: 20px 0px;" ng-if="displayView === 'actions'">
+  <div style="padding: 20px 0px;" ng-if="displayView === 'actions' && (isCICDManMember || isSuperUser)">
     <at-panel-body>
       <div class="at-List-toolbarAction">
         <button
@@ -285,7 +289,7 @@
   </div>
 
   <!-- VIEW HISTORY -->
-  <div style="padding: 20px 0px;" ng-if="displayView === 'history'">
+  <div style="padding: 20px 0px;" ng-if="displayView === 'history' && (isCICDmember || isSuperUser)">
     <table class="table">
       <thead>
         <tr class="table-head">
@@ -320,7 +324,7 @@
   </paginate>
 
   <!-- VIEW PIPELINE -->
-  <div style="padding: 20px 0px;" ng-if="displayView === 'pipeline'">
+  <div style="padding: 20px 0px;" ng-if="displayView === 'pipeline' && (isCICDmember || isSuperUser)">
     <span style="font-weight: bold;">Choose template:</span>
     <select style="width: 170px" ng-model="selected.item" ng-change="getSteps(item)"
       ng-options="item as item.name for item in storedTemplates track by item.id"

@@ -22,6 +22,9 @@ function AtLayoutController ($scope, $http, strings, ProcessErrors, $transitions
                 checkOrgAdmin();
                 checkNotificationAdmin();
                 checkSQLDVMaccess();
+                checkMCDaccess();
+                checkCICDManAccess();
+                checkCICDaccess();
             }
         }
     });
@@ -105,6 +108,60 @@ function AtLayoutController ($scope, $http, strings, ProcessErrors, $transitions
                 ProcessErrors(null, data, status, null, {
                     hdr: strings.get('error.HEADER'),
                     msg: strings.get('error.CALL', { path: SQLDVMaccess, action: 'GET', status })
+                });
+            });
+    }
+
+    function checkMCDaccess () {
+        const MCDaccess = `api/v2/users/${vm.currentUserId}/teams/?name=MCD`;
+        $http.get(MCDaccess)
+            .then(({ data }) => {
+                if (data.count > 0) {
+                    vm.isMCDmember = true;
+                } else {
+                    vm.isMCDmember = false;
+                }
+            })
+            .catch(({ data, status }) => {
+                ProcessErrors(null, data, status, null, {
+                    hdr: strings.get('error.HEADER'),
+                    msg: strings.get('error.CALL', { path: MCDaccess, action: 'GET', status })
+                });
+            });
+    }
+
+    function checkCICDManAccess () {
+        const CICDaccess = `api/v2/users/${vm.currentUserId}/teams/?name=CI/CD management`;
+        $http.get(CICDaccess)
+            .then(({ data }) => {
+                if (data.count > 0) {
+                    vm.isCICDManMember = true;
+                } else {
+                    vm.isCICDManMember = false;
+                }
+            })
+            .catch(({ data, status }) => {
+                ProcessErrors(null, data, status, null, {
+                    hdr: strings.get('error.HEADER'),
+                    msg: strings.get('error.CALL', { path: CICDaccess, action: 'GET', status })
+                });
+            });
+    }
+
+    function checkCICDaccess () {
+        const CICDaccess = `api/v2/users/${vm.currentUserId}/teams/?name=CI/CD`;
+        $http.get(CICDaccess)
+            .then(({ data }) => {
+                if (data.count > 0) {
+                    vm.isCICDmember = true;
+                } else {
+                    vm.isCICDmember = false;
+                }
+            })
+            .catch(({ data, status }) => {
+                ProcessErrors(null, data, status, null, {
+                    hdr: strings.get('error.HEADER'),
+                    msg: strings.get('error.CALL', { path: CICDaccess, action: 'GET', status })
                 });
             });
     }

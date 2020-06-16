@@ -24,6 +24,7 @@ export default [
     Wait,
     Uploader
   ) => {
+    const vm = this || {};
     $scope.displayView = "templates";
     $scope.isAllowRun = false;
     $scope.isAllowDelete = true;
@@ -35,6 +36,64 @@ export default [
     $scope.errors = null;
     $scope.selected = {};
     $rootScope.fieldsDisabled = false;
+
+    function checkCICDManAccess () {
+      console.log('vm :>> ', vm);
+      const CICDaccess = `api/v2/users/${vm.currentUserId}/teams/?name=CI/CD management`;
+      $http.get(CICDaccess)
+          .then(({ data }) => {
+              if (data.count > 0) {
+                  vm.isCICDManMember = true;
+                  $scope.isCICDManMember = true;
+              } else {
+                  vm.isCICDManMember = false;
+                  $scope.isCICDManMember = false;
+                  $scope.displayView = 'pipeline';
+              }
+          })
+          .catch(({ data, status }) => {
+              ProcessErrors(null, data, status, null, {
+                  hdr: strings.get('error.HEADER'),
+                  msg: strings.get('error.CALL', { path: CICDaccess, action: 'GET', status })
+              });
+          });
+  }
+
+  function checkCICDaccess () {
+    const CICDaccess = `api/v2/users/${vm.currentUserId}/teams/?name=CI/CD`;
+    $http.get(CICDaccess)
+        .then(({ data }) => {
+            if (data.count > 0) {
+                vm.isCICDMmember = true;
+                $scope.isCICDmember = true;
+                $scope.displayView = 'pipeline';
+            } else {
+                vm.isCICDMmember = false;
+                $scope.isCICDmember = false;
+            }
+        })
+        .catch(({ data, status }) => {
+            ProcessErrors(null, data, status, null, {
+                hdr: strings.get('error.HEADER'),
+                msg: strings.get('error.CALL', { path: CICDaccess, action: 'GET', status })
+            });
+        });
+  }
+
+  $scope.$watch('$root.current_user', (val) => {
+    vm.isLoggedIn = val && val.username;
+    if (!_.isEmpty(val)) {
+        vm.isSuperUser = $scope.$root.user_is_superuser || $scope.$root.user_is_system_auditor;
+        $scope.isSuperUser = $scope.$root.user_is_superuser || $scope.$root.user_is_system_auditor;
+        vm.currentUsername = val.username;
+        vm.currentUserId = val.id;
+
+        if (!vm.isSuperUser) {
+            checkCICDManAccess();
+            checkCICDaccess();
+        }
+    }
+});
     $scope.$on("updateDataset", (e, dataset, queryset) => {
       if(e.targetScope.basePath.indexOf('deploy_template') > 0) {
         $scope.dataset = dataset;
@@ -301,6 +360,7 @@ export default [
           Wait("start");
           let tempArr = $rootScope.isConfigUploaded.map((item) => {
             item.name = Math.random().toString(36).substring(7);
+            item.job = null;
             return item;
           });
           $rootScope.isConfigUploaded = tempArr;
