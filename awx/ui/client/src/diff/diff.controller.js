@@ -66,18 +66,30 @@ export default [
       $http({
         method: 'GET',
         url: '/git/api/repos/'
-      }).then(response => {
+      }).then(responseRepos => {
         $scope.URL = '/git/api/repos/';
-        $scope.diffEnvironments = {
-          model: null,
-          versions: response.data.repositories.map((repo, idx) => {
-            return {
-              id: idx,
-              name: repo.repo
+        $http({
+          method: 'GET',
+          url: '/api/v2/inventories/'
+        }).then(responseInv => {
+          $scope.diffEnvironments = {
+            model: null,
+            versions: []
+          };
+          responseInv.data.results.forEach(inventory => {
+            if (inventory.description === 'cac_project') {
+              responseRepos.data.repositories.forEach((repo, idx) => {
+                if (repo.repo === inventory.name) {
+                  $scope.diffEnvironments.versions.push({
+                    id: idx,
+                    name: repo.repo
+                  })
+                }
+              })
             }
           })
-        }
-        Wait('stop');
+          Wait('stop')
+        })
       },
       (response) => {
         $scope.diffErrorMessage = "Error at "
