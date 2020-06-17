@@ -522,6 +522,7 @@ export default [
       $rootScope.isConfigUploaded = [];
       $rootScope.isConfigUploaded.push(item);
       $rootScope.fieldsDisabled = true;
+      $scope.isAllowRun = true;
       let getNextStep = (prevStepId) => {
         $http({
           method: 'GET',
