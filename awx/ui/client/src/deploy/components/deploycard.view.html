@@ -21,7 +21,7 @@
       <input id="setuper" ng-disabled="isDisabledFields" type="checkbox" ng-model="isdeployer" ng-change="setDeployer()"/>
       <label for="setuper">Deployer step</label>
     </div>
-    <div class="log" ng-if="current.job">
+    <div class="log" ng-if="current.job && status === 'successful'">
       <i class="fa fa-eye"></i>
       <span class="log_view" ng-click="handleViewLog()">View log</span>
     </div>
@@ -41,12 +41,13 @@
     </div>
     <div
       class="DashboardGraphs error"
-      ng-if="final.status === 'failed'"
+      ng-if="final.status === 'failed' || status === 'failed'"
       style="background-color: #f8d7da;
     border: 1px solid #f5c6cb; padding-bottom: 20px;"
     >
       <i class="fa fa-warning"></i> Something went wrong. See log
-      <a ng-href="#/jobs/playbook/{{final['job']}}">here...</a>
+      <a ng-if="final.status === 'failed'" target="_blank" ng-href="#/jobs/playbook/{{final['job']}}/">here...</a>
+      <a ng-if="status === 'failed'" target="_blank" ng-href="#/jobs/playbook/{{finishedJobId}}/">here...</a>
     </div>
     <div
       class="gear"

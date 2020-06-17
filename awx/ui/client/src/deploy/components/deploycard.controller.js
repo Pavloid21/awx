@@ -79,6 +79,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
       $scope.status = $rootScope.isConfigUploaded[this.index].status;
       $scope.ispicker = $rootScope.isConfigUploaded[this.index].picker;
       $scope.isdeployer = $rootScope.isConfigUploaded[this.index].setuper;
+      $scope.finishedJobId = $rootScope.isConfigUploaded[this.index].job;
       if (
         $rootScope.isConfigUploaded.length > $scope.domainsList.length && this.allowRun
       ) {
