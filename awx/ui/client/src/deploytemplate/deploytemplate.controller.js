@@ -484,31 +484,35 @@ export default [
       let cardList = [];
       let skip = null;
       Wait('start');
-      (function cards(id) {
-        if (id < $scope.selected.item.deployHistoryIds.length) {
-          $http({
-            method: 'GET',
-            url: `/api/v2/deploy_history/${$scope.selected.item.deployHistoryIds[id]}/`
-          }).then(
-            function success(response) {
-              if (idx !== undefined && spentItem && nextItem && idx === id) {
-                cardList[idx] = spentItem;
-                cardList[idx + 1] = nextItem;
-                skip = idx + 1;
-              } else if (id !== skip) {
-                cardList.push(response.data)
+      try {
+        (function cards(id) {
+          if (id < $scope.selected.item.deployHistoryIds.length) {
+            $http({
+              method: 'GET',
+              url: `/api/v2/deploy_history/${$scope.selected.item.deployHistoryIds[id]}/`
+            }).then(
+              function success(response) {
+                if (idx !== undefined && spentItem && nextItem && idx === id) {
+                  cardList[idx] = spentItem;
+                  cardList[idx + 1] = nextItem;
+                  skip = idx + 1;
+                } else if (id !== skip) {
+                  cardList.push(response.data)
+                }
+                Wait('stop');
+                cards.call(null, id + 1);
+              },
+              function error(e) {
+                alert(e);
+                Wait('stop');
               }
-              Wait('stop');
-              cards.call(null, id + 1);
-            },
-            function error(e) {
-              alert(e);
-              Wait('stop');
-            }
-          )
-        }
-      })(0)
-      $rootScope.isConfigUploaded = cardList;
+            )
+          }
+        })(0)
+        $rootScope.isConfigUploaded = cardList;
+      } catch (e) {
+        Wait('stop')
+      }
     }
 
     $rootScope.getSteps = $scope.getSteps;
