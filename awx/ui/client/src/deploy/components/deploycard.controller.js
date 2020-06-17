@@ -146,6 +146,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         method: 'GET',
         url: `/diff/read_json/?job=${$scope.current.job}&file=forDeploy.json`
       }).then(successJsonData => {
+        $scope.logStrings = null;
         $scope.commitStrings = JSON.stringify(successJsonData.data.results).split('\n');
         $scope.tableData = successJsonData.data.results;
         $scope.canNotApply = true;
@@ -154,9 +155,10 @@ export default function($rootScope, $scope, $element, Wait, $http) {
     } else if ($scope.isdeployer) {
       $http({
         method: 'GET',
-        url: `/diff/read_json/?job=${$scope.current.job}&file=json2rest.log`
+        url: `/diff/read_info/?job=${$scope.current.job}&file=json2rest.log`
       }).then(successJsonData => {
-        $scope.commitStrings = successJsonData.data.results.split('\n');
+        $scope.commitStrings = null;
+        $scope.logStrings = successJsonData.data.results.split('\n');
         $scope.tableData = successJsonData.data.results;
         $scope.showPopup = true;
         $scope.canNotApply = true;
@@ -215,6 +217,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
             method: 'GET',
             url: `/diff/read_json/?job=${$rootScope.job}&file=forDeploy.json`
           }).then(successJsonData => {
+            $scope.logStrings = null;
             $scope.commitStrings = JSON.stringify(successJsonData.data.results).split('\n');
             $scope.tableData = successJsonData.data.results;
             $scope.showPopup = true;
@@ -224,9 +227,10 @@ export default function($rootScope, $scope, $element, Wait, $http) {
     } else if ($scope.isdeployer) {
       $http({
         method: 'GET',
-        url: `/diff/read_json/?job=${$rootScope.job}&file=json2rest.log`
+        url: `/diff/read_info/?job=${$rootScope.job}&file=json2rest.log`
       }).then(successJsonData => {
-        $scope.commitStrings = successJsonData.data.results.split('\n');
+        $scope.commitStrings = null;
+        $scope.logStrings = successJsonData.data.results.split('\n');
         $scope.tableData = successJsonData.data.results;
         $scope.showPopup = true;
       })

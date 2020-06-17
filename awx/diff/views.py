@@ -91,7 +91,6 @@ class DiffView(View):
 
     def get(self, request, *args, **kwargs):
         path = AWX_API_PATH
-        invId = 2
         if request.GET['isnode'] == 'production':
             path = 'http://localhost'
 
@@ -107,7 +106,6 @@ class DiffView(View):
                 'compare_hash_two': self.kwargs['right_version_id'],
                 'composite': request.GET['composite']
             },
-            'inventory': invId
         },
         auth=(LOGIN, PASS),
         verify=False)
@@ -205,6 +203,16 @@ class ReadDiffJSON(View):
                 file_data = fh.read()
                 print(file_data)
                 return JsonResponse({'results': json.loads(file_data)})
+        raise Http404
+
+class ReadDiffinfo(View):
+    def get(self, request, *args, **kwargs):
+        file_path = os.path.join(settings.MEDIA_ROOT + '/' + request.GET['job'] + '/', request.GET['file'])
+        if os.path.exists(file_path):
+                fh = open(file_path, 'rb')
+                file_data = fh.read()
+                print(file_data)
+                return JsonResponse({'results': file_data.decode("utf-8")})
         raise Http404
 
 class DownloadDSL(View):

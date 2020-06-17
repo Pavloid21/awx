@@ -61,6 +61,11 @@
       </div>
       <div class="popup-body">
         <div style="overflow: auto; max-height: 400px; margin-bottom: 15px;">
+          <div class="DashboardGraphs" ng-show="logStrings" style="text-align: left; padding: 20px 10px; margin-bottom: 20px;">
+            <div ng-repeat="log in logStrings">
+              {{log}}
+            </div>
+          </div>
           <div class="DashboardGraphs" ng-show="commitStrings" style="text-align: left; padding: 20px 10px; margin-bottom: 20px;">
             <div ng-repeat="str in commitStrings">
               <div>

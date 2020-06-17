@@ -20,7 +20,8 @@ from awx.diff.views import (
     DownloadDSL,
     DownloadDSLArchive,
     DownloadPDF,
-    ReadDiffJSON
+    ReadDiffJSON,
+    ReadDiffinfo
 )
 
 app_name = 'diff'
@@ -42,5 +43,6 @@ urlpatterns = [
     url(r'^downloaddslarc/$', DownloadDSLArchive.as_view(), name='dwnloaddslarch'),
     url(r'^read_json/$', ReadDiffJSON.as_view(), name='rdjson'),
     url(r'^download_pdf/$', DownloadPDF.as_view(), name='dwnloadpdf'),
+    url(r'^read_info/$', ReadDiffinfo.as_view(), name='rdinfo'),
 ]
 
