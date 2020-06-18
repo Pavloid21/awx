@@ -70,7 +70,7 @@ export default [
         $scope.URL = '/git/api/repos/';
         $http({
           method: 'GET',
-          url: '/api/v2/inventories/'
+          url: '/api/v2/inventories/?page_size=1000'
         }).then(responseInv => {
           $scope.diffEnvironments = {
             model: null,
