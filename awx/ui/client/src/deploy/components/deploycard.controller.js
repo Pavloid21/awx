@@ -22,7 +22,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   Wait('start')
   $http({
     method: 'GET',
-    url: '/api/v2/inventories/'
+    url: '/api/v2/inventories/?page_size=1000'
   }).then(invResponse => {
     $scope.inventories = invResponse.data.results;
     $http({
