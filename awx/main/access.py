@@ -42,6 +42,7 @@ from awx.main.models import (
 )
 
 from awx.main.models.deploytemplate import DeployTemplate
+from awx.main.models.deployhistory import DeployHistory
 from awx.main.models.action import Action
 from awx.main.models.mixins import ResourceMixin
 
@@ -511,15 +512,78 @@ class NotificationAttachMixin(BaseAccess):
             obj, sub_obj, relationship, relationship, data=data
         )
 
+class DeployHistoryAccess(BaseAccess):
+    model = DeployHistory
+
+    def can_attach(self, obj):
+        return True
+
+    def can_add(self, data):
+        return True
+
+    def can_delete(self, obj):
+        return True
+
+    def can_change(self, obj, data):
+        return True
+
+    def can_write(self, obj, data):
+        # Alias for change.
+        return True
+    
+    def can_read(self, obj):
+        return True
+
+    def can_admin(self, obj, data):
+        return True
+
 class DeployTemplateAccess(BaseAccess):
     model = DeployTemplate
 
+    def can_attach(self, obj):
+        return True
+
+    def can_add(self, data):
+        return True
+
     def can_delete(self, obj):
+        return True
+
+    def can_change(self, obj, data):
+        return True
+
+    def can_write(self, obj, data):
+        # Alias for change.
+        return True
+    
+    def can_read(self, obj):
+        return True
+
+    def can_admin(self, obj, data):
         return True
 class ActionAccess(BaseAccess):
     model = Action
 
+    def can_attach(self, obj):
+        return True
+
+    def can_add(self, data):
+        return True
+
     def can_delete(self, obj):
+        return True
+
+    def can_change(self, obj, data):
+        return True
+
+    def can_write(self, obj, data):
+        # Alias for change.
+        return True
+    
+    def can_read(self, obj):
+        return True
+
+    def can_admin(self, obj, data):
         return True
 class InstanceAccess(BaseAccess):
 
