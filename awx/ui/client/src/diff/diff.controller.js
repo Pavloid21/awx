@@ -34,7 +34,7 @@ export default [
     var config = { attributes: true, subtree: true };
     
     var callback = function(mutations) {
-      console.log('CHANGES HOOK:>> ', mutations);
+      // console.log('CHANGES HOOK:>> ', mutations);
       function union() {
         var tds = document.querySelectorAll(`.${this.class}`)
         tds.forEach((item, index) => {
@@ -146,9 +146,12 @@ export default [
               let t = tag;
               t.tag = t.tag.replace('refs/tags/', '');
               return t;
-            }))
+            }).sort(function(a, b) {
+              a = new Date(a.date);
+              b = new Date(b.date);
+              return a>b ? -1 : a<b ? 1 : 0;
+          }))
           })
-          console.log($scope.env1Versions)
           Wait('stop')
         })
       }
@@ -345,10 +348,26 @@ export default [
             }).then(function success(response) {
               $scope.compareData = response.data
               $scope.final = $scope.compareData.results;
+              let added = $scope.compareData.results.added_in_second
+              let deleted = $scope.compareData.results.deleted_from_second
+              let difference = {};
+              Object.keys(added).map(key => {
+                if (!difference[key]) {
+                  difference[key] = {}
+                }
+                difference[key].added = added[key]
+              })
+              Object.keys(deleted).map(key => {
+                if (!difference[key]) {
+                  difference[key] = {}
+                }
+                difference[key].deleted = deleted[key]
+              })
               $scope.isEmpty =
                 Object.keys($scope.final)[0] === undefined;
               Wait("stop");
               $scope.isCalculating = false;
+              $scope.final.difference = difference;
             }, () => {
               Wait('stop')
               $scope.isEmpty = true;

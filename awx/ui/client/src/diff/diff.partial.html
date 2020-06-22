@@ -275,15 +275,23 @@ border: 1px solid #c3e6cb; padding-bottom: 20px;">
       border="1"
       class="diff_table"
       ng-repeat="(key, value) in final"
+      ng-if="key != 'added_in_second' && key != 'deleted_from_second'"
       id="diff_table"
     >
       <tr ng-click="collapseView(key)" class="clps">
         <td ng-if="key === 'new_value'">New values</td>
-        <td ng-if="key === 'deleted_from_second'" ng-bind-template="Deleted from {{uiEnv2}} ({{env2Version.tag}})"></td>
-        <td ng-if="key === 'added_in_second'" ng-bind-template="Added to {{uiEnv2}} ({{env2Version.tag}})"></td>
-        <td ng-if="key === 'changes'">Changes</td>
-        <td ng-if="key === 'object_deleted_from_second'" ng-bind-template="Objects deleted from {{uiEnv2}} ({{env2Version.tag}})"></td>
-        <td ng-if="key === 'object_added_in_second'" ng-bind-template="Objects added to {{uiEnv2}} ({{env2Version.tag}})"></td>
+        <!-- <td ng-if="key === 'deleted_from_second' || key === 'added_in_second'" ng-bind-template="Deleted from {{uiEnv2}} ({{env2Version.tag}})"></td> -->
+        <!-- <td ng-if="key === 'added_in_second'" ng-bind-template="Added to {{uiEnv2}} ({{env2Version.tag}})"></td> -->
+        <td
+          ng-if="key === 'changes'"
+          ng-bind-template="Differences between the parameters between the domain {{uiEnv1}} version {{env1Version.tag}} and domain {{uiEnv2}} version {{env2Version.tag}}"
+        ></td>
+        <!-- <td ng-if="key === 'object_deleted_from_second'" ng-bind-template="Objects deleted from {{uiEnv2}} ({{env2Version.tag}})"></td>
+        <td ng-if="key === 'object_added_in_second'" ng-bind-template="Objects added to {{uiEnv2}} ({{env2Version.tag}})"></td> -->
+        <td
+          ng-if="key === 'difference'"
+          ng-bind-template="Differences in the composition of objects between the domain {{uiEnv1}} version {{env1Version.tag}} and domain {{uiEnv2}} version {{env2Version.tag}}"
+        ></td>
       </tr>
       <tr ng_class="hide_{{key}}" ng-hide="isCollapse['{{key}}'] === true">
         <td>
@@ -305,9 +313,10 @@ border: 1px solid #c3e6cb; padding-bottom: 20px;">
                 >
                   <tr>
                     <td ng-if="key === 'changes' || key === 'new_value'"><strong>{{k1}}</strong></td>
-                    <td ng-if="key != 'changes' && key != 'new_value' && key != 'added_in_second' && key != 'deleted_from_second'"><strong>{{k1}}</strong></td>
-                    <td ng-if="key != 'added_in_second' && key != 'deleted_from_second'"></td>
+                    <!-- <td ng-if="key != 'changes' && key != 'new_value' && key != 'added_in_second' && key != 'deleted_from_second'"><strong>{{k1}}</strong></td> -->
+                    <!-- <td ng-if="key != 'added_in_second' && key != 'deleted_from_second'"></td> -->
                     <td ng-if="key === 'changes' || key === 'new_value'"></td>
+                    <!-- <td ng-if="key === 'difference'">difference</td> -->
                   </tr>
                   <!-- CHANGES & NEW VALUES -->
                   <tr ng-if="key === 'changes' || key === 'new_value'">
@@ -323,33 +332,48 @@ border: 1px solid #c3e6cb; padding-bottom: 20px;">
                     <td rowspan="1" class="td_parameter pathto">{{item.path_to_parameter}}</td>
                   </tr>
                   <!-- DELETED AND ADDED OBJECTS -->
-                  <tr ng-if="key === 'object_deleted_from_second' || key === 'object_added_in_second'">
+                  <!-- <tr ng-if="key === 'object_deleted_from_second' || key === 'object_added_in_second'">
                     <td><strong>URL to edit</strong></td>
                     <td><strong>Values</strong></td>
-                  </tr>
-                  <tr ng-repeat="item in final[key][k][k1]" ng-if="key === 'object_deleted_from_second' || key === 'object_added_in_second'">
+                  </tr> -->
+                  <!-- <tr ng-repeat="item in final[key][k][k1]" ng-if="key === 'object_deleted_from_second' || key === 'object_added_in_second'">
                     <td class="td_parameter" ng-if="$first" rowspan="{{final[key][k][k1].length}}">{{item.url_to_edit}}</td>
                     <td class="td_parameter">
                       <div>
                         <p ng-repeat="(iKey, iValue) in item" ng-if="iKey !== 'url_to_edit'" ng-bind-template="'{{iKey}}': '{{iValue}}'"></p>
                       </div>
                     </td>
+                  </tr> -->
+                </table>
+                <table border="1" ng-if="key === 'difference'" class="diff_gray_table" style="width: 100%;">
+                  <!-- DIFFERENCE -->
+                  <tr ng-if="key === 'difference'">
+                    <td><strong ng-bind-template="{{uiEnv1}} ({{env1Version.tag}})"></strong></td>
+                    <td><strong ng-bind-template="{{uiEnv2}} ({{env2Version.tag}})"></strong></td>
+                  </tr>
+                  <tr ng-repeat="item in final[key][k].added">
+                    <td>{{item.name}}</td>
+                    <td>None</td>
+                  </tr>
+                  <tr ng-repeat="item in final[key][k].deleted">
+                    <td>None</td>
+                    <td>{{item}}</td>
                   </tr>
                 </table>
-                <table border="1" class="diff_green_table" ng-if="key === 'added_in_second'">
+                <!-- <table border="1" class="diff_green_table" ng-if="key === 'added_in_second'"> -->
                   <!-- ADDED PARAMS -->
-                  <tr ng-if="key === 'added_in_second'">
+                  <!-- <tr ng-if="key === 'added_in_second'">
                   </tr>
                   <tr ng-repeat="item in final[key][k]" ng-if="key === 'deleted_from_second' || key === 'added_in_second'">
                     <td>{{item.name}}</td>
                   </tr>
-                </table>
-                <table border="1" class="diff_red_table" ng-if="key === 'deleted_from_second'">
+                </table> -->
+                <!-- <table border="1" class="diff_red_table" ng-if="key === 'deleted_from_second'"> -->
                   <!-- DELETED PARAMS -->
-                  <tr ng-repeat="item in final[key][k]" ng-if="key === 'deleted_from_second' || key === 'added_in_second'">
+                  <!-- <tr ng-repeat="item in final[key][k]" ng-if="key === 'deleted_from_second' || key === 'added_in_second'">
                     <td>{{item}}</td>
                   </tr>
-                </table>
+                </table> -->
   
               </td>
             </tr>
