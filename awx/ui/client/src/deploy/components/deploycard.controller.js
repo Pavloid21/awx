@@ -202,7 +202,10 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         method: 'GET',
         url: `/api/v2/action/${deployerStep.action[0]}/`
       }).then(responseAction => {
-        let extraVars = JSON.parse(responseAction.data.extra_vars);
+        let extraVars = JSON.parse(responseAction.data.extra_vars.length ? 
+          responseAction.data.extra_vars :
+          '{}'
+          );
         extraVars.deploy_vars = $rootScope.job;
         $http({
           method: 'PATCH',

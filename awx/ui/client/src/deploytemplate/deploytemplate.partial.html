@@ -40,25 +40,47 @@
     style="padding: 20px 20px"
     ng-show="!!isAdding && displayView === 'templates'"
   >
-    <label for="template_name">Name of template: </label>
-    <input
-      type="text"
-      id="template_name"
-      ng-model="templateName"
-      ng-change="templateNameInputChange()"
-    />
+    <div>
+      <label for="template_name">Name of template: </label>
+      <input
+        type="text"
+        id="template_name"
+        ng-model="templateName"
+        ng-change="templateNameInputChange()"
+      />
+    </div>
     <div class="pipeline">
-      <deploy-card
-        ng-repeat="(key, value) in $root.isConfigUploaded track by $index"
-        step="{{key + 1}}"
-        index="key"
-        allowrun="isAllowRun"
-        allowdelete="isAllowDelete"
-      >
-      </deploy-card>
-      <div class="add_card" ng-click="handleAddCard()">
-        <i class="fa fa-plus-circle"></i>
-      </div>
+      <!-- <div id="pipeline_container" ng-view elem-ready="some()">
+        <div ng-repeat="(key, column) in treeView">
+          <div ng-repeat="(l, cell) in column track by column.length + l">
+            <deploy-card
+              ng-if="notEmptyCell(key, l)"
+              id="card_{{column.length + l}}"
+              step="{{column.length + l}}"
+              index="column.length + l"
+              allowrun="isAllowRun"
+              allowdelete="isAllowDelete"
+            >
+            </deploy-card>
+            <div class="add_card" ng-class="{prev_success: l % 2 === 0, prev_failed: l % 2 > 0}" id="card_{{treeView[key - 1].length * 2 + l}}" ng-if="isEmptyCell(key, l)" ng-click="handleAddCard()">
+              <i class="fa fa-plus-circle"></i>
+              <p class="prev_success" ng-if="l % 2 === 0">on previous succeeded</p>
+              <p class="prev_failed" ng-if="l % 2 > 0">on previous failed</p>
+            </div>
+          </div>
+        </div>
+      </div> -->
+        <deploy-card
+          ng-repeat="(key, value) in $root.isConfigUploaded track by $index"
+          step="{{key + 1}}"
+          index="key"
+          allowrun="isAllowRun"
+          allowdelete="isAllowDelete"
+        >
+        </deploy-card>
+        <div class="add_card" ng-click="handleAddCard()">
+          <i class="fa fa-plus-circle"></i>
+        </div>
     </div>
     <div class="pipeline" style="padding-top: 20px;">
       <button class="btn btn-success" ng-click="handleSave()" ng-if="!isEditing">Save</button>
@@ -325,20 +347,24 @@
 
   <!-- VIEW PIPELINE -->
   <div style="padding: 20px 0px;" ng-if="displayView === 'pipeline' && (isCICDmember || isSuperUser)">
-    <span style="font-weight: bold;">Choose template:</span>
-    <select style="width: 170px" ng-model="selected.item" ng-change="getSteps(item)"
-      ng-options="item as item.name for item in storedTemplates track by item.id"
-    >
-    </select>
-    <div class="pipeline">
-      <deploy-card
-        ng-repeat="(key, value) in $root.isConfigUploaded track by $index"
-        step="{{key + 1}}"
-        index="key"
-        allowrun="isAllowRun"
-        allowdelete="isAllowDelete"
+    <div>
+      <span style="font-weight: bold;">Choose template:</span>
+      <select style="width: 170px" ng-model="selected.item" ng-change="getSteps(item)"
+        ng-options="item as item.name for item in storedTemplates track by item.id"
       >
-      </deploy-card>
+      </select>
+    </div>
+    <div class="pipeline">
+      <div id="pipeline_container">
+        <deploy-card
+          ng-repeat="(key, value) in $root.isConfigUploaded track by $index"
+          step="{{key + 1}}"
+          index="key"
+          allowrun="isAllowRun"
+          allowdelete="isAllowDelete"
+        >
+        </deploy-card>
+      </div>
     </div>
   </div>
   <!-- POPUP -->

@@ -31,3 +31,5 @@ class DeployHistory(CommonModel, ResourceMixin):
     )
     action = models.ManyToManyField("Action", blank=True)
     prev_step_id = models.IntegerField(blank=True, null=True)
+    on_success = models.IntegerField(blank=True, null=True)
+    on_failed = models.IntegerField(blank=True, null=True)

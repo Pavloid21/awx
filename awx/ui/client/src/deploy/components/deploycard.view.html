@@ -25,6 +25,10 @@
       <i class="fa fa-eye"></i>
       <span class="log_view" ng-click="handleViewLog()">View log</span>
     </div>
+    <div class="log" ng-if="current.job && status === 'failed'">
+      <i class="fa fa-repeat"></i>
+      <span class="log_view" ng-click="deployConfig($ctrl.index)">Restart</span>
+    </div>
     <div
       class="play-button"
       ng-class="{disabledButton: !domain || prevStepNotComplited}"

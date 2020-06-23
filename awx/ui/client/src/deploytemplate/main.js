@@ -38,6 +38,19 @@ export default angular
     return this;
   })
   .controller("deploytemplate", controller)
+  .directive( 'elemReady', function( $parse ) {
+    return {
+        restrict: 'A',
+        link: function( $scope, elem, attrs ) {  
+           elem.resize(function(){
+            $scope.$apply(function(){
+                var func = $parse(attrs.elemReady);
+                func($scope);
+            })
+          })
+        }
+     }
+ })
   .run([
     "$stateExtender",
     function($stateExtender) {

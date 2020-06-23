@@ -1,5 +1,7 @@
 "use strict";
 import JSONEditor from 'jsoneditor';
+import panzoom from 'panzoom';
+import _ from 'lodash';
 
 export default [
   "$rootScope",
@@ -36,6 +38,8 @@ export default [
     $scope.errors = null;
     $scope.selected = {};
     $rootScope.fieldsDisabled = false;
+    $scope.treeView = [[]]
+    
 
     function checkCICDManAccess () {
       console.log('vm :>> ', vm);
@@ -66,7 +70,7 @@ export default [
             if (data.count > 0) {
                 vm.isCICDMmember = true;
                 $scope.isCICDmember = true;
-                $scope.displayView = 'pipeline';
+                $scope.pipelineClick();
             } else {
                 vm.isCICDMmember = false;
                 $scope.isCICDmember = false;
@@ -79,6 +83,63 @@ export default [
             });
         });
   }
+
+  function treeToTreeView (tree) {
+    Wait('start')
+    let deep = (node, column = 0) => {
+      if (!$scope.treeView[column]) {
+        $scope.treeView.push([])
+      }
+      if (!$scope.treeView[column + 1]) {
+        $scope.treeView.push([])
+      }
+      if (node == null || node === undefined) {
+        $scope.treeView[column].push({});
+        $scope.treeView[column + 1].push(null, null);
+        return
+      };
+      $scope.treeView[column].push(node);
+      deep(node.on_success, column + 1)
+      deep(node.on_failed, column + 1)
+    }
+    deep(tree)
+    console.log('$scope.treeView :>> ', $scope.treeView);
+    Wait('stop')
+  }
+
+  // treeToTreeView(
+  //   {
+  //     description: "1",
+  //     status: "start",
+  //     on_success: {
+  //       description: "2",
+  //       status: "start",
+  //       on_success: {
+  //         description: "18",
+  //         status: "start",
+  //         on_success: null,
+  //         on_failed: {
+  //           description: "18",
+  //           status: "start",
+  //           on_success: null,
+  //           on_failed: null
+  //         }
+  //       },
+  //       on_failed: null
+  //     },
+  //     on_failed: {
+  //       description: "3",
+  //       status: "start",
+  //       on_success: null,
+  //       on_failed: {
+  //         description: "11",
+  //         status: "start",
+  //         on_success: null,
+  //         on_failed: null
+  //       }
+  //     }
+  //   })
+  
 
   $scope.$watch('$root.current_user', (val) => {
     vm.isLoggedIn = val && val.username;
@@ -93,7 +154,15 @@ export default [
             checkCICDaccess();
         }
     }
-});
+  });
+
+  // PANZOOM ENABLING
+  // $scope.$watch('$root.isConfigUploaded', (val) => {
+  //   let pipelineContainer = document.getElementById('pipeline_container');
+  //   panzoom(pipelineContainer).zoomAbs(
+  //     100, 100, .8
+  //   );
+  // })
     $scope.$on("updateDataset", (e, dataset, queryset) => {
       if(e.targetScope.basePath.indexOf('deploy_template') > 0) {
         $scope.dataset = dataset;
@@ -186,12 +255,75 @@ export default [
       $scope.isAllowDelete = false;
       $rootScope.isConfigUploaded = [];
     };
+    $scope.notEmptyCell = (key, l) => {
+      return $scope.treeView[key][l] && Object.keys($scope.treeView[key][l]).length > 1
+    }
+
+    $scope.isEmptyCell = (key, l) => {
+      return $scope.treeView[key][l] && Object.keys($scope.treeView[key][l]).length <= 1
+    }
 
     $scope.storedTemplates = Dataset.data.results;
     $scope.deployHistoryRows = History.data.results;
     $scope.storedActions = Action.data.results;
     $rootScope.isConfigUploaded = [];
     $scope.cards = [];
+
+    $scope.some = () => {
+      console.log('EXECUTED ONLOAD :>> ');
+      let pipelineContainer = document.getElementById('pipeline_container');
+      $scope.treeView.forEach((column, cid) => {
+        column.forEach((cell, id) => {
+          if (cid !== $scope.treeView.length - 1) {
+            let cardElement = document.querySelector(`#card_${column.length + id}`);
+            let successChild = document.querySelector(`#card_${(column.length + id) * 2}`);
+            let failedChild = document.querySelector(`#card_${(column.length + id) * 2 + 1}`);
+            if (successChild && failedChild) {
+              let firstChildCoords = {
+                x: successChild.offsetLeft,
+                y: successChild.offsetTop + successChild.offsetHeight / 2
+              }
+  
+              let secondChildCoords = {
+                x: failedChild.offsetLeft,
+                y: failedChild.offsetTop + failedChild.offsetHeight / 2
+              }
+              let x = cardElement.offsetWidth + cardElement.offsetLeft;
+              let y = cardElement.offsetTop;
+              let center = cardElement.offsetTop + cardElement.offsetHeight / 2;
+              if (x !== 0 && y !== 0 && !cardElement.classList.contains('prev_failed') && !cardElement.classList.contains('prev_success')) {
+                console.log('cardElement :>> ', cardElement.id);
+                // draw dots and path
+                let svgContainer = document.createElement('div');
+                svgContainer.setAttribute('class', 'svg_container');
+                let circle = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                let checkPoints = [firstChildCoords.y, secondChildCoords.y, center]
+                let height = _.max(checkPoints) - _.min(checkPoints)
+                circle.setAttribute('width', 80);
+                circle.setAttribute('height', height);
+                circle.setAttribute('viewBox', `0 0 80 ${height}`);
+                circle.setAttribute('version', '1.1');
+                circle.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                console.log('x, y :>> ', x, y);
+                circle.innerHTML = `
+                  <line x1="6" y1=${Math.abs(firstChildCoords.y - center)} x2=80 y2=${Math.abs(firstChildCoords.y - _.min(checkPoints))} stroke="green"/>
+                  <line x1="6" y1=${Math.abs(firstChildCoords.y - center)} x2=80 y2=${height - Math.abs(_.max(checkPoints) - secondChildCoords.y)} stroke="red"/>
+                  <circle cx="6" cy=${Math.abs(firstChildCoords.y - center)} r="4" fill="#767676"/>
+                `;
+                svgContainer.style.top = _.min(checkPoints) + 'px';
+                svgContainer.style.left = x + 'px';
+                svgContainer.appendChild(circle);
+                pipelineContainer.appendChild(svgContainer);
+              }
+            }
+          }
+        })
+      })
+    }
+
+    $scope.$on('$viewContentLoaded', () => {
+      console.log('LOADED :>> ');
+    })
 
     $scope.handleAddTemplate = () => {
       $scope.isAdding = true;
@@ -206,6 +338,8 @@ export default [
         setuper: false,
         action:[],
         prev_step_id: $scope.parentIndex,
+        on_success: null,
+        on_failed: null
       });
     };
 
@@ -295,7 +429,7 @@ export default [
       $scope.isEditing = true;
       $scope.actionName = $scope.currentEditAction.name;
       $scope.selected.action = $scope.storedJobTemplates.filter(template => template.id === $scope.currentEditAction.job_templates[0])[0];
-      editor.set(JSON.parse($scope.currentEditAction.extra_vars))
+      editor.set(JSON.parse($scope.currentEditAction.extra_vars || '{}'))
     }
 
     $scope.setConfigFile = (files) => {
@@ -333,7 +467,10 @@ export default [
         setuper: false,
         action: [],
         prev_step_id: $scope.parentIndex,
+        on_success: null,
+        on_failed: null
       });
+      console.log('$rootScope.isConfigUploaded :>> ', $rootScope.isConfigUploaded);
     };
 
 
