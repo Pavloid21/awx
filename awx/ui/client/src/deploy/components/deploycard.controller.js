@@ -118,7 +118,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         $scope.status = "failed";
         $scope.final = {
           status: "failed",
-          job: $scope.job.id
+          job: $scope.job
         };
         $rootScope.isConfigUploaded[$scope.index].status = "failed";
         $rootScope.isConfigUploaded[$scope.index].job = $scope.job;
