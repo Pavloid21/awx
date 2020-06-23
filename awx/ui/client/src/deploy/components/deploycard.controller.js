@@ -298,6 +298,8 @@ export default function($rootScope, $scope, $element, Wait, $http) {
           if (inventory.name === $scope.domain) {
             action = response.data;
             let extraVars = JSON.parse(action.extra_vars);
+            if ($scope.ispicker)
+              extraVars.send_mail = 'false';
             $http({
               method: 'POST',
               url: `/api/v2/job_templates/${action.job_templates[0]}/launch/`,
