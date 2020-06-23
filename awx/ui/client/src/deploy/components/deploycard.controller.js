@@ -90,7 +90,16 @@ export default function($rootScope, $scope, $element, Wait, $http) {
       }
     }
     $scope.current = $rootScope.isConfigUploaded[this.index];
+    if ($rootScope.showLogPopup[`card_${$scope.index}`]) {
+      $scope.handleViewLog();
+    }
   };
+
+  // $scope.$watch('showPopup', (newValue, oldValue, scope) => {
+  //   console.log('newValue :>> ', newValue);
+  //   console.log('oldValue :>> ', oldValue);
+  //   console.log('scope :>> ', scope);
+  // })
 
   let patchStep = () => {
     $http({
@@ -151,7 +160,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         $scope.commitStrings = JSON.stringify(successJsonData.data.results).split('\n');
         $scope.tableData = successJsonData.data.results;
         $scope.canNotApply = true;
-        $scope.showPopup = true;
+        $rootScope.showLogPopup[`card_${$scope.index}`] = true;
       })
     } else if ($scope.isdeployer) {
       $http({
@@ -161,7 +170,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         $scope.commitStrings = null;
         $scope.logStrings = successJsonData.data.results.split('\n');
         $scope.tableData = successJsonData.data.results;
-        $scope.showPopup = true;
+        $rootScope.showLogPopup[`card_${$scope.index}`] = true;
         $scope.canNotApply = true;
       })
     } else {
@@ -224,7 +233,9 @@ export default function($rootScope, $scope, $element, Wait, $http) {
             $scope.logStrings = null;
             $scope.commitStrings = JSON.stringify(successJsonData.data.results).split('\n');
             $scope.tableData = successJsonData.data.results;
-            $scope.showPopup = true;
+            $rootScope.showLogPopup[`card_${$scope.index}`] = false;
+            $scope.confirmChanges();
+            $scope.handleViewLog();
           })
         })
       })
@@ -236,7 +247,9 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         $scope.commitStrings = null;
         $scope.logStrings = successJsonData.data.results.split('\n');
         $scope.tableData = successJsonData.data.results;
-        $scope.showPopup = true;
+        $rootScope.showLogPopup[`card_${$scope.index}`] = false;
+        $scope.confirmChanges();
+        $scope.handleViewLog();
       })
     } else {
       $scope.confirmChanges();
@@ -249,13 +262,17 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   };
 
   $scope.closePopup = () => {
-    $scope.showPopup = false;
-    let complitedItem = $rootScope.isConfigUploaded[$scope.index];
-    $rootScope.getSteps($scope.index, complitedItem, $rootScope.isConfigUploaded[$scope.index + 1]);
+    $rootScope.showLogPopup[`card_${$scope.index}`] = false;
+    // let complitedItem = $rootScope.isConfigUploaded[$scope.index];
+    // $rootScope.getSteps($scope.index, complitedItem, $rootScope.isConfigUploaded[$scope.index + 1]);
+  }
+
+  $scope.applyPopup = () => {
+    $rootScope.showLogPopup[`card_${$scope.index}`] = false;
   }
 
   $scope.confirmChanges = () => {
-    $scope.showPopup = false;
+    // $scope.showPopup = false;
     let complitedItem = $rootScope.isConfigUploaded[$scope.index];
     delete $scope.afterComplitedItem.id;
     console.log('$scope.afterComplitedItem :>> ', $scope.afterComplitedItem);
@@ -277,7 +294,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   }
 
   $scope.declaimChanges = () => {
-    $scope.showPopup = false;
+    $rootScope.showLogPopup[`card_${$scope.index}`] = false;
     let complitedItem = $rootScope.isConfigUploaded[$scope.index];
     $rootScope.getSteps($scope.index, complitedItem, $rootScope.isConfigUploaded[$scope.index + 1]);
   }

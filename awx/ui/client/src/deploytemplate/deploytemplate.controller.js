@@ -248,10 +248,12 @@ export default [
       $rootScope.isConfigUploaded = [];
       $rootScope.fieldsDisabled = true;
       $scope.selected.item = null;
+      $rootScope.showLogPopup = {};
     };
     $scope.historyClick = () => {
       $scope.displayView = "history";
       // $scope.isAllowRun = false;
+      $rootScope.showLogPopup = {};
       $scope.isAllowDelete = false;
       $rootScope.isConfigUploaded = [];
     };

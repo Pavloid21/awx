@@ -142,7 +142,7 @@ export default [
             method: 'GET',
             url: `/git/api/${$scope.env1.name}/tags/`
           }).then(successResponse => {
-            $scope.env1Versions = $scope.env1Versions.concat(successResponse.data.tags.map(tag => {
+            let versions = $scope.env1Versions.concat(successResponse.data.tags.map(tag => {
               let t = tag;
               t.tag = t.tag.replace('refs/tags/', '');
               return t;
@@ -151,6 +151,14 @@ export default [
               b = new Date(b.date);
               return a>b ? -1 : a<b ? 1 : 0;
           }))
+          $scope.env1Versions = [];
+            versions.forEach((version, id) => {
+              if (id > 0 && version.hash === versions[0].hash) {
+                versions[0].subtag = `${version.tag}`;
+              } else {
+                $scope.env1Versions.push(version)
+              }
+            })
           })
           Wait('stop')
         })
@@ -175,11 +183,23 @@ export default [
             method: 'GET',
             url: `/git/api/${$scope.env2.name}/tags/`
           }).then(successResponse => {
-            $scope.env2Versions = $scope.env2Versions.concat(successResponse.data.tags.map(tag => {
+            let versions = $scope.env2Versions.concat(successResponse.data.tags.map(tag => {
               let t = tag;
               t.tag = t.tag.replace('refs/tags/', '');
               return t;
-            }))
+            }).sort(function(a, b) {
+              a = new Date(a.date);
+              b = new Date(b.date);
+              return a>b ? -1 : a<b ? 1 : 0;
+            }));
+            $scope.env2Versions = [];
+            versions.forEach((version, id) => {
+              if (id > 0 && version.hash === versions[0].hash) {
+                versions[0].subtag = `${version.tag}`;
+              } else {
+                $scope.env2Versions.push(version)
+              }
+            })
           })
           Wait('stop')
         })

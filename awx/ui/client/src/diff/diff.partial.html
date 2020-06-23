@@ -81,7 +81,7 @@
       <div class="card_radio" ng-class="{green_box: env1version.tag === 'master', blue_box: env1version.tag === 'current'}" ng-repeat="env1version in env1Versions track by $index" ng-hide="env1version.hash === env2Version.hash">
         <input type="radio" ng-value="env1version.tag" name="env1" id="{{env1version.hash}}1" ng-model="$parent.env1VersionChoosen" ng-change="setVersionEnv1()"/>
         <label for="{{env1version.target}}1" ng-show="env1version.tag !== 'master' && env1version.tag !== 'current'"">{{env1version.tag}}</label>
-        <label for="{{env1version.target}}1" ng-show="env1version.tag === 'master'">Actual</label>
+        <label for="{{env1version.target}}1" ng-show="env1version.tag === 'master'">{{env1version.subtag+' Actual'}}</label>
         <label for="{{env1version.target}}1" ng-show="env1version.tag === 'current'">Current</label>
         <div>
           <div class="commit_info">
@@ -98,7 +98,7 @@
         <div class="card_radio" ng-class="{green_box: env2version.tag === 'master', blue_box: env2version.tag === 'current'}" ng-repeat="env2version in env2Versions track by $index" ng-hide="env2version.hash === env1Version.hash">
           <input type="radio" ng-value="env2version.tag" name="env2" id="{{env2version.hash}}2" ng-model="$parent.env2VersionChoosen" ng-change="setVersionEnv2()"/>
           <label for="{{env2version.target}}2" ng-show="env2version.tag !== 'master' && env2version.tag !== 'current'">{{env2version.tag}}</label>
-          <label for="{{env2version.target}}2" ng-show="env2version.tag === 'master'">Actual</label>
+          <label for="{{env2version.target}}2" ng-show="env2version.tag === 'master'">{{env2version.subtag+' Actual'}}</label>
           <label for="{{env2version.target}}2" ng-show="env2version.tag === 'current'">Current</label>
           <div>
             <div class="commit_info">

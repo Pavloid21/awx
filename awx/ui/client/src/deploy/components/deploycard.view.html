@@ -58,7 +58,7 @@
       ng-if="final === null && status !== 'failed' && status !== 'successful' || status === 'pending'"
     ></div>
   </div>
-  <div class="popup" ng-show="showPopup">
+  <div class="popup" ng-show="$root.showLogPopup.{{'card_' + index}}">
     <div class="popup-content" style="width: 86%;">
       <div class="popup-header">
         <span class="close" ng-click="closePopup()">&times;</span>
@@ -67,7 +67,7 @@
       <div class="popup-body">
         <div style="overflow: auto; max-height: 400px; margin-bottom: 15px;">
           <div class="DashboardGraphs" ng-show="logStrings" style="text-align: left; padding: 20px 10px; margin-bottom: 20px;">
-            <div ng-repeat="log in logStrings">
+            <div ng-repeat="log in logStrings track by $index">
               {{log}}
             </div>
           </div>
@@ -156,7 +156,7 @@
             </div>
           </div>
         </div>
-        <button class="btn btn-primary" ng-click="confirmChanges()" ng-show="!canNotApply">
+        <button class="btn btn-primary" ng-click="applyPopup()" ng-show="!canNotApply">
           <i class="fa fa-play-circle"></i>
           <span>Apply</span>
         </button>
