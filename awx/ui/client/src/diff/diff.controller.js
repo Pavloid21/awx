@@ -371,7 +371,7 @@ export default [
         let extraVars = JSON.parse(job.extra_vars);
         if (extraVars.compare_hash_one === $scope.env1Version.hash &&
             extraVars.compare_hash_two === $scope.env2Version.hash &&
-            && extraVars.compare_only &&
+            extraVars.compare_only &&
             extraVars.composite === $scope.confirmed.toString()) {
               return true;
         }
