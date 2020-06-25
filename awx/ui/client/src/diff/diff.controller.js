@@ -431,6 +431,33 @@ export default [
       }
     };
 
+    $scope.$on('ws-jobs', (e, data) => {
+      // console.log('data :>> ', data);
+      if (data.status === 'successful') {
+        $http({
+          method: "GET",
+          url: `/diff/read_json/?job=${data.unified_job_id}&file=changes.json`
+        }).then((response) => {
+          $scope.compareData = response.data
+          $scope.final = $scope.compareData.results;
+          $scope.isEmpty =
+            Object.keys($scope.final)[0] === undefined;
+          Wait("stop");
+          $scope.isCalculating = false;
+        }, () => {
+          $scope.isEmpty = true;
+          $scope.isCalculating = false;
+        });
+      } else if (data.status === 'failed') {
+        $scope.final = {
+          status: "failed",
+          job: $scope.job.id
+        };
+        $scope.isCalculating = false;
+        Wait("stop");
+      }
+    })
+
     $scope.compare = function() {
       $scope.compareData = null;
       $scope.diffErrorMessage = null;
@@ -463,42 +490,6 @@ export default [
                 $scope.isCalculating = false;
               } else {
                 $scope.job = response.data;
-                let requestJob = () => {
-                  $http({
-                    method: "GET",
-                    url: `/diff/results/?job=${$scope.job.id}`
-                  }).then(function success(response) {
-                    if (
-                      response.data.status !== "successful" &&
-                      response.data.status !== "failed"
-                    ) {
-                      setTimeout(() => requestJob(), 30 * 1000);
-                    } else if (response.data.status === "failed") {
-                      $scope.final = {
-                        status: "failed",
-                        job: $scope.job.id
-                      };
-                      $scope.isCalculating = false;
-                      Wait("stop");
-                    } else {
-                      $http({
-                        method: "GET",
-                        url: `/diff/read_json/?job=${$scope.job.id}&file=changes.json`
-                      }).then((response) => {
-                        $scope.compareData = response.data
-                        $scope.final = $scope.compareData.results;
-                        $scope.isEmpty =
-                          Object.keys($scope.final)[0] === undefined;
-                        Wait("stop");
-                        $scope.isCalculating = false;
-                      }, () => {
-                        $scope.isEmpty = true;
-                        $scope.isCalculating = false;
-                      });
-                    }
-                  });
-                };
-                requestJob();
               }
             },
             function error(response) {

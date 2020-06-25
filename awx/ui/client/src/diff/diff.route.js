@@ -19,6 +19,13 @@ export default {
       }
     }
   },
+  data: {
+    socket: {
+        groups: {
+            jobs: ["status_changed"]
+        }
+    }
+  },
   resolve: {
     lastPath: function($location) {
       return $location.url();
