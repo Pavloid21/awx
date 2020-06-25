@@ -11,7 +11,8 @@ export default [
   "lastPath",
   "$http",
   "Wait",
-  ($rootScope, $scope, $location, ConfigService, Dataset, lastPath, $http, Wait) => {
+  "Rest",
+  ($rootScope, $scope, $location, ConfigService, Dataset, lastPath, $http, Wait, Rest) => {
     Wait("start");
 
     $("#diffCompareButton").css("cursor", "not-allowed");
@@ -101,6 +102,13 @@ export default [
       })
       Wait('stop')
     })
+
+    $http({
+      method: 'GET',
+      url: '/git/api/env/'
+    }).then(envResponse => {
+      $scope.ENV = envResponse.data
+    });
 
     $scope.env1Versions = null;
     $scope.env2Versions = null;
@@ -271,70 +279,82 @@ export default [
           selected[1].title
         }&composite=${!!$scope.confirmed}&isnode=undefined`;
       }
-      $http({ method: "GET", url: url, timeout: 60 * 1000 }).then(
-        function success(response) {
-          $scope.compareData = {};
-          if (response.data.status === "failed") {
-            $scope.final = { status: "failed", job: response.data.job };
-            $scope.compareData = response.data;
-          } else {
-            $scope.job = response.data;
-            let requestJob = () => {
-              $http({
-                method: "GET",
-                url: `/diff/results/?job=${$scope.job.id}`
-              }).then(function success(response) {
-                if (
-                  response.data.status !== "successful" &&
-                  response.data.status !== "failed"
-                ) {
-                  setTimeout(() => requestJob(), 30 * 1000);
-                } else if (response.data.status === "failed") {
-                  $scope.final = {
-                    status: "failed",
-                    job: $scope.job.id
-                  };
-                  Wait("stop");
-                } else {
-                  $http({
-                    method: "GET",
-                    url: `/diff/final/?job=${$scope.job.id}&status=successful`
-                  }).then(function success(response) {
-                    $scope.compareData = response.data.compare.results.find(
-                      res => {
-                        if (
-                          res.task.indexOf("сompare v_one and v_two") >=
-                            0 &&
-                          !!res.event_data.res
-                        ) {
-                          return true;
-                        }
-                        return false;
-                      }
-                    );
-                    $scope.final = JSON.parse(
-                      $scope.compareData.event_data.res.stdout
-                    );
-                    $scope.isEmpty =
-                      Object.keys($scope.final)[0] === undefined;
-                    Wait("stop");
-                  });
-                }
-              });
-            };
-            requestJob();
-          }
-        },
-        function error(response) {
-          $scope.diffErrorMessage = "Error at "
-            .concat(url)
-            .concat(" : ")
-            .concat(response.statusText);
-          $scope.compareData = null;
-          console.log($scope.diffErrorMessage);
-          Wait("stop");
+      Rest.setURL(`/api/v2/job_templates/${$scope.ENV.DIFF_JOB_ID}/launch`);
+      Rest.post({
+        extra_vars: {
+          compare_domain_one: $scope.env1Version,
+          compare_domain_two: $scope.env2Version,
+          compare_version_one: selected[0].title,
+          compare_version_two: selected[1].title,
+          compare_hash_one: selected[0].id,
+          compare_hash_two: selected[1].id,
+          composite: !!$scope.confirmed
         }
-      );
+      }).then();
+      // $http({ method: "GET", url: url, timeout: 60 * 1000 }).then(
+      //   function success(response) {
+      //     $scope.compareData = {};
+      //     if (response.data.status === "failed") {
+      //       $scope.final = { status: "failed", job: response.data.job };
+      //       $scope.compareData = response.data;
+      //     } else {
+      //       $scope.job = response.data;
+      //       let requestJob = () => {
+      //         $http({
+      //           method: "GET",
+      //           url: `/diff/results/?job=${$scope.job.id}`
+      //         }).then(function success(response) {
+      //           if (
+      //             response.data.status !== "successful" &&
+      //             response.data.status !== "failed"
+      //           ) {
+      //             setTimeout(() => requestJob(), 30 * 1000);
+      //           } else if (response.data.status === "failed") {
+      //             $scope.final = {
+      //               status: "failed",
+      //               job: $scope.job.id
+      //             };
+      //             Wait("stop");
+      //           } else {
+      //             $http({
+      //               method: "GET",
+      //               url: `/diff/final/?job=${$scope.job.id}&status=successful`
+      //             }).then(function success(response) {
+      //               $scope.compareData = response.data.compare.results.find(
+      //                 res => {
+      //                   if (
+      //                     res.task.indexOf("сompare v_one and v_two") >=
+      //                       0 &&
+      //                     !!res.event_data.res
+      //                   ) {
+      //                     return true;
+      //                   }
+      //                   return false;
+      //                 }
+      //               );
+      //               $scope.final = JSON.parse(
+      //                 $scope.compareData.event_data.res.stdout
+      //               );
+      //               $scope.isEmpty =
+      //                 Object.keys($scope.final)[0] === undefined;
+      //               Wait("stop");
+      //             });
+      //           }
+      //         });
+      //       };
+      //       requestJob();
+      //     }
+      //   },
+      //   function error(response) {
+      //     $scope.diffErrorMessage = "Error at "
+      //       .concat(url)
+      //       .concat(" : ")
+      //       .concat(response.statusText);
+      //     $scope.compareData = null;
+      //     console.log($scope.diffErrorMessage);
+      //     Wait("stop");
+      //   }
+      // );
     }
 
     const browseExistingCompareResults = () => {
@@ -351,6 +371,7 @@ export default [
         let extraVars = JSON.parse(job.extra_vars);
         if (extraVars.compare_hash_one === $scope.env1Version.hash &&
             extraVars.compare_hash_two === $scope.env2Version.hash &&
+            && extraVars.compare_only &&
             extraVars.composite === $scope.confirmed.toString()) {
               return true;
         }
@@ -390,6 +411,7 @@ export default [
             }, () => {
               Wait('stop');
               $scope.isEmpty = true;
+              $scope.compareData = null;
               $("#diffCompareButton").css("cursor", "pointer");
               $("#diffCompareButton").css("pointer-events", "auto");
             });
@@ -432,11 +454,11 @@ export default [
     };
 
     $scope.$on('ws-jobs', (e, data) => {
-      // console.log('data :>> ', data);
+      console.log('data :>> ', data);
       if (data.status === 'successful') {
         $http({
           method: "GET",
-          url: `/diff/read_json/?job=${data.unified_job_id}&file=changes.json`
+          url: `/diff/read_json/?job=${$scope.job}&file=changes.json`
         }).then((response) => {
           $scope.compareData = response.data
           $scope.final = $scope.compareData.results;
@@ -481,7 +503,20 @@ export default [
           }&v2=${
             $scope.env2Version.tag
           }&composite=${!!$scope.confirmed}&isnode=undefined`;
-          $http({ method: "GET", url: url }).then(
+          // $http({ method: "GET", url: url }).then(
+            Rest.setUrl(`/api/v2/job_templates/${$scope.ENV.DIFF_JOB_ID}/launch`);
+            Rest.post({
+              extra_vars: {
+                compare_domain_one: env1[0].name,
+                compare_domain_two: env2[0].name,
+                compare_version_one: $scope.env1Version.tag,
+                compare_version_two: $scope.env2Version.tag,
+                compare_hash_one: $scope.env1Version.hash,
+                compare_hash_two: $scope.env2Version.hash,
+                composite: !!$scope.confirmed,
+                compare_only: true
+              }
+            }).then(
             function success(response) {
               $scope.compareData = {};
               if (response.data.status === "failed") {
@@ -489,7 +524,7 @@ export default [
                 $scope.compareData = response.data;
                 $scope.isCalculating = false;
               } else {
-                $scope.job = response.data;
+                $scope.job = response.data.job;
               }
             },
             function error(response) {
