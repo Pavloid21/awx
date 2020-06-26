@@ -424,6 +424,32 @@ export default [
       )
     }
 
+    $scope.deleteHistoryRow = (event, item) => {
+      event.stopPropagation()
+      console.log('item :>> ', event);
+      $http({
+        method: 'DELETE',
+        url: `/api/v2/deploy_history/${item.id}/`
+      }).then(() => {
+        let url = $scope.history.previous || $scope.history.next;
+        let urlParams = new URLSearchParams(url);
+        let page = +urlParams.get('page');
+        let pageRequest = 0;
+        if ($scope.deployHistoryRows.length > 1) {
+          pageRequest = $scope.history.previous ? page + 1 : page - 1
+        } else {
+          pageRequest = page
+        }
+        $http({
+          method: 'GET',
+          url: `/api/v2/deploy_history/?order_by=-created&page_size=10&not__status=start&prev_step_id__isnull=1&page=${pageRequest}`
+        }).then(response => {
+          $scope.history = response.data;
+          $scope.deployHistoryRows = response.data.results;
+        })
+      })
+    }
+
     $scope.editAction = (id) => {
       $scope.currentEditAction = $scope.storedActions.filter(action => action.id === id)[0];
       $scope.isAddingAction = true;

@@ -318,6 +318,7 @@
           <th>ID</th>
           <th>DATE</th>
           <th>USER</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -332,6 +333,11 @@
             style="width: 200px;"
           ></td>
           <td>{{item.summary_fields.created_by.username}}</td>
+          <td>
+            <button class="btn btn-danger" ng-click="deleteHistoryRow($event, item)">
+              <i class="fa fa-trash" ng></i>
+            </button>
+          </td>
         </tr>
       </tbody>
     </table>
