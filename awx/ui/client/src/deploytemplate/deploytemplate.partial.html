@@ -50,37 +50,41 @@
       />
     </div>
     <div class="pipeline">
-      <!-- <div id="pipeline_container" ng-view elem-ready="some()">
-        <div ng-repeat="(key, column) in treeView">
+      <div id="pipeline_container" ng-view elem-ready="some()">
+        <div ng-repeat="(key, column) in $parent.treeView">
           <div ng-repeat="(l, cell) in column track by column.length + l">
             <deploy-card
-              ng-if="notEmptyCell(key, l)"
-              id="card_{{column.length + l}}"
-              step="{{column.length + l}}"
+              ng-if="!isEmptyCell(key, l)"
+              id="card_{{key}}{{l}}"
+              step="{{key}}{{l}}"
               index="column.length + l"
               allowrun="isAllowRun"
               allowdelete="isAllowDelete"
+              points="cell.points"
+              name="cell.name"
+              ispicker="cell.picker"
+              isdeployer="cell.setuper"
+              domain="cell.domain"
+              action="cell.action"
             >
             </deploy-card>
-            <div class="add_card" ng-class="{prev_success: l % 2 === 0, prev_failed: l % 2 > 0}" id="card_{{treeView[key - 1].length * 2 + l}}" ng-if="isEmptyCell(key, l)" ng-click="handleAddCard()">
+            <div class="add_card panzoom-exclude" id="card_{{key}}{{l}}" ng-if="isEmptyCell(key, l)" ng-click="handleAddStep(key, l)">
               <i class="fa fa-plus-circle"></i>
-              <p class="prev_success" ng-if="l % 2 === 0">on previous succeeded</p>
-              <p class="prev_failed" ng-if="l % 2 > 0">on previous failed</p>
             </div>
           </div>
         </div>
-      </div> -->
-        <deploy-card
+      </div>
+        <!-- <deploy-card
           ng-repeat="(key, value) in $root.isConfigUploaded track by $index"
           step="{{key + 1}}"
           index="key"
           allowrun="isAllowRun"
           allowdelete="isAllowDelete"
         >
-        </deploy-card>
-        <div class="add_card" ng-click="handleAddCard()">
+        </deploy-card> -->
+        <!-- <div class="add_card" ng-click="handleAddCard()">
           <i class="fa fa-plus-circle"></i>
-        </div>
+        </div> -->
     </div>
     <div class="pipeline" style="padding-top: 20px;">
       <button class="btn btn-success" ng-click="handleSave()" ng-if="!isEditing">Save</button>

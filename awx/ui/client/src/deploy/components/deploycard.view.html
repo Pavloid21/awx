@@ -1,26 +1,43 @@
 <div class="card-deploy">
-  <div class="card_header">
-    <h3>Step {{$ctrl.step}}</h3>
-    <i class="fa fa-trash-o" ng-show="allowDelete" ng-click="handleDeleteCard()"/>
+  <div class="card_header" ng-click="editStepName($ctrl.step)">
+    <h3 ng-if="!name && !isEditingName">Step {{$ctrl.step}}</h3>
+    <p ng-if="name && !isEditingName">{{name}}</p>
+    <div class="name_input" ng-if="isEditingName">
+      <input type="text" ng-model="$parent.name"/>
+      <button class="btn btn-xs btn-success" ng-click="saveName($event, $ctrl.step)">Ok</button>
+    </div>
+    <i class="fa fa-trash-o" ng-show="allowDelete" ng-click="handleDeleteCard($ctrl.step)"/>
   </div>
   <hr/>
   <div style="margin-bottom: 10px;">
     <span>Choose domain:</span>
-    <select style="width: 170px" ng-disabled="isDisabledFields" ng-model="domain" ng-change="setDomain()">
+    <select style="width: 170px" ng-disabled="isDisabledFields" ng-model="domain" ng-change="setDomain($ctrl.step)">
       <option ng-repeat="(key, domain) in domainsList">{{domain}}</option>
     </select>
     <span>Choose action:</span>
-    <select style="width: 170px" ng-disabled="isDisabledFields" ng-model="action" ng-change="setAction()">
+    <select style="width: 170px" ng-disabled="isDisabledFields" ng-model="action" ng-change="setAction($ctrl.step)">
       <option ng-repeat="act in actionsList" ng-value="act.id">{{act.name}}</option>
     </select>
     <div>
-      <input id="picker" ng-disabled="isDisabledFields" type="checkbox" ng-model="ispicker" ng-change="setPicker()"/>
+      <input id="picker" ng-disabled="isDisabledFields" type="checkbox" ng-model="ispicker" ng-change="setPicker($ctrl.step)"/>
       <label for="picker">Composer step</label>
     </div>
     <div>
-      <input id="setuper" ng-disabled="isDisabledFields" type="checkbox" ng-model="isdeployer" ng-change="setDeployer()"/>
+      <input id="setuper" ng-disabled="isDisabledFields" type="checkbox" ng-model="isdeployer" ng-change="setDeployer($ctrl.step)"/>
       <label for="setuper">Deployer step</label>
     </div>
+    <div class="points_container" ng-if="points.length">
+      <p class="points_label">KEY POINTS</p>
+      <div class="points_table_wrapper">
+        <table>
+          <tr ng-repeat="(idx, point) in points">
+            <td>{{point.key}}</td>
+            <td><i class="fa fa-trash-o" ng-show="allowDelete" ng-click="handleDeletePoint($ctrl.step, idx)"/></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="width: 100%;" ng-click="handleAddPoint($ctrl.step)">ADD POINT</button>
     <div class="log" ng-if="current.job && status === 'successful'">
       <i class="fa fa-eye"></i>
       <span class="log_view" ng-click="handleViewLog()">View log</span>

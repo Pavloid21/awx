@@ -3,6 +3,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   this.allowRun = null;
   this.allowDelete = null;
   $scope.domainsList = [];
+  $scope.name = null;
   $scope.isDisabledFields = $rootScope.fieldsDisabled;
   $scope.isCollapse = {
     changes: false,
@@ -54,45 +55,51 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   $scope.status = "start";
   $scope.watcher = $rootScope.isConfigUploaded;
   this.$onInit = function() {
-    // Init from history if exists
-    if (this.index > 0) {
-      if ($rootScope.isConfigUploaded[this.index - 1].status !== 'start' &&
-          $rootScope.isConfigUploaded[this.index - 1].status !== 'pending') {
-            $scope.prevStepNotComplited = false;
-          } else {
-            $scope.prevStepNotComplited = true;
-          }
-    } else {
-      if ($rootScope.isConfigUploaded[this.index].status === 'failed' || $rootScope.isConfigUploaded[this.index].status === 'successful') {
-        $scope.prevStepNotComplited = true;
-      } else {
-        $scope.prevStepNotComplited = false;
-      }
-    }
-    $scope.index = this.index;
-    $scope.allowRun = this.allowrun;
+  //   // Init from history if exists
+  //   if (this.index > 0) {
+  //     if ($rootScope.isConfigUploaded[this.index - 1].status !== 'start' &&
+  //         $rootScope.isConfigUploaded[this.index - 1].status !== 'pending') {
+  //           $scope.prevStepNotComplited = false;
+  //         } else {
+  //           $scope.prevStepNotComplited = true;
+  //         }
+  //   } else {
+  //     if ($rootScope.isConfigUploaded[this.index].status === 'failed' || $rootScope.isConfigUploaded[this.index].status === 'successful') {
+  //       $scope.prevStepNotComplited = true;
+  //     } else {
+  //       $scope.prevStepNotComplited = false;
+  //     }
+  //   }
+  //   $scope.index = this.index;
+  //   $scope.allowRun = this.allowrun;
+    $scope.name = this.name;
+    $scope.points = this.points;
+    $scope.ispicker = this.ispicker;
+    $scope.isdeployer = this.isdeployer;
     $scope.allowDelete = this.allowdelete;
-    $scope.isDisabledFields = $rootScope.fieldsDisabled;
-    if ($rootScope.isConfigUploaded.length) {
-      $scope.domain = $rootScope.isConfigUploaded[this.index].domain;
-      $scope.action = $rootScope.isConfigUploaded[this.index].action[0];
-      $scope.status = $rootScope.isConfigUploaded[this.index].status;
-      $scope.ispicker = $rootScope.isConfigUploaded[this.index].picker;
-      $scope.isdeployer = $rootScope.isConfigUploaded[this.index].setuper;
-      $scope.finishedJobId = $rootScope.isConfigUploaded[this.index].job;
-      if (
-        $rootScope.isConfigUploaded.length > $scope.domainsList.length && this.allowRun
-      ) {
-        $rootScope.isConfigUploaded.pop();
-      }
-      if (this.index > 0) {
-        $scope.parentIndex = $rootScope.isConfigUploaded[this.index - 1].id;
-      }
-    }
-    $scope.current = $rootScope.isConfigUploaded[this.index];
-    if ($rootScope.showLogPopup[`card_${$scope.index}`]) {
-      $scope.handleViewLog();
-    }
+    $scope.domain = this.domain;
+    $scope.action = this.action[0];
+  //   $scope.isDisabledFields = $rootScope.fieldsDisabled;
+  //   if ($rootScope.isConfigUploaded.length) {
+  //     $scope.domain = $rootScope.isConfigUploaded[this.index].domain;
+  //     $scope.action = $rootScope.isConfigUploaded[this.index].action[0];
+  //     $scope.status = $rootScope.isConfigUploaded[this.index].status;
+  //     $scope.ispicker = $rootScope.isConfigUploaded[this.index].picker;
+  //     $scope.isdeployer = $rootScope.isConfigUploaded[this.index].setuper;
+  //     $scope.finishedJobId = $rootScope.isConfigUploaded[this.index].job;
+  //     if (
+  //       $rootScope.isConfigUploaded.length > $scope.domainsList.length && this.allowRun
+  //     ) {
+  //       $rootScope.isConfigUploaded.pop();
+  //     }
+  //     if (this.index > 0) {
+  //       $scope.parentIndex = $rootScope.isConfigUploaded[this.index - 1].id;
+  //     }
+  //   }
+  //   $scope.current = $rootScope.isConfigUploaded[this.index];
+  //   if ($rootScope.showLogPopup[`card_${$scope.index}`]) {
+  //     $scope.handleViewLog();
+  //   }
   };
 
   // $scope.$watch('showPopup', (newValue, oldValue, scope) => {
@@ -150,6 +157,33 @@ export default function($rootScope, $scope, $element, Wait, $http) {
     });
   };
 
+  $scope.$watchCollection('$root.treeView', () => {
+    $rootScope.rerenderTree()
+  })
+
+  $scope.editStepName = (id) => {
+    $scope.isEditingName = true;
+  }
+
+  $scope.saveName = (e, id) => {
+    e.stopPropagation();
+    function dive(node) {
+      if (!node) {
+        return;
+      }
+      if (node.node === id) {
+        node.name = $scope.name
+      } else {
+        node.children.forEach(child => {
+          dive(child)
+        })
+      }
+    }
+    dive($rootScope.tree);
+    $rootScope.rerenderTree();
+    $scope.isEditingName = false;
+  }
+
   $scope.handleViewLog = () => {
     if ($scope.ispicker) {
       $http({
@@ -178,24 +212,154 @@ export default function($rootScope, $scope, $element, Wait, $http) {
     }
   }
 
-  $scope.setDomain = () => {
-    $rootScope.isConfigUploaded[$scope.index].domain = $scope.domain;
+  $scope.setDomain = (id) => {
+    // $rootScope.isConfigUploaded[$scope.index].domain = $scope.domain;
+    if (id) {
+      function dive(node) {
+        if (!node) {
+          return;
+        }
+        if (node.node === id) {
+          node.domain = $scope.domain
+        } else {
+          node.children.forEach(child => {
+            dive(child)
+          })
+        }
+      }
+      dive($rootScope.tree);
+    }
   };
 
-  $scope.setAction = () => {
-    $rootScope.isConfigUploaded[$scope.index].action = [$scope.action];
+  $scope.setAction = (id) => {
+    // $rootScope.isConfigUploaded[$scope.index].action = [$scope.action];
+    if (id) {
+      function dive(node) {
+        if (!node) {
+          return;
+        }
+        if (node.node === id) {
+          node.action = [$scope.action]
+        } else {
+          node.children.forEach(child => {
+            dive(child)
+          })
+        }
+      }
+      dive($rootScope.tree);
+    }
   };
 
-  $scope.setPicker = () => {
-    $rootScope.isConfigUploaded[$scope.index].picker = $scope.ispicker;
+  $scope.setPicker = (id) => {
+    // $rootScope.isConfigUploaded[$scope.index].picker = $scope.ispicker;
+    if (id) {
+      function dive(node) {
+        if (!node) {
+          return;
+        }
+        if (node.node === id) {
+          node.picker = $scope.ispicker
+        } else {
+          node.children.forEach(child => {
+            dive(child)
+          })
+        }
+      }
+      dive($rootScope.tree);
+    }
   }
 
-  $scope.setDeployer = () => {
-    $rootScope.isConfigUploaded[$scope.index].setuper = $scope.isdeployer;
+  $scope.setDeployer = (id) => {
+    // $rootScope.isConfigUploaded[$scope.index].setuper = $scope.isdeployer;
+    if (id) {
+      function dive(node) {
+        if (!node) {
+          return;
+        }
+        if (node.node === id) {
+          node.setuper = $scope.isdeployer
+        } else {
+          node.children.forEach(child => {
+            dive(child)
+          })
+        }
+      }
+      dive($rootScope.tree);
+    }
   }
 
-  $scope.handleDeleteCard = () => {
+  $scope.handleDeleteCard = (id) => {
     $rootScope.isConfigUploaded.splice($scope.index, 1);
+    if (id) {
+      function dive(node) {
+        if (!node) {
+          return;
+        }
+        if (node.node === id) {
+          node.children = [];
+          node.points = [];
+          node.status = null;
+        } else {
+          node.children.forEach(child => {
+            dive(child)
+          })
+        }
+      }
+      dive($rootScope.tree);
+      $rootScope.treeView = [];
+      $rootScope.treeToTreeView($rootScope.tree)
+      // $rootScope.rerenderTree()
+    }
+  }
+
+  $scope.handleDeletePoint = (id, point) => {
+    if (id) {
+      function dive(node) {
+        if (!node) {
+          return
+        }
+        if (node.node === id) {
+          node.points.forEach((p, index) => {
+            if (index === point) {
+              node.points.splice(index, 1);
+              node.children.splice(index, 1)
+            }
+          })
+        } else {
+          node.children.forEach(child => {
+            dive(child)
+          })
+        }
+      }
+      dive($rootScope.tree)
+      $rootScope.treeView = [];
+      $rootScope.treeToTreeView($rootScope.tree)
+      // $rootScope.rerenderTree()
+    }
+  }
+
+  $scope.handleAddPoint = (id) => {
+    if (id) {
+      function dive(node) {
+        if (!node) {
+          return;
+        }
+        if (node.node === id) {
+          node.points.push({
+            key: id,
+            value: 0
+          })
+        } else {
+          node.children.forEach(child => {
+            dive(child)
+          })
+        }
+      }
+      dive($rootScope.tree);
+      $rootScope.treeView = [];
+      $rootScope.treeToTreeView($rootScope.tree);
+      // $rootScope.rerenderTree();
+    }
   }
 
   let throwJobId = (historyRecordId) => {

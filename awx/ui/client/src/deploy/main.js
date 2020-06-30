@@ -58,7 +58,13 @@ export default angular
       step: '@',
       index: '=',
       allowrun: '=',
-      allowdelete: '='
+      allowdelete: '=',
+      points: '=',
+      name: '=',
+      ispicker: '=',
+      isdeployer: '=',
+      domain: '=',
+      action: '='
     },
   })
   .controller("deploy", controller)

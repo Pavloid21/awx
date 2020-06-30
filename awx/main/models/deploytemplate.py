@@ -3,7 +3,7 @@ from rest_framework import serializers
 from django.utils.translation import ugettext_lazy as _
 from awx.main.models.mixins import ResourceMixin
 from awx.main.models.base import CommonModel
-from django.contrib.postgres.fields import ArrayField
+# from django.contrib.postgres.fields import TextField
 from awx.main.fields import (
     AutoOneToOneField, ImplicitRoleField, OrderedManyToManyField
 )
@@ -19,7 +19,8 @@ class DeployTemplate(CommonModel, ResourceMixin):
         app_label: 'main'
         ordering = ('pk',)
 
-    deployHistoryIds = ArrayField(models.IntegerField())
+    tree = models.TextField(blank = True, default = None)
+    # deployHistoryIds = ArrayField(models.IntegerField())
     admin_role = ImplicitRoleField(
         parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     )
