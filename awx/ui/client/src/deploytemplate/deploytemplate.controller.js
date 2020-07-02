@@ -178,8 +178,9 @@ export default [
   })
 
   // PANZOOM ENABLING
-  $scope.$watch('$root.isConfigUploaded', (val) => {
-    let pipelineContainer = document.getElementById('pipeline_container');
+  $scope.$watchCollection('$root.treeView', (val) => {
+    let elem = $scope.displayView === 'pipeline' ? 'tree_run_container' : 'pipeline_container'
+    let pipelineContainer = document.getElementById(elem);
     panzoom(pipelineContainer, {
       autocenter: true, 
       bounds: true,
@@ -200,6 +201,17 @@ export default [
         $scope.deployActionRows = dataset.results;
       }
     });
+
+    $scope.enablePanzoom = () => {
+      let treeRunContainer = document.getElementById('tree_run_container');
+      panzoom(treeRunContainer, {
+        autocenter: true, 
+        bounds: true,
+        onTouch: function(e) {
+          return false; // tells the library to not preventDefault.
+        }
+      })
+    }
 
     // JSON EDITOR INIT https://github.com/josdejong/jsoneditor
     const container = document.getElementById("jsoneditor")
@@ -308,16 +320,17 @@ export default [
     $rootScope.findNode = findNode;
 
     $scope.some = () => {
-      console.log('$rootScope.tree :>> ', $rootScope.tree);
-      let pipelineContainer = document.getElementById('pipeline_container');
+      let elem = $scope.displayView === 'pipeline' ? 'tree_run_container' : 'pipeline_container'
+      // console.log('$rootScope.tree :>> ', $rootScope.tree, elem);
+      let pipelineContainer = document.getElementById(elem);
       document.querySelectorAll('.svg_container').forEach(e => e.remove())
       $rootScope.treeView.forEach((column, cid) => {
         column.forEach((cell, id) => {
           if (cid !== $rootScope.treeView.length - 1) {
-            let cardElement = document.querySelector(`#card_${cid}${id}`);
+            let cardElement = pipelineContainer.querySelector(`#card_${cid}${id}`);
             let childrenElements = $rootScope.treeView[cid + 1].map((child, c) => {
               if (child && child.parent_node === cell.node) {
-                return document.querySelector(`#card_${cid + 1}${c}`)
+                return pipelineContainer.querySelector(`#card_${cid + 1}${c}`)
               }
             })
             let coords = [];
@@ -596,7 +609,7 @@ export default [
         on_success: null,
         on_failed: null
       });
-      console.log('$rootScope.isConfigUploaded :>> ', $rootScope.isConfigUploaded);
+      // console.log('$rootScope.isConfigUploaded :>> ', $rootScope.isConfigUploaded);
     };
 
 
@@ -796,68 +809,21 @@ export default [
     };
 
     $scope.getSteps = (idx, spentItem, nextItem) => {
-      let cardList = [];
-      let skip = null;
-      Wait('start');
-      try {
-        (function cards(id) {
-          if (id < $scope.selected.item.deployHistoryIds.length) {
-            $http({
-              method: 'GET',
-              url: `/api/v2/deploy_history/${$scope.selected.item.deployHistoryIds[id]}/`
-            }).then(
-              function success(response) {
-                if (idx !== undefined && spentItem && nextItem && idx === id) {
-                  cardList[idx] = spentItem;
-                  cardList[idx + 1] = nextItem;
-                  skip = idx + 1;
-                } else if (id !== skip) {
-                  cardList.push(response.data)
-                }
-                Wait('stop');
-                cards.call(null, id + 1);
-              },
-              function error(e) {
-                alert(e);
-                Wait('stop');
-              }
-            )
-          }
-        })(0)
-        $rootScope.isConfigUploaded = cardList;
-      } catch (e) {
-        Wait('stop')
-      }
+      $rootScope.tree = JSON.parse($scope.selected.item.tree);
+      treeToTreeView($rootScope.tree);
+      $scope.some('tree_run_container');
     }
 
     $rootScope.getSteps = $scope.getSteps;
 
     $scope.historyRowClick = (item) => {
       $scope.displayView = 'pipeline';
-      $rootScope.isConfigUploaded = [];
-      $rootScope.isConfigUploaded.push(item);
+      $scope.fromHistory = true;
+      $rootScope.tree = JSON.parse(item.tree);
+      treeToTreeView($rootScope.tree)
       $rootScope.fieldsDisabled = true;
       $scope.isAllowRun = true;
-      let getNextStep = (prevStepId) => {
-        $http({
-          method: 'GET',
-          url: `/api/v2/deploy_history/?prev_step_id=${prevStepId}`
-        }).then(
-          function success(response) {
-            if (response.data.results.length) {
-              $rootScope.isConfigUploaded.push(response.data.results[0]);
-              getNextStep(response.data.results[0].id);
-            }
-            Wait('stop');
-          },
-  
-          function error(response) {
-            console.warn(response)
-            Wait('stop')
-          }
-        )
-      }
-      getNextStep(item.id)
+      $scope.some()
     }
 
     $scope.closePopup = () => {

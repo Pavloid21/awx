@@ -2,10 +2,11 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   this.index = null;
   this.allowRun = null;
   this.allowDelete = null;
+  this.step = null;
   $scope.domainsList = [];
   $scope.name = null;
   $scope.isDisabledFields = $rootScope.fieldsDisabled;
-  $scope.isCollapse = {
+  $rootScope.isCollapse = {
     changes: false,
     added: false,
     deleted: false
@@ -45,33 +46,10 @@ export default function($rootScope, $scope, $element, Wait, $http) {
     $scope.actionsList = response.data.results
     Wait('stop')
   })
-  $http({
-    method: 'GET',
-    url: '/api/v2/deploy_history/?order_by=-created&setuper=true'
-  }).then(function success(response) {
-    $scope.deployList = response.data.results
-    Wait('stop')
-  })
   $scope.status = "start";
   $scope.watcher = $rootScope.isConfigUploaded;
   this.$onInit = function() {
-  //   // Init from history if exists
-  //   if (this.index > 0) {
-  //     if ($rootScope.isConfigUploaded[this.index - 1].status !== 'start' &&
-  //         $rootScope.isConfigUploaded[this.index - 1].status !== 'pending') {
-  //           $scope.prevStepNotComplited = false;
-  //         } else {
-  //           $scope.prevStepNotComplited = true;
-  //         }
-  //   } else {
-  //     if ($rootScope.isConfigUploaded[this.index].status === 'failed' || $rootScope.isConfigUploaded[this.index].status === 'successful') {
-  //       $scope.prevStepNotComplited = true;
-  //     } else {
-  //       $scope.prevStepNotComplited = false;
-  //     }
-  //   }
-  //   $scope.index = this.index;
-  //   $scope.allowRun = this.allowrun;
+      $scope.allowRun = this.allowrun;
     $scope.name = this.name;
     $scope.points = this.points;
     $scope.ispicker = this.ispicker;
@@ -79,42 +57,48 @@ export default function($rootScope, $scope, $element, Wait, $http) {
     $scope.allowDelete = this.allowdelete;
     $scope.domain = this.domain;
     $scope.action = this.action[0];
-  //   $scope.isDisabledFields = $rootScope.fieldsDisabled;
-  //   if ($rootScope.isConfigUploaded.length) {
-  //     $scope.domain = $rootScope.isConfigUploaded[this.index].domain;
-  //     $scope.action = $rootScope.isConfigUploaded[this.index].action[0];
-  //     $scope.status = $rootScope.isConfigUploaded[this.index].status;
-  //     $scope.ispicker = $rootScope.isConfigUploaded[this.index].picker;
-  //     $scope.isdeployer = $rootScope.isConfigUploaded[this.index].setuper;
-  //     $scope.finishedJobId = $rootScope.isConfigUploaded[this.index].job;
-  //     if (
-  //       $rootScope.isConfigUploaded.length > $scope.domainsList.length && this.allowRun
-  //     ) {
-  //       $rootScope.isConfigUploaded.pop();
-  //     }
-  //     if (this.index > 0) {
-  //       $scope.parentIndex = $rootScope.isConfigUploaded[this.index - 1].id;
-  //     }
-  //   }
-  //   $scope.current = $rootScope.isConfigUploaded[this.index];
-  //   if ($rootScope.showLogPopup[`card_${$scope.index}`]) {
-  //     $scope.handleViewLog();
-  //   }
+    $scope.step = this.step;
+    if ($rootScope.tree) {
+      function dive(node, parent) {
+        if (!node) {
+          return;
+        }
+        if ($scope.step === node.node) {
+          $scope.status = node.status;
+          $scope.current = node
+          if (!!parent) {
+            if (parent.status !== 'start' && parent.status !== 'pending') {
+              $scope.prevStepNotComplited = false;
+            } else {
+              $scope.prevStepNotComplited = true;
+            }
+          } else {
+            if (node.status === 'failed' || node.status === 'successful' || node.status === 'skiped') {
+              $scope.prevStepNotComplited = true;
+            } else {
+              $scope.prevStepNotComplited = false;
+            }
+          }
+        }
+        if (node.setuper) {
+          $scope.deployStep = node
+        }
+        node.children.forEach(child => {
+          dive(child, node)
+        })
+      }
+      dive($rootScope.tree, null)
+    }
   };
 
-  // $scope.$watch('showPopup', (newValue, oldValue, scope) => {
-  //   console.log('newValue :>> ', newValue);
-  //   console.log('oldValue :>> ', oldValue);
-  //   console.log('scope :>> ', scope);
-  // })
-
+  
   let patchStep = () => {
     $http({
       method: 'PATCH',
       url: `/api/v2/deploy_history/${$scope.recordId}/`,
-      data: $rootScope.isConfigUploaded[$scope.index]
+      data: {tree: JSON.stringify($rootScope.tree)}
     }).then((patchPesponse) => {
-      $rootScope.isConfigUploaded[$scope.index]= patchPesponse.data;
+      $rootScope.tree = JSON.parse(patchPesponse.data.tree);
       throwJobId(patchPesponse.data.id);
     })
   }
@@ -147,22 +131,52 @@ export default function($rootScope, $scope, $element, Wait, $http) {
           status: "success",
           job: $scope.job
         };
-        $rootScope.isConfigUploaded[$scope.index].status = "successful";
-        $rootScope.isConfigUploaded[$scope.index].job = $scope.job;
-        delete $rootScope.isConfigUploaded[$scope.index].name;
-        $rootScope.currentStep = response.data.prevStep;
+        function dive(node) {
+          if (!node) {
+            return;
+          }
+          if (node.node === $scope.step) {
+            node.status = 'successful';
+            node.job = $scope.job;
+          }
+          node.children.forEach(child => {
+            dive(child)
+          })
+        }
+        dive($rootScope.tree);
+        $rootScope.treeToTreeView($rootScope.tree);
         patchStep();
         Wait("stop");
       }
     });
   };
 
+  $scope.skipStep = (id) => {
+    function dive(node) {
+      if (!node) {
+        return;
+      }
+      if (id === node.node) {
+        $scope.status = 'skiped';
+        node.status = $scope.status;
+      }
+      node.children.forEach(child => {
+        dive(child, node)
+      })
+    }
+    dive($rootScope.tree)
+    console.log('$rootScope.tree :>> ', $rootScope.tree);
+    $rootScope.treeToTreeView($rootScope.tree);
+    $rootScope.rerenderTree()
+  }
+
   $scope.$watchCollection('$root.treeView', () => {
     $rootScope.rerenderTree()
   })
 
-  $scope.editStepName = (id) => {
-    $scope.isEditingName = true;
+  $scope.editStepName = () => {
+    if ($scope.allowDelete)
+      $scope.isEditingName = true;
   }
 
   $scope.saveName = (e, id) => {
@@ -190,22 +204,22 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         method: 'GET',
         url: `/diff/read_json/?job=${$scope.current.job}&file=forDeploy.json`
       }).then(successJsonData => {
-        $scope.logStrings = null;
-        $scope.commitStrings = JSON.stringify(successJsonData.data.results).split('\n');
-        $scope.tableData = successJsonData.data.results;
-        $scope.canNotApply = true;
-        $rootScope.showLogPopup[`card_${$scope.index}`] = true;
+        $rootScope.logStrings = null;
+        $rootScope.commitStrings = JSON.stringify(successJsonData.data.results).split('\n');
+        $rootScope.tableData = successJsonData.data.results;
+        $rootScope.canNotApply = true;
+        $rootScope.showLogPopup[`card_`] = true;
       })
     } else if ($scope.isdeployer) {
       $http({
         method: 'GET',
         url: `/diff/read_info/?job=${$scope.current.job}&file=json2rest.log`
       }).then(successJsonData => {
-        $scope.commitStrings = null;
-        $scope.logStrings = successJsonData.data.results.split('\n');
-        $scope.tableData = successJsonData.data.results;
-        $rootScope.showLogPopup[`card_${$scope.index}`] = true;
-        $scope.canNotApply = true;
+        $rootScope.commitStrings = null;
+        $rootScope.logStrings = successJsonData.data.results.split('\n');
+        $rootScope.tableData = successJsonData.data.results;
+        $rootScope.showLogPopup[`card_`] = true;
+        $rootScope.canNotApply = true;
       })
     } else {
 
@@ -346,8 +360,8 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         }
         if (node.node === id) {
           node.points.push({
-            key: id,
-            value: 0
+            key: 'success',
+            value: true
           })
         } else {
           node.children.forEach(child => {
@@ -370,7 +384,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
       $scope.afterComplitedItem.status = 'start';
     }
     if ($scope.ispicker) {
-      let deployerStep = $scope.deployList[0];
+      let deployerStep = $scope.deployStep;
       $http({
         method: 'GET',
         url: `/api/v2/action/${deployerStep.action[0]}/`
@@ -394,12 +408,12 @@ export default function($rootScope, $scope, $element, Wait, $http) {
             method: 'GET',
             url: `/diff/read_json/?job=${$rootScope.job}&file=forDeploy.json`
           }).then(successJsonData => {
-            $scope.logStrings = null;
-            $scope.commitStrings = JSON.stringify(successJsonData.data.results).split('\n');
-            $scope.tableData = successJsonData.data.results;
-            $rootScope.showLogPopup[`card_${$scope.index}`] = false;
-            $scope.confirmChanges();
-            $scope.handleViewLog();
+            $rootScope.logStrings = null;
+            $rootScope.commitStrings = JSON.stringify(successJsonData.data.results).split('\n');
+            $rootScope.tableData = successJsonData.data.results;
+            $rootScope.showLogPopup[`card_`] = false;
+            $rootScope.confirmChanges();
+            $rootScope.handleViewLog();
           })
         })
       })
@@ -408,57 +422,36 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         method: 'GET',
         url: `/diff/read_info/?job=${$rootScope.job}&file=json2rest.log`
       }).then(successJsonData => {
-        $scope.commitStrings = null;
-        $scope.logStrings = successJsonData.data.results.split('\n');
-        $scope.tableData = successJsonData.data.results;
-        $rootScope.showLogPopup[`card_${$scope.index}`] = false;
-        $scope.confirmChanges();
-        $scope.handleViewLog();
+        $rootScope.commitStrings = null;
+        $rootScope.logStrings = successJsonData.data.results.split('\n');
+        $rootScope.tableData = successJsonData.data.results;
+        $rootScope.showLogPopup[`card_`] = false;
+        $rootScope.confirmChanges();
+        $rootScope.handleViewLog();
       })
     } else {
-      $scope.confirmChanges();
+      $rootScope.confirmChanges();
     }
-    // $scope.showPopup = true;
   }
 
-  $scope.collapseView = function(chapter) {
-    $scope.isCollapse[chapter] = !$scope.isCollapse[chapter];
+  $rootScope.collapseView = function(chapter) {
+    $rootScope.isCollapse[chapter] = !$rootScope.isCollapse[chapter];
   };
 
-  $scope.closePopup = () => {
-    $rootScope.showLogPopup[`card_${$scope.index}`] = false;
-    // let complitedItem = $rootScope.isConfigUploaded[$scope.index];
-    // $rootScope.getSteps($scope.index, complitedItem, $rootScope.isConfigUploaded[$scope.index + 1]);
+  $rootScope.closePopup = () => {
+    $rootScope.showLogPopup[`card_`] = false;
   }
 
-  $scope.applyPopup = () => {
-    $rootScope.showLogPopup[`card_${$scope.index}`] = false;
+  $rootScope.applyPopup = () => {
+    $rootScope.showLogPopup[`card_`] = false;
   }
 
   $scope.confirmChanges = () => {
-    // $scope.showPopup = false;
-    let complitedItem = $rootScope.isConfigUploaded[$scope.index];
-    delete $scope.afterComplitedItem.id;
-    console.log('$scope.afterComplitedItem :>> ', $scope.afterComplitedItem);
-    if ($scope.afterComplitedItem) {
-      $scope.afterComplitedItem.name = Math.random().toString(36).substring(7);
-      Wait('start')
-      $http({
-        method: 'POST',
-        url: `/api/v2/deploy_history/`,
-        data: $scope.afterComplitedItem
-      }).then((patchedNextItem) => {
-        Wait('stop')
-        $rootScope.isConfigUploaded[$scope.index + 1] = patchedNextItem.data;
-        $rootScope.getSteps($scope.index, complitedItem, $rootScope.isConfigUploaded[$scope.index + 1]);
-      })
-    } else {
-      $rootScope.getSteps($scope.index, complitedItem, $rootScope.isConfigUploaded[$scope.index + 1]);
-    }
+    $scope.showPopup = false;
   }
 
-  $scope.declaimChanges = () => {
-    $rootScope.showLogPopup[`card_${$scope.index}`] = false;
+  $rootScope.declaimChanges = () => {
+    $rootScope.showLogPopup[`card_`] = false;
     let complitedItem = $rootScope.isConfigUploaded[$scope.index];
     $rootScope.getSteps($scope.index, complitedItem, $rootScope.isConfigUploaded[$scope.index + 1]);
   }
@@ -492,28 +485,20 @@ export default function($rootScope, $scope, $element, Wait, $http) {
             .then(launchResponse => {
               $scope.job = launchResponse.data.job;
               $rootScope.job = launchResponse.data.job;
-              if (index === 0) {
+              // if (index === '0') {
                 $http({
                   method: 'POST',
                   url: '/api/v2/deploy_history/',
                   data: {
-                    status: 'pending',
                     name: makeid(10),
                     description: '',
-                    domain: $scope.domain,
-                    action: [action.id],
-                    job: $scope.job,
-                    prev_step_id: Number.isNaN($scope.parentIndex) ? null : $scope.parentIndex
+                    tree: JSON.stringify($rootScope.tree)
                   }
                 })
                 .then(resp => {
                   $scope.recordId = resp.data.id;
                   requestJob();
                 })                
-              } else {
-                $scope.recordId = $rootScope.isConfigUploaded[index].id
-                requestJob();
-              }
             })
           }
         })

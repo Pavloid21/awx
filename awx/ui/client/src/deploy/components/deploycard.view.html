@@ -1,5 +1,5 @@
 <div class="card-deploy">
-  <div class="card_header" ng-click="editStepName($ctrl.step)">
+  <div class="card_header" ng-click="editStepName()">
     <h3 ng-if="!name && !isEditingName">Step {{$ctrl.step}}</h3>
     <p ng-if="name && !isEditingName">{{name}}</p>
     <div class="name_input" ng-if="isEditingName">
@@ -37,7 +37,10 @@
         </table>
       </div>
     </div>
-    <button class="btn btn-primary" style="width: 100%;" ng-click="handleAddPoint($ctrl.step)">ADD POINT</button>
+    <button class="btn btn-primary" ng-if="!allowRun && points.length < 1" style="width: 100%;" ng-click="handleAddPoint($ctrl.step)">ADD POINT</button>
+    <div class="log" ng-if="status === 'start' && allowRun && isDisabledFields && !prevStepNotComplited">
+      <span class="log_view" ng-click="skipStep($ctrl.step)">Skip step</span>
+    </div>
     <div class="log" ng-if="current.job && status === 'successful'">
       <i class="fa fa-eye"></i>
       <span class="log_view" ng-click="handleViewLog()">View log</span>
@@ -48,7 +51,7 @@
     </div>
     <div
       class="play-button"
-      ng-class="{disabledButton: !domain || prevStepNotComplited}"
+      ng-class="{disabledButton: prevStepNotComplited}"
       ng-if="final === undefined && status === 'start' && allowRun && isDisabledFields"
       ng-click="deployConfig($ctrl.index)"
     >
@@ -75,112 +78,5 @@
       ng-if="final === null && status !== 'failed' && status !== 'successful' || status === 'pending'"
     ></div>
   </div>
-  <div class="popup" ng-show="$root.showLogPopup.{{'card_' + index}}">
-    <div class="popup-content" style="width: 86%;">
-      <div class="popup-header">
-        <span class="close" ng-click="closePopup()">&times;</span>
-        <h4>Upcoming changes</h4>
-      </div>
-      <div class="popup-body">
-        <div style="overflow: auto; max-height: 400px; margin-bottom: 15px;">
-          <div class="DashboardGraphs" ng-show="logStrings" style="text-align: left; padding: 20px 10px; margin-bottom: 20px;">
-            <div ng-repeat="log in logStrings track by $index">
-              {{log}}
-            </div>
-          </div>
-          <div class="DashboardGraphs" ng-show="commitStrings" style="text-align: left; padding: 20px 10px; margin-bottom: 20px;">
-            <div ng-repeat="str in commitStrings">
-              <div>
-                <table
-                  border="1"
-                  class="diff_table"
-                  ng-repeat="(key, value) in tableData"
-                  id="diff_table"
-                >
-                  <tr ng-click="collapseView(key)" class="clps">
-                    <td ng-if="key === 'added'">Added</td>
-                    <td ng-if="key === 'deleted'">Deleted</td>
-                    <td ng-if="key === 'changes'">Changes</td>
-                  </tr>
-                  <tr ng_class="hide_{{key}}" ng-hide="isCollapse['{{key}}'] === true">
-                    <td>
-                      <table
-                        border="1"
-                        class="table_container"
-                        ng-repeat="(k, val) in tableData[key]"
-                      >
-                        <tr>
-                          <td class="strong_title">{{k}}</td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <table
-                              border="1"
-                              ng-class="{diff_gray_table: key != 'deleted' && key != 'added', diff_red_table: key === 'deleted', diff_green_table: key === 'added'}"
-                              ng-repeat="(k1, val) in tableData[key][k]"
-                              ng-if="key != 'deleted' && key != 'added'"
-                            >
-                              <tr>
-                                <td ng-if="key === 'changes' || key === 'added'"><strong>{{k1}}</strong></td>
-                                <td ng-if="key != 'changes' && key != 'added'"><strong>{{k1}}</strong></td>
-                                <td ng-if="key != 'added' && key != 'deleted'"></td>
-                                <td ng-if="key === 'changes' || key === 'added'"></td>
-                              </tr>
-                              <!-- CHANGES & NEW VALUES -->
-                              <tr ng-if="key === 'changes'">
-                                <td><strong>parameter</strong></td>
-                                <td ng-if="!!uiEnv1"><strong ng-bind-template="{{uiEnv1}} ({{env1Version.tag}})"></strong></td>
-                                <td ng-if="!!uiEnv2"><strong ng-bind-template="{{uiEnv2}} ({{env2Version.tag}})"></strong></td>
-                                <td ng-if="!uiEnv1"><strong>Old value</strong></td>
-                                <td ng-if="!uiEnv2"><strong>New value</strong></td>
-                                <td><strong>path to parameter</strong></td>
-                              </tr>
-                              <tr ng-repeat="item in tableData[key][k][k1]" ng-if="key === 'changes' || key === 'added'">
-                                <td class="td_parameter">{{item.parameter}}</td>
-                                <td class="td_parameter">{{item.old_value}}</td>
-                                <td class="td_parameter">{{item.new_value}}</td>
-                                <td rowspan="1" class="td_parameter pathto">{{item.path_to_parameter}}</td>
-                              </tr>
-                            </table>
-                            <table border="1" class="diff_green_table" ng-if="key === 'added'">
-                              <!-- ADDED PARAMS -->
-                              <tr ng-if="key === 'added'">
-                                <td><strong>Name</strong></td>
-                                <td><strong>Path to get configs</strong></td>
-                              </tr>
-                              <tr ng-repeat="item in tableData[key][k]" ng-if="key === 'added'">
-                                <td>{{item.name}}</td>
-                                <td ng-if="$first" rowspan="{{tableData[key][k].length}}">{{item.ylm_path_to_get_configs}}</td>
-                              </tr>
-                            </table>
-                            <table border="1" class="diff_red_table" ng-if="key === 'deleted'">
-                              <!-- DELETED PARAMS -->
-                              <tr ng-repeat="item in tableData[key][k]">
-                                <td>{{item}}</td>
-                              </tr>
-                            </table>
-              
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                </table>
-              </div>
-            </div>
-            <div ng-repeat="hash in commitHashStr">
-              {{hash}}
-            </div>
-          </div>
-        </div>
-        <button class="btn btn-primary" ng-click="applyPopup()" ng-show="!canNotApply">
-          <i class="fa fa-play-circle"></i>
-          <span>Apply</span>
-        </button>
-        <button class="btn" ng-click="declaimChanges()" ng-if="!showCompleted">
-          <span>Cancel</span>
-        </button>
-      </div>
-    </div>
-  </div>
+  
 </div>
