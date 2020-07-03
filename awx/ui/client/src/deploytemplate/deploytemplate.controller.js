@@ -292,6 +292,7 @@ export default [
       $scope.displayView = "pipeline";
       $scope.isAllowRun = true;
       $scope.isAllowDelete = false;
+      $scope.fromHistory = false;
       $rootScope.tree = null;
       $rootScope.treeView = null;
       $rootScope.fieldsDisabled = true;
@@ -304,6 +305,10 @@ export default [
       $scope.isAllowDelete = false;
       $rootScope.tree = null;
     };
+
+    $scope.setTaskDescription = () => {
+      $rootScope.taskDescription = `${$scope.selected.item.name}_${$scope.selected.taskDescription}`;
+    }
 
     $scope.isEmptyCell = (key, l) => {
       return $rootScope.treeView[key][l] && !$rootScope.treeView[key][l].status

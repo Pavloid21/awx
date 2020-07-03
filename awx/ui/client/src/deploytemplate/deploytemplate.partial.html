@@ -74,17 +74,6 @@
           </div>
         </div>
       </div>
-        <!-- <deploy-card
-          ng-repeat="(key, value) in $root.isConfigUploaded track by $index"
-          step="{{key + 1}}"
-          index="key"
-          allowrun="isAllowRun"
-          allowdelete="isAllowDelete"
-        >
-        </deploy-card> -->
-        <!-- <div class="add_card" ng-click="handleAddCard()">
-          <i class="fa fa-plus-circle"></i>
-        </div> -->
     </div>
     <div class="pipeline" style="padding-top: 20px;">
       <button class="btn btn-success" ng-click="handleSave()" ng-if="!isEditing">Save</button>
@@ -320,6 +309,8 @@
       <thead>
         <tr class="table-head">
           <th>ID</th>
+          <th>TEMPLATE</th>
+          <th>TASK SCOPE</th>
           <th>DATE</th>
           <th>USER</th>
           <th></th>
@@ -332,6 +323,8 @@
           ng-click="historyRowClick(item)"
         >
           <td>{{item.id}}</td>
+          <td>{{item.description}}</td>
+          <td>{{item.name}}</td>
           <td
             ng-bind="item.created | date:'dd-MM-yyyy HH:mm:ss'"
             style="width: 200px;"
@@ -357,12 +350,16 @@
 
   <!-- VIEW PIPELINE -->
   <div style="padding: 20px 0px;" ng-if="displayView === 'pipeline' && (isCICDmember || isSuperUser)" elem-ready="enablePanzoom()">
-    <div>
+    <div ng-if="!fromHistory">
       <span style="font-weight: bold;">Choose template:</span>
       <select style="width: 170px" ng-model="selected.item" ng-change="getSteps(item)"
         ng-options="item as item.name for item in storedTemplates track by item.id"
       >
       </select>
+    </div>
+    <div ng-if="!fromHistory" style="margin-top: 10px;">
+      <span style="font-weight: bold;">Task:</span>
+      <input type="text" ng-model="selected.taskDescription" ng-change="setTaskDescription()"/>
     </div>
     <div class="pipeline" ng-if="selected.item || fromHistory" ng-view elem-ready="some('tree_run_container')">
       <div id="tree_run_container">

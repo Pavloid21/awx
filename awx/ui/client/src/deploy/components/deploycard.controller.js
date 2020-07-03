@@ -468,8 +468,8 @@ export default function($rootScope, $scope, $element, Wait, $http) {
                   method: 'POST',
                   url: '/api/v2/deploy_history/',
                   data: {
-                    name: makeid(10),
-                    description: '',
+                    name: $rootScope.taskDescription.split('_')[1],
+                    description: $rootScope.taskDescription.split('_')[0],
                     tree: JSON.stringify($rootScope.tree)
                   }
                 })
