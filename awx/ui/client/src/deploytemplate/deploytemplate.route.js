@@ -33,6 +33,13 @@ export default {
       }
     }
   },
+  data: {
+    socket: {
+        groups: {
+            jobs: ["status_changed"]
+        }
+    }
+  },
   resolve: {
     Dataset: [
       "$stateParams",

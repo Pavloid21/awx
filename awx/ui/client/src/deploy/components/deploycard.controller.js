@@ -56,7 +56,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
     $scope.isdeployer = this.isdeployer;
     $scope.allowDelete = this.allowdelete;
     $scope.domain = this.domain;
-    $scope.action = this.action[0];
+    $scope.action = this.action ? this.action[0] : null;
     $scope.step = this.step;
     if ($rootScope.tree) {
       function dive(node, parent) {
@@ -91,65 +91,40 @@ export default function($rootScope, $scope, $element, Wait, $http) {
     }
   };
 
-  
-  let patchStep = () => {
+  let updateTree = () => {
+    Wait('start');
     $http({
       method: 'PATCH',
-      url: `/api/v2/deploy_history/${$scope.recordId}/`,
-      data: {tree: JSON.stringify($rootScope.tree)}
-    }).then((patchPesponse) => {
-      $rootScope.tree = JSON.parse(patchPesponse.data.tree);
-      throwJobId(patchPesponse.data.id);
+      url: `/api/v2/deploy_history/${$rootScope.historyId}/`,
+      data: {
+        tree: JSON.stringify($rootScope.tree)
+      }
     })
   }
 
-  let requestJob = () => {
-    $http({
-      method: "GET",
-      url: `/api/v2/jobs/${$scope.job}/`
-    }).then((response) => {
-      if (
-        response.data.status !== "successful" &&
-        response.data.status !== "failed"
-      ) {
-        $scope.status = "pending";
-        setTimeout(() => requestJob(), 10 * 1000);
-      } else if (response.data.status === "failed") {
-        $scope.status = "failed";
-        $scope.final = {
-          status: "failed",
-          job: $scope.job
-        };
-        $rootScope.isConfigUploaded[$scope.index].status = "failed";
-        $rootScope.isConfigUploaded[$scope.index].job = $scope.job;
-        delete $rootScope.isConfigUploaded[$scope.index].name;
-        patchStep();
-        Wait("stop");
-      } else {
-        $scope.status = "successful";
-        $scope.final = {
-          status: "success",
-          job: $scope.job
-        };
-        function dive(node) {
-          if (!node) {
-            return;
-          }
-          if (node.node === $scope.step) {
-            node.status = 'successful';
-            node.job = $scope.job;
-          }
-          node.children.forEach(child => {
-            dive(child)
-          })
-        }
-        dive($rootScope.tree);
-        $rootScope.treeToTreeView($rootScope.tree);
-        patchStep();
-        Wait("stop");
+  $scope.$on('ws-jobs', (e, data) => {
+    function dive(node) {
+      if (!node) {
+        return;
       }
-    });
-  };
+      if (data.unified_job_id === node.job) {
+        node.status = data.status
+      }
+      node.children.forEach(child => {
+        dive(child)
+      })
+    }
+    if (data.status === 'successful') {
+      dive($rootScope.tree);
+      $rootScope.treeToTreeView($rootScope.tree);
+      throwJobId();
+      updateTree();
+    } else if (data.status === 'failed') {
+      dive($rootScope.tree);
+      $rootScope.treeToTreeView($rootScope.tree);
+      updateTree();
+    }
+  })
 
   $scope.skipStep = (id) => {
     function dive(node) {
@@ -170,9 +145,9 @@ export default function($rootScope, $scope, $element, Wait, $http) {
     $rootScope.rerenderTree()
   }
 
-  $scope.$watchCollection('$root.treeView', () => {
+  $scope.$watch('$root.treeView', () => {
     $rootScope.rerenderTree()
-  })
+  }, true)
 
   $scope.editStepName = () => {
     if ($scope.allowDelete)
@@ -265,7 +240,6 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   };
 
   $scope.setPicker = (id) => {
-    // $rootScope.isConfigUploaded[$scope.index].picker = $scope.ispicker;
     if (id) {
       function dive(node) {
         if (!node) {
@@ -284,7 +258,6 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   }
 
   $scope.setDeployer = (id) => {
-    // $rootScope.isConfigUploaded[$scope.index].setuper = $scope.isdeployer;
     if (id) {
       function dive(node) {
         if (!node) {
@@ -376,13 +349,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
     }
   }
 
-  let throwJobId = (historyRecordId) => {
-    if ($scope.index + 1 < $rootScope.isConfigUploaded.length) {
-      $scope.afterComplitedItem = $rootScope.isConfigUploaded[$scope.index + 1];
-      $scope.afterComplitedItem.prev_step_id = historyRecordId;
-      $scope.afterComplitedItem.job = null;
-      $scope.afterComplitedItem.status = 'start';
-    }
+  let throwJobId = () => {
     if ($scope.ispicker) {
       let deployerStep = $scope.deployStep;
       $http({
@@ -452,8 +419,6 @@ export default function($rootScope, $scope, $element, Wait, $http) {
 
   $rootScope.declaimChanges = () => {
     $rootScope.showLogPopup[`card_`] = false;
-    let complitedItem = $rootScope.isConfigUploaded[$scope.index];
-    $rootScope.getSteps($scope.index, complitedItem, $rootScope.isConfigUploaded[$scope.index + 1]);
   }
 
   $scope.deployConfig = index => {
@@ -484,8 +449,21 @@ export default function($rootScope, $scope, $element, Wait, $http) {
             })
             .then(launchResponse => {
               $scope.job = launchResponse.data.job;
+              function dive(node) {
+                if (!node) {
+                  return;
+                }
+                if ($scope.step === node.node) {
+                  node.status = 'pending';
+                  node.job = launchResponse.data.job;
+                }
+                node.children.forEach(child => {
+                  dive(child)
+                })
+              }
+              dive($rootScope.tree);
               $rootScope.job = launchResponse.data.job;
-              // if (index === '0') {
+              if ($scope.step === '00') {
                 $http({
                   method: 'POST',
                   url: '/api/v2/deploy_history/',
@@ -496,9 +474,20 @@ export default function($rootScope, $scope, $element, Wait, $http) {
                   }
                 })
                 .then(resp => {
-                  $scope.recordId = resp.data.id;
-                  requestJob();
+                  $rootScope.historyId = resp.data.id;
                 })                
+              } else {
+                $http({
+                  method: 'PATCH',
+                  url: `/api/v2/deploy_history/${$rootScope.historyId}/`,
+                  data: {
+                    tree: JSON.stringify($rootScope.tree)
+                  }
+                })
+                .then(resp => {
+                  $rootScope.historyId = resp.data.id;
+                })
+              }
             })
           }
         })

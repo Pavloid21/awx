@@ -151,6 +151,7 @@ export default [
     }
     deep(tree)
     $rootScope.treeView = treeView;
+    console.log('$rootScope.treeView :>> ', $rootScope.treeView);
     Wait('stop')
   }
 
@@ -173,22 +174,28 @@ export default [
     }
   });
 
-  $scope.$watchCollection('$root.treeView', () => {
+  $scope.$watch('$root.treeView', () => {
     $scope.some()
-  })
+  }, true)
+
+  $scope.$watch('$root.tree', () => {
+    $scope.some()
+  }, true)
 
   // PANZOOM ENABLING
-  $scope.$watchCollection('$root.treeView', (val) => {
+  $scope.$watch('$root.treeView', (val) => {
     let elem = $scope.displayView === 'pipeline' ? 'tree_run_container' : 'pipeline_container'
     let pipelineContainer = document.getElementById(elem);
-    panzoom(pipelineContainer, {
-      autocenter: true, 
-      bounds: true,
-      onTouch: function(e) {
-        return false; // tells the library to not preventDefault.
-      }
-    })
-  })
+    if (pipelineContainer) {
+      panzoom(pipelineContainer, {
+        autocenter: true, 
+        bounds: true,
+        onTouch: function(e) {
+          return false; // tells the library to not preventDefault.
+        }
+      })
+    }
+  }, true)
     $scope.$on("updateDataset", (e, dataset, queryset) => {
       if(e.targetScope.basePath.indexOf('deploy_template') > 0) {
         $scope.dataset = dataset;
@@ -204,13 +211,15 @@ export default [
 
     $scope.enablePanzoom = () => {
       let treeRunContainer = document.getElementById('tree_run_container');
-      panzoom(treeRunContainer, {
-        autocenter: true, 
-        bounds: true,
-        onTouch: function(e) {
-          return false; // tells the library to not preventDefault.
-        }
-      })
+      if (treeRunContainer) {
+        panzoom(treeRunContainer, {
+          autocenter: true, 
+          bounds: true,
+          onTouch: function(e) {
+            return false; // tells the library to not preventDefault.
+          }
+        })
+      }
     }
 
     // JSON EDITOR INIT https://github.com/josdejong/jsoneditor
@@ -269,30 +278,31 @@ export default [
       $scope.displayView = "templates";
       $scope.isAllowRun = false;
       $scope.isAllowDelete = true;
-      $rootScope.isConfigUploaded = [];
+      $rootScope.tree = null;
       $rootScope.fieldsDisabled = false;
+      $scope.isEditing = false;
     };
     $scope.actionsClick = () => {
       $scope.displayView = "actions";
       $scope.isAllowRun = false;
       $scope.isAllowDelete = true;
-      $rootScope.isConfigUploaded = [];
+      $rootScope.tree = null;
     };
     $scope.pipelineClick = () => {
       $scope.displayView = "pipeline";
       $scope.isAllowRun = true;
       $scope.isAllowDelete = false;
-      $rootScope.isConfigUploaded = [];
+      $rootScope.tree = null;
+      $rootScope.treeView = null;
       $rootScope.fieldsDisabled = true;
       $scope.selected.item = null;
       $rootScope.showLogPopup = {};
     };
     $scope.historyClick = () => {
       $scope.displayView = "history";
-      // $scope.isAllowRun = false;
       $rootScope.showLogPopup = {};
       $scope.isAllowDelete = false;
-      $rootScope.isConfigUploaded = [];
+      $rootScope.tree = null;
     };
 
     $scope.isEmptyCell = (key, l) => {
@@ -321,7 +331,6 @@ export default [
 
     $scope.some = () => {
       let elem = $scope.displayView === 'pipeline' ? 'tree_run_container' : 'pipeline_container'
-      // console.log('$rootScope.tree :>> ', $rootScope.tree, elem);
       let pipelineContainer = document.getElementById(elem);
       document.querySelectorAll('.svg_container').forEach(e => e.remove())
       $rootScope.treeView.forEach((column, cid) => {
@@ -553,7 +562,7 @@ export default [
         }
         $http({
           method: 'GET',
-          url: `/api/v2/deploy_history/?order_by=-created&page_size=10&not__status=start&prev_step_id__isnull=1&page=${pageRequest}`
+          url: `/api/v2/deploy_history/?order_by=-created&page_size=10&page=${pageRequest}`
         }).then(response => {
           $scope.history = response.data;
           $scope.deployHistoryRows = response.data.results;
@@ -609,7 +618,6 @@ export default [
         on_success: null,
         on_failed: null
       });
-      // console.log('$rootScope.isConfigUploaded :>> ', $rootScope.isConfigUploaded);
     };
 
 
@@ -671,76 +679,6 @@ export default [
           })
         }
       }
-  //     else if ($scope.isConfigUploaded.length > 0) {
-  //       let notValidCard = [];
-  //       $scope.isConfigUploaded.forEach((item, index) => {
-  //         if (!item.domain) {
-  //           notValidCard.push({ index });
-  //         }
-  //       });
-  //       if (notValidCard.length) {
-  //         $scope.errors = {
-  //           details: `Domain not specified on step ${
-  //             notValidCard[0].index + 1
-  //           }`,
-  //         };
-  //       } else {
-  //         Wait("start");
-  //         let tempArr = $rootScope.isConfigUploaded.map((item) => {
-  //           item.name = Math.random().toString(36).substring(7);
-  //           item.job = null;
-  //           return item;
-  //         });
-  //         $rootScope.isConfigUploaded = tempArr;
-  //         let prevStepId = null;
-  //         let ids = [];
-  //         (function loop(i) {
-  //           if (i < tempArr.length) {
-  //             tempArr[i].prev_step_id = prevStepId;
-  //             $http({
-  //               method: 'POST',
-  //               url: '/api/v2/deploy_history/',
-  //               data: tempArr[i]
-  //             }).then((successResponse) => {
-  //               ids.push(successResponse.data.id)
-  //               prevStepId = successResponse.data.id;
-  //               if (i === tempArr.length - 1) {
-  //                 $http({
-  //                   method: 'POST',
-  //                   url: '/api/v2/deploy_template/',
-  //                   data: {
-  //                     name: $scope.templateName,
-  //                     deployHistoryIds: ids
-  //                   }
-  //                 }).then(function success() {
-  //                   $scope.isAdding = false;
-  //                   $http({
-  //                     method: "GET",
-  //                     url: "/api/v2/deploy_template/?order=-created",
-  //                   }).then(
-  //                     function success(response) {
-  //                       $scope.storedTemplates = response.data.results;
-  //                       $scope.dataset = response.data;
-  //                       Wait("stop");
-  //                     },
-  //                     function error() {
-  //                       alert("Somethinng went wrong.");
-  //                       Wait("stop");
-  //                     }
-  //                   );
-  //                 },
-  //                 function error() {
-  //                   alert("Somethinng went wrong.");
-  //                   Wait("stop");
-  //                 }
-  //               );
-  //               }
-  //               loop.call(null, i+1)
-  //             })
-  //           }
-  //         })(0)
-  //   };
-  // }
 }
     $scope.handleSaveAction = () => {
       Wait('start');
@@ -818,8 +756,46 @@ export default [
 
     $scope.historyRowClick = (item) => {
       $scope.displayView = 'pipeline';
+      let changed = false;
       $scope.fromHistory = true;
+      $rootScope.historyId = item.id;
       $rootScope.tree = JSON.parse(item.tree);
+      function dive(node) {
+        if (!node) {
+          return;
+        }
+        if (node.status === 'pending') {
+          changed = true;
+          Wait('start')
+          $http({
+            method: 'GET',
+            url: `/api/v2/jobs/${node.job}/`
+          }).then((jobResponse) => {
+            node.status = jobResponse.data.status;
+            dive($rootScope.tree)
+            $http({
+              method: 'PATCH',
+              url: `/api/v2/deploy_history/${item.id}/`,
+              data: {
+                tree: JSON.stringify($rootScope.tree)
+              }
+            }).then((response) => {
+              $rootScope.tree = JSON.parse(response.data.tree);
+              treeToTreeView($rootScope.tree);
+              $scope.some();  
+            })
+            Wait('stop')
+          }, () => {
+            Wait('stop')
+          })
+        } else {
+          node.children.forEach(child => {
+            dive(child)
+          })
+        }
+      }
+      dive($rootScope.tree)
+      console.log('$rootScope.tree :>> ', $rootScope.tree);
       treeToTreeView($rootScope.tree)
       $rootScope.fieldsDisabled = true;
       $scope.isAllowRun = true;

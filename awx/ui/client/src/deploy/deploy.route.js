@@ -16,9 +16,14 @@ export default {
       value: {
         page_size: 10,
         order_by: '-created',
-        prev_step_id__isnull: true,
-        not__status: 'start'
       }
+    }
+  },
+  data: {
+    socket: {
+        groups: {
+            jobs: ["status_changed"]
+        }
     }
   },
   resolve: {

@@ -32,7 +32,7 @@
         <table>
           <tr ng-repeat="(idx, point) in points">
             <td>{{point.key}}</td>
-            <td><i class="fa fa-trash-o" ng-show="allowDelete" ng-click="handleDeletePoint($ctrl.step, idx)"/></td>
+            <td class="hover_effect"><i class="fa fa-trash-o" ng-show="allowDelete" ng-click="handleDeletePoint($ctrl.step, idx)"/></td>
           </tr>
         </table>
       </div>
@@ -47,13 +47,13 @@
     </div>
     <div class="log" ng-if="current.job && status === 'failed'">
       <i class="fa fa-repeat"></i>
-      <span class="log_view" ng-click="deployConfig($ctrl.index)">Restart</span>
+      <span class="log_view" ng-click="deployConfig($ctrl.step)">Restart</span>
     </div>
     <div
       class="play-button"
       ng-class="{disabledButton: prevStepNotComplited}"
       ng-if="final === undefined && status === 'start' && allowRun && isDisabledFields"
-      ng-click="deployConfig($ctrl.index)"
+      ng-click="deployConfig($ctrl.step)"
     >
       <i class="fa fa-play-circle"></i>
     </div>
