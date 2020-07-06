@@ -1,4 +1,4 @@
-<div class="card-deploy">
+<div class="card-deploy" id="{{'card_' + $ctrl.step}}">
   <div class="card_header" ng-click="editStepName()">
     <h3 ng-if="!name && !isEditingName">Step {{$ctrl.step}}</h3>
     <p ng-if="name && !isEditingName">{{name}}</p>

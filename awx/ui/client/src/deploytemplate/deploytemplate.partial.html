@@ -55,7 +55,6 @@
           <div ng-repeat="(l, cell) in column track by column.length + l">
             <deploy-card
               ng-if="!isEmptyCell(key, l)"
-              id="card_{{key}}{{l}}"
               step="{{key}}{{l}}"
               index="column.length + l"
               allowrun="isAllowRun"
@@ -367,7 +366,6 @@
           <div ng-repeat="(l, cell) in column track by column.length + l">
             <deploy-card
               ng-if="!isEmptyCell(key, l)"
-              id="card_{{key}}{{l}}"
               step="{{key}}{{l}}"
               index="column.length + l"
               allowrun="isAllowRun"
