@@ -71,11 +71,11 @@
     >
       <i class="fa fa-warning"></i> Something went wrong. See log
       <a ng-if="final.status === 'failed'" target="_blank" ng-href="#/jobs/playbook/{{final['job']}}/">here...</a>
-      <a ng-if="status === 'failed'" target="_blank" ng-href="#/jobs/playbook/{{finishedJobId}}/">here...</a>
+      <a ng-if="status === 'failed'" target="_blank" ng-href="#/jobs/playbook/{{current.job}}/">here...</a>
     </div>
     <div
       class="gear"
-      ng-if="final === null && status !== 'failed' && status !== 'successful' || status === 'pending'"
+      ng-if="final === null && status !== 'failed' && status !== 'successful' || status === 'pending' || status === 'running'"
     ></div>
   </div>
   

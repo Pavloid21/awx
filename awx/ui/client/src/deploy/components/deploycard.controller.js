@@ -83,6 +83,9 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         if (node.setuper) {
           $scope.deployStep = node
         }
+        if (node.picker) {
+          $scope.pickerStep = node
+        }
         node.children.forEach(child => {
           dive(child, node)
         })
@@ -108,7 +111,8 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         return;
       }
       if (data.unified_job_id === node.job) {
-        node.status = data.status
+        node.status = data.status;
+        $scope.current = node;
       }
       node.children.forEach(child => {
         dive(child)
@@ -117,11 +121,14 @@ export default function($rootScope, $scope, $element, Wait, $http) {
     if (data.status === 'successful') {
       dive($rootScope.tree);
       $rootScope.treeToTreeView($rootScope.tree);
+      $rootScope.job = data.id;
       throwJobId();
       updateTree();
     } else if (data.status === 'failed') {
+      $rootScope.job = data.id;
       dive($rootScope.tree);
       $rootScope.treeToTreeView($rootScope.tree);
+      throwJobId();
       updateTree();
     }
   })
@@ -360,7 +367,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
           responseAction.data.extra_vars :
           '{}'
           );
-        extraVars.deploy_vars = $rootScope.job;
+        extraVars.deploy_vars = $scope.current.job;
         $http({
           method: 'PATCH',
           url: `/api/v2/action/${responseAction.data.id}/`,
@@ -373,31 +380,33 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         }).then(successPatch => {
           $http({
             method: 'GET',
-            url: `/diff/read_json/?job=${$rootScope.job}&file=forDeploy.json`
+            url: `/diff/read_json/?job=${$scope.current.job}&file=forDeploy.json`
           }).then(successJsonData => {
+            console.log('sucessJsonData.status :>> ', successJsonData.status);
             $rootScope.logStrings = null;
             $rootScope.commitStrings = JSON.stringify(successJsonData.data.results).split('\n');
             $rootScope.tableData = successJsonData.data.results;
-            $rootScope.showLogPopup[`card_`] = false;
-            $rootScope.confirmChanges();
-            $rootScope.handleViewLog();
+            $rootScope.showLogPopup[`card_`] = true;
+            // $rootScope.closePopup();
+            // $rootScope.handleViewLog()
           })
         })
       })
     } else if ($scope.isdeployer) {
       $http({
         method: 'GET',
-        url: `/diff/read_info/?job=${$rootScope.job}&file=json2rest.log`
+        url: `/diff/read_info/?job=${$scope.current.job}&file=json2rest.log`
       }).then(successJsonData => {
+        console.log('sucessJsonData.status :>> ', successJsonData.status);
         $rootScope.commitStrings = null;
         $rootScope.logStrings = successJsonData.data.results.split('\n');
         $rootScope.tableData = successJsonData.data.results;
-        $rootScope.showLogPopup[`card_`] = false;
-        $rootScope.confirmChanges();
-        $rootScope.handleViewLog();
+        $rootScope.showLogPopup[`card_`] = true;
+        // $rootScope.closePopup();
+        // $rootScope.handleViewLog();
       })
     } else {
-      $rootScope.confirmChanges();
+      $rootScope.closePopup();
     }
   }
 
@@ -439,6 +448,8 @@ export default function($rootScope, $scope, $element, Wait, $http) {
             let extraVars = JSON.parse(action.extra_vars);
             if ($scope.ispicker)
               extraVars.send_mail = 'false';
+            if ($scope.isdeployer)
+              extraVars.deploy_vars = $scope.pickerStep.job;
             $http({
               method: 'POST',
               url: `/api/v2/job_templates/${action.job_templates[0]}/launch/`,

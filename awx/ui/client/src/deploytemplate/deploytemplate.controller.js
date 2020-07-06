@@ -40,7 +40,6 @@ export default [
     $rootScope.fieldsDisabled = false;
     $rootScope.treeView = [[]]
     
-
     function checkCICDManAccess () {
       console.log('vm :>> ', vm);
       const CICDaccess = `api/v2/users/${vm.currentUserId}/teams/?name=CI/CD management`;
@@ -82,6 +81,21 @@ export default [
                 msg: strings.get('error.CALL', { path: CICDaccess, action: 'GET', status })
             });
         });
+  }
+
+  // Observe DOM changes
+  const config = {
+    attributes: true,
+    subtree: true
+  }; 
+  const callback = function(mutationsList, observer) {
+    $scope.some()
+  };
+  const observer = new MutationObserver(callback);
+  observer.observe(document, config);
+  console.log('observer :>> ', observer);
+  vm.$onDestroy = () => {
+    observer.disconnect();
   }
 
   $rootScope.tree = {
@@ -337,69 +351,71 @@ export default [
     $scope.some = () => {
       let elem = $scope.displayView === 'pipeline' ? 'tree_run_container' : 'pipeline_container'
       let pipelineContainer = document.getElementById(elem);
-      document.querySelectorAll('.svg_container').forEach(e => e.remove())
-      $rootScope.treeView.forEach((column, cid) => {
-        column.forEach((cell, id) => {
-          if (cid !== $rootScope.treeView.length - 1) {
-            let cardElement = pipelineContainer.querySelector(`#card_${cid}${id}`);
-            let childrenElements = $rootScope.treeView[cid + 1].map((child, c) => {
-              if (child && child.parent_node === cell.node) {
-                return pipelineContainer.querySelector(`#card_${cid + 1}${c}`)
-              }
-            })
-            let coords = [];
-            if (childrenElements.length) {
-              childrenElements.forEach(ce => {
-                if (ce) {
-                  coords.push({
-                    x: ce.offsetLeft,
-                    y: ce.offsetTop + ce.offsetHeight / 2
-                  })
+      if (pipelineContainer) {
+        document.querySelectorAll('.svg_container').forEach(e => e.remove())
+        $rootScope.treeView.forEach((column, cid) => {
+          column.forEach((cell, id) => {
+            if (cid !== $rootScope.treeView.length - 1) {
+              let cardElement = pipelineContainer.querySelector(`#card_${cid}${id}`);
+              let childrenElements = $rootScope.treeView[cid + 1].map((child, c) => {
+                if (child && child.parent_node === cell.node) {
+                  return pipelineContainer.querySelector(`#card_${cid + 1}${c}`)
                 }
               })
-              if (cardElement) {
-                let x = cardElement.offsetWidth + cardElement.offsetLeft;
-                let y = cardElement.offsetTop;
-                let center = cardElement.offsetTop + cardElement.offsetHeight / 2;
-                if (x !== 0 && y !== 0 && !cardElement.classList.contains('add_card')) {
-                  // draw dots and path
-                  let svgContainer = document.createElement('div');
-                  svgContainer.setAttribute('class', 'svg_container');
-                  let circle = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                  let checkPoints = coords.map(coord => coord.y).concat(center)
-                  let height = _.max(checkPoints) - _.min(checkPoints) >= 12 ? _.max(checkPoints) - _.min(checkPoints) : 12
-                  circle.setAttribute('width', 80);
-                  circle.setAttribute('height', height);
-                  circle.setAttribute('viewBox', `0 0 80 ${height}`);
-                  circle.setAttribute('version', '1.1');
-                  circle.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-                  let sourcePositionY = null;
-                  if (Math.abs(_.min(checkPoints) - center) === height) {
-                    sourcePositionY = height - 6
-                  } else if(Math.abs(_.min(checkPoints) - center) < 6) {
-                    sourcePositionY = 6;
-                  } else {
-                    sourcePositionY = Math.abs(_.min(checkPoints) - center)
+              let coords = [];
+              if (childrenElements.length) {
+                childrenElements.forEach(ce => {
+                  if (ce) {
+                    coords.push({
+                      x: ce.offsetLeft,
+                      y: ce.offsetTop + ce.offsetHeight / 2
+                    })
                   }
-                  let lines = coords.map(coord => {
-                    return `<line x1="6" y1=${sourcePositionY} x2=80 y2=${Math.abs(coord.y - _.min(checkPoints))} stroke="#C4C4C4"/>`
-                  })
-                  circle.innerHTML = `
-                    ${lines.join('\n')}
-                    <circle cx="6" cy=${sourcePositionY} r="4" fill="#C4C4C4"/>
-                  `;
-                  svgContainer.style.top = _.min(checkPoints) + 'px';
-                  svgContainer.style.left = x + 'px';
-                  svgContainer.appendChild(circle);
-                  pipelineContainer.appendChild(svgContainer);
+                })
+                if (cardElement) {
+                  let x = cardElement.offsetWidth + cardElement.offsetLeft;
+                  let y = cardElement.offsetTop;
+                  let center = cardElement.offsetTop + cardElement.offsetHeight / 2;
+                  if (x !== 0 && y !== 0 && !cardElement.classList.contains('add_card')) {
+                    // draw dots and path
+                    let svgContainer = document.createElement('div');
+                    svgContainer.setAttribute('class', 'svg_container');
+                    let circle = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    let checkPoints = coords.map(coord => coord.y).concat(center)
+                    let height = _.max(checkPoints) - _.min(checkPoints) >= 12 ? _.max(checkPoints) - _.min(checkPoints) : 12
+                    circle.setAttribute('width', 80);
+                    circle.setAttribute('height', height);
+                    circle.setAttribute('viewBox', `0 0 80 ${height}`);
+                    circle.setAttribute('version', '1.1');
+                    circle.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                    let sourcePositionY = null;
+                    if (Math.abs(_.min(checkPoints) - center) === height) {
+                      sourcePositionY = height - 6
+                    } else if(Math.abs(_.min(checkPoints) - center) < 6) {
+                      sourcePositionY = 6;
+                    } else {
+                      sourcePositionY = Math.abs(_.min(checkPoints) - center)
+                    }
+                    let lines = coords.map(coord => {
+                      return `<line x1="6" y1=${sourcePositionY} x2=80 y2=${Math.abs(coord.y - _.min(checkPoints))} stroke="#C4C4C4"/>`
+                    })
+                    circle.innerHTML = `
+                      ${lines.join('\n')}
+                      <circle cx="6" cy=${sourcePositionY} r="4" fill="#C4C4C4"/>
+                    `;
+                    svgContainer.style.top = _.min(checkPoints) + 'px';
+                    svgContainer.style.left = x + 'px';
+                    svgContainer.appendChild(circle);
+                    pipelineContainer.appendChild(svgContainer);
+                  }
                 }
               }
             }
-          }
+          })
         })
-      })
+      }
     }
-
+    
     $scope.handleAddStep = (column, id) => {
       function dive(node) {
         if (!node) {
@@ -769,7 +785,7 @@ export default [
         if (!node) {
           return;
         }
-        if (node.status === 'pending') {
+        if (node.status === 'pending' || node.status === 'running') {
           changed = true;
           Wait('start')
           $http({
