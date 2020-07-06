@@ -93,10 +93,6 @@ export default [
   };
   const observer = new MutationObserver(callback);
   observer.observe(document, config);
-  console.log('observer :>> ', observer);
-  vm.$onDestroy = () => {
-    observer.disconnect();
-  }
 
   $rootScope.tree = {
     description: "1",
@@ -108,6 +104,10 @@ export default [
       }
     ]
   }
+
+  $scope.$on('$destroy', () => {
+    observer.disconnect();
+  })
 
   function treeToTreeView (tree) {
     Wait('start')
