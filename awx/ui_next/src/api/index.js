@@ -2,6 +2,7 @@ import AdHocCommands from './models/AdHocCommands';
 import Config from './models/Config';
 import CredentialTypes from './models/CredentialTypes';
 import Credentials from './models/Credentials';
+import DeployHistory from './models/DeployHistory';
 import Groups from './models/Groups';
 import Hosts from './models/Hosts';
 import InstanceGroups from './models/InstanceGroups';
@@ -31,6 +32,7 @@ const AdHocCommandsAPI = new AdHocCommands();
 const ConfigAPI = new Config();
 const CredentialsAPI = new Credentials();
 const CredentialTypesAPI = new CredentialTypes();
+const DeployHistoryAPI = new DeployHistory();
 const GroupsAPI = new Groups();
 const HostsAPI = new Hosts();
 const InstanceGroupsAPI = new InstanceGroups();
@@ -61,6 +63,7 @@ export {
   ConfigAPI,
   CredentialsAPI,
   CredentialTypesAPI,
+  DeployHistoryAPI,
   GroupsAPI,
   HostsAPI,
   InstanceGroupsAPI,

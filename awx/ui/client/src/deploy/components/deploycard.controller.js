@@ -95,7 +95,6 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   };
 
   let updateTree = () => {
-    Wait('start');
     $http({
       method: 'PATCH',
       url: `/api/v2/deploy_history/${$rootScope.historyId}/`,

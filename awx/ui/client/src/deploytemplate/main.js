@@ -9,36 +9,8 @@ import route from "./deploytemplate.route";
 
 export default angular
   .module("deploytemplate", [])
-  .factory('Uploader', function($q, $rootScope, $cookies) {
-    this.upload = function(url, file) {
-      var deferred = $q.defer(),
-          formdata = new FormData(),
-          xhr = new XMLHttpRequest();
-      formdata.append('file', file);
-
-      xhr.onreadystatechange = function(r) {
-        if (4 === this.readyState) {
-          if (xhr.status == 200) {
-            $rootScope.$apply(function() {
-              deferred.resolve(xhr);  
-            });
-          } else {
-            $rootScope.$apply(function() {
-              deferred.reject(xhr);  
-            });
-          }
-        }
-      }
-      xhr.open("POST", url, true);
-      xhr.setRequestHeader('X-CSRFToken', $cookies.get('csrftoken'))
-      xhr.setRequestHeader('Content-Disposition', 'form-data')
-      xhr.send(formdata);
-      return deferred.promise;
-    };
-    return this;
-  })
   .controller("deploytemplate", controller)
-  .directive( 'elemReady', function( $parse ) {
+  .directive('elemReady', function( $parse ) {
     return {
         restrict: 'A',
         link: function( $scope, elem, attrs ) {  

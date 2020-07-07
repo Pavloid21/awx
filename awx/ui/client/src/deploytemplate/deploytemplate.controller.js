@@ -5,28 +5,37 @@ import _ from 'lodash';
 
 export default [
   "$rootScope",
+  "$state",
   "$scope",
   "$location",
   "ConfigService",
+  'JobsStrings',
   "Dataset",
   "History",
   "Actions",
   "$http",
   "Wait",
   "Uploader",
+  "SearchBasePath",
+  "resolvedModels",
   (
     $rootScope,
+    $state,
     $scope,
     $location,
     ConfigService,
+    strings,
     Dataset,
     History,
     Action,
     $http,
     Wait,
-    Uploader
+    Uploader,
+    SearchBasePath,
+    resolvedModels,
   ) => {
     const vm = this || {};
+    const [deployHistory] = resolvedModels;
     $scope.displayView = "templates";
     $scope.isAllowRun = false;
     $scope.isAllowDelete = true;
@@ -38,10 +47,52 @@ export default [
     $scope.errors = null;
     $scope.selected = {};
     $rootScope.fieldsDisabled = false;
-    $rootScope.treeView = [[]]
+    $rootScope.treeView = [[]];
+
+    // smart search
+    const name = 'deploy_history';
+    const iterator = 'deploy_history';
+    let paginateQuerySet = {};
+    const toolbarSortDefault = {
+      label: `${strings.get('sort.LAUNCHED_BY_DESCENDING')}`,
+      value: '-created'
+    };
+
+    vm.searchBasePath = SearchBasePath;
+    vm.list = { iterator, name };
+    vm.isPortalMode = $state.includes('portalMode');
+
+    vm.toolbarSortOptions = [
+      { label: `${strings.get('sort.NAME_ASCENDING')}`, value: 'name' },
+      { label: `${strings.get('sort.NAME_DESCENDING')}`, value: '-name' },
+      { label: `${strings.get('sort.LAUNCHED_BY_ASCENDING')}`, value: 'created' },
+      { label: `${strings.get('sort.LAUNCHED_BY_DESCENDING')}`, value: '-created' },
+    ];
+
+    vm.toolbarSortValue = toolbarSortDefault;
+
+    vm.onToolbarSort = (sort) => {
+      vm.toolbarSortValue = sort;
+
+      const queryParams = Object.assign(
+          {},
+          $state.params.deploy_history_search,
+          paginateQuerySet,
+          { order_by: sort.value }
+      );
+
+      // Update URL with params
+      $state.go('.', {
+          deploy_history_search: queryParams
+      }, { notify: false, location: 'replace' });
+    };
+    
+    $scope.vm = vm;
+    $scope.searchTags = {
+      page_size: 10
+    }
     
     function checkCICDManAccess () {
-      console.log('vm :>> ', vm);
       const CICDaccess = `api/v2/users/${vm.currentUserId}/teams/?name=CI/CD management`;
       $http.get(CICDaccess)
           .then(({ data }) => {
@@ -217,10 +268,12 @@ export default [
       } else if (e.targetScope.basePath.indexOf('deploy_history') > 0) {
         $scope.history = dataset;
         $scope.deployHistoryRows = dataset.results;
+        paginateQuerySet = queryset;
       } else {
         $scope.actions = dataset;
         $scope.deployActionRows = dataset.results;
       }
+      $scope.vm = vm;
     });
 
     $scope.enablePanzoom = () => {

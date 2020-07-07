@@ -3,7 +3,7 @@ import controller from "./deploytemplate.controller";
 import { N_ } from "../i18n";
 
 export default {
-  searchPrefix: "deptemplate",
+  searchPrefix: "deploy_history",
   name: "deptemplate",
   route: "/deptemplate",
   controller: controller,
@@ -18,7 +18,7 @@ export default {
         order_by: '-created'
       }
     },
-    deploy_search: {
+    deploy_history_search: {
       dynamic: true,
       value: {
         page_size: 10,
@@ -41,6 +41,9 @@ export default {
     }
   },
   resolve: {
+    lastPath: function($location) {
+      return $location.url();
+    },
     Dataset: [
       "$stateParams",
       "Wait",
@@ -59,8 +62,8 @@ export default {
       "GetBasePath",
       "QuerySet",
       ($stateParams, Wait, GetBasePath, qs) => {
-        const searchParam = $stateParams.deploy_search;
-        const searchPath = GetBasePath("deploy_history") || 'api/v2/deploy_history/';
+        const searchParam = $stateParams.deploy_history_search;
+        const searchPath = GetBasePath("deploy_history");
         Wait("start");
         return qs.search(searchPath, searchParam).finally(() => Wait("stop"));
       }
@@ -76,7 +79,22 @@ export default {
         Wait("start");
         return qs.search(searchPath, searchParam).finally(() => Wait("stop"));
       }
-    ]
+    ],
+    SearchBasePath: [
+      'GetBasePath',
+      (GetBasePath) => {
+        return GetBasePath('deploy_history')
+      }
+    ],
+    resolvedModels: [
+      'DeployHistoryModel',
+      (DeployHistory) => {
+          const models = [
+              new DeployHistory(['options']),
+          ];
+          return Promise.all(models);
+      },
+    ],
   },
   onExit: function() {
     // hacky way to handle user browsing away via URL bar

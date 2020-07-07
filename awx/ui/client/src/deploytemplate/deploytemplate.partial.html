@@ -304,7 +304,29 @@
 
   <!-- VIEW HISTORY -->
   <div style="padding: 20px 0px;" ng-if="displayView === 'history' && (isCICDmember || isSuperUser)">
-    <table class="table">
+    <at-panel-body>
+      <div class="at-List-toolbar">
+        <smart-search
+            class="at-List-search"
+            django-model="deployhistory"
+            base-path="{{vm.searchBasePath}}"
+            iterator="deploy_history"
+            list="vm.list"
+            dataset="history"
+            collection="deployHistoryRows"
+            search-tags="searchTags"
+            search-bar-full-width="vm.isPortalMode">
+        </smart-search>
+    </div>
+      <at-list-toolbar
+          ng-if="deployHistoryRows.length > 0"
+          sort-only="true"
+          sort-value="vm.toolbarSortValue"
+          sort-options="vm.toolbarSortOptions"
+          on-sort="vm.onToolbarSort">
+      </at-list-toolbar>
+    </at-panel-body>
+    <table class="table table-sm">
       <thead>
         <tr class="table-head">
           <th>ID</th>
@@ -342,8 +364,8 @@
     ng-if="displayView === 'history'"
     collection="deployHistoryRows"
     dataset="history"
-    iterator="deploy"
-    base-path="api/v2/deploy_history"
+    iterator="deploy_history"
+    base-path="deploy_history"
   >
   </paginate>
 
@@ -378,9 +400,6 @@
               action="cell.action"
             >
             </deploy-card>
-            <!-- <div class="add_card panzoom-exclude" id="card_{{key}}{{l}}" ng-if="isEmptyCell(key, l)" ng-click="handleAddStep(key, l)">
-              <i class="fa fa-plus-circle"></i>
-            </div> -->
           </div>
         </div>
       </div>

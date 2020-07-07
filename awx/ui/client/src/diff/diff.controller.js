@@ -12,11 +12,86 @@ export default [
   "$http",
   "Wait",
   "Rest",
-  ($rootScope, $scope, $location, ConfigService, Dataset, lastPath, $http, Wait, Rest) => {
+  'ProjectsStrings',
+  'Alert',
+  ($rootScope, $scope, $location, ConfigService, Dataset, lastPath, $http, Wait, Rest, strings, Alert) => {
     Wait("start");
+    const vm = this || {};
+    vm.strings = strings;
 
     $("#diffCompareButton").css("cursor", "not-allowed");
     $("#verCompareButton").css("cursor", "not-allowed");
+
+    function getJobStatusIcon (project) {
+      let icon = 'none';
+      switch (project.status) {
+          case 'n/a':
+          case 'ok':
+          case 'never updated':
+              icon = 'none';
+              break;
+          case 'pending':
+          case 'waiting':
+          case 'new':
+              icon = 'none';
+              break;
+          case 'updating':
+          case 'running':
+              icon = 'running';
+              break;
+          case 'successful':
+              icon = 'success';
+              break;
+          case 'failed':
+          case 'missing':
+          case 'canceled':
+              icon = 'error';
+              break;
+          default:
+              break;
+      }
+      return icon;
+  }
+
+  function getStatusTooltip (project) {
+    let tooltip = '';
+    switch (project.status) {
+        case 'n/a':
+        case 'ok':
+        case 'never updated':
+            tooltip = vm.strings.get('status.NEVER_UPDATE');
+            break;
+        case 'pending':
+        case 'waiting':
+        case 'new':
+            tooltip = vm.strings.get('status.UPDATE_QUEUED');
+            break;
+        case 'updating':
+        case 'running':
+            tooltip = vm.strings.get('status.UPDATE_RUNNING');
+            break;
+        case 'successful':
+            tooltip = vm.strings.get('status.UPDATE_SUCCESS');
+            break;
+        case 'failed':
+            tooltip = vm.strings.get('status.UPDATE_FAILED');
+            break;
+        case 'missing':
+            tooltip = vm.strings.get('status.UPDATE_MISSING');
+            break;
+        case 'canceled':
+            tooltip = vm.strings.get('status.UPDATE_CANCELED');
+            break;
+        default:
+            break;
+    }
+    return tooltip;
+}
+
+$scope.showSCMStatus = (id) => {
+  const project = $scope.storedJobs.find((p) => p.id === id);
+  Rest.setUrl(project.url);
+};
 
     $scope.diffView = "APP_CFG";
     $scope.displayView = 'compare';
@@ -25,10 +100,18 @@ export default [
     $scope.isList = true;
     $scope.$on("updateDataset", (e, dataset, queryset) => {
       $scope.dataset = dataset;
-      $scope.storedJobs = dataset.results;
+      $scope.storedJobs = dataset.results.map(project => {
+        project.statusIcon = getJobStatusIcon(project);
+        project.statusTip = getStatusTooltip(project);
+        return project;
+      })
     });
 
-    $scope.storedJobs = Dataset.data.results;
+    $scope.storedJobs = Dataset.data.results.map(project => {
+      project.statusIcon = getJobStatusIcon(project);
+      project.statusTip = getStatusTooltip(project);
+      return project;
+    })
     $scope.allowCompareVersions = false;
     $scope.confirmed = false;
     
@@ -290,71 +373,7 @@ export default [
           compare_hash_two: selected[1].id,
           composite: !!$scope.confirmed
         }
-      }).then();
-      // $http({ method: "GET", url: url, timeout: 60 * 1000 }).then(
-      //   function success(response) {
-      //     $scope.compareData = {};
-      //     if (response.data.status === "failed") {
-      //       $scope.final = { status: "failed", job: response.data.job };
-      //       $scope.compareData = response.data;
-      //     } else {
-      //       $scope.job = response.data;
-      //       let requestJob = () => {
-      //         $http({
-      //           method: "GET",
-      //           url: `/diff/results/?job=${$scope.job.id}`
-      //         }).then(function success(response) {
-      //           if (
-      //             response.data.status !== "successful" &&
-      //             response.data.status !== "failed"
-      //           ) {
-      //             setTimeout(() => requestJob(), 30 * 1000);
-      //           } else if (response.data.status === "failed") {
-      //             $scope.final = {
-      //               status: "failed",
-      //               job: $scope.job.id
-      //             };
-      //             Wait("stop");
-      //           } else {
-      //             $http({
-      //               method: "GET",
-      //               url: `/diff/final/?job=${$scope.job.id}&status=successful`
-      //             }).then(function success(response) {
-      //               $scope.compareData = response.data.compare.results.find(
-      //                 res => {
-      //                   if (
-      //                     res.task.indexOf("сompare v_one and v_two") >=
-      //                       0 &&
-      //                     !!res.event_data.res
-      //                   ) {
-      //                     return true;
-      //                   }
-      //                   return false;
-      //                 }
-      //               );
-      //               $scope.final = JSON.parse(
-      //                 $scope.compareData.event_data.res.stdout
-      //               );
-      //               $scope.isEmpty =
-      //                 Object.keys($scope.final)[0] === undefined;
-      //               Wait("stop");
-      //             });
-      //           }
-      //         });
-      //       };
-      //       requestJob();
-      //     }
-      //   },
-      //   function error(response) {
-      //     $scope.diffErrorMessage = "Error at "
-      //       .concat(url)
-      //       .concat(" : ")
-      //       .concat(response.statusText);
-      //     $scope.compareData = null;
-      //     console.log($scope.diffErrorMessage);
-      //     Wait("stop");
-      //   }
-      // );
+      })
     }
 
     const browseExistingCompareResults = () => {
