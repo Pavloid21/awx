@@ -150,8 +150,9 @@ export default [
     status: "start",
     points: [
       {
-        key: 'success',
-        value: true
+        type: 'Status',
+        name: 'Success',
+        value:'successful'
       }
     ]
   }
@@ -503,8 +504,9 @@ export default [
         status: "start",
         points: [
           {
-            key: 'success',
-            value: true
+            type: 'Status',
+            name: 'Success',
+            value:'successful'
           }
         ]
       }

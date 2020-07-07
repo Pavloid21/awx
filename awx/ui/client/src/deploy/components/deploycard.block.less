@@ -160,6 +160,20 @@ Gear Loader  / prefixfree
     border: none;
   }
 }
-.hover_effect:hover {
-  cursor: pointer;
+.hover_effect {
+  text-align: center;
+  &:hover {
+    cursor: pointer;
+  }
+}
+.points_editor {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  .point_control_buttons {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    margin-top: 15px;
+  }
 }

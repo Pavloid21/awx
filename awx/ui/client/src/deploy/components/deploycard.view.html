@@ -31,13 +31,33 @@
       <div class="points_table_wrapper">
         <table>
           <tr ng-repeat="(idx, point) in points">
-            <td>{{point.key}}</td>
+            <td>{{point.name}}</td>
             <td class="hover_effect"><i class="fa fa-trash-o" ng-show="allowDelete" ng-click="handleDeletePoint($ctrl.step, idx)"/></td>
           </tr>
         </table>
       </div>
     </div>
-    <button class="btn btn-primary" ng-if="!allowRun && points.length < 1" style="width: 100%;" ng-click="handleAddPoint($ctrl.step)">ADD POINT</button>
+    <div class="points_editor" ng-if="pointEditor">
+      <label for="point_type_selector">Type:</label>
+      <select id="point_type_selector" ng-model="newPoint.type" ng-change="onTypeChanged()">
+        <option>Status</option>
+        <option>Trigger</option>
+      </select>
+      <label for="point_status_selector" ng-if="newPoint.type === 'Status'">Status endpoint:</label>
+      <select id="point_status_selector" ng-if="newPoint.type === 'Status'" ng-model="newPoint.value">
+        <option>successful</option>
+        <option>failed</option>
+      </select>
+      <label for="point_trigger_value" ng-if="newPoint.type === 'Trigger'">Value:</label>
+      <input type="text" ng-if="newPoint.type === 'Trigger'" ng-model="newPoint.value"/>
+      <label for="point_name">Name:</label>
+      <input type="text"ng-model="newPoint.name"/>
+      <div class="point_control_buttons">
+        <button class="btn btn-success btn-xs" ng-if="newPoint.type && newPoint.value" ng-click="handleAddPoint($ctrl.step)">OK</button>
+        <button class="btn btn-warning btn-xs" ng-click="handleAddPointCancel()">Cancel</button>
+      </div>
+    </div>
+    <button class="btn btn-primary" ng-if="!allowRun && !pointEditor" style="width: 100%;" ng-click="openPointEditor()">ADD POINT</button>
     <div class="log" ng-if="status === 'start' && allowRun && isDisabledFields && !prevStepNotComplited">
       <span class="log_view" ng-click="skipStep($ctrl.step)">Skip step</span>
     </div>

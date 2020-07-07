@@ -5,6 +5,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
   this.step = null;
   $scope.domainsList = [];
   $scope.name = null;
+  $scope.newPoint = {};
   $scope.isDisabledFields = $rootScope.fieldsDisabled;
   $rootScope.isCollapse = {
     changes: false,
@@ -331,6 +332,14 @@ export default function($rootScope, $scope, $element, Wait, $http) {
     }
   }
 
+  $scope.openPointEditor = () => {
+    $scope.pointEditor = true;
+  }
+
+  $scope.onTypeChanged = () => {
+    $scope.newPoint.value = null;
+  }
+
   $scope.handleAddPoint = (id) => {
     if (id) {
       function dive(node) {
@@ -339,8 +348,9 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         }
         if (node.node === id) {
           node.points.push({
-            key: 'success',
-            value: true
+            name: $scope.newPoint.name,
+            type: $scope.newPoint.type,
+            value: $scope.newPoint.value,
           })
         } else {
           node.children.forEach(child => {
@@ -351,8 +361,12 @@ export default function($rootScope, $scope, $element, Wait, $http) {
       dive($rootScope.tree);
       $rootScope.treeView = [];
       $rootScope.treeToTreeView($rootScope.tree);
-      // $rootScope.rerenderTree();
+      $scope.pointEditor = false;
     }
+  }
+
+  $scope.handleAddPointCancel = () => {
+    $scope.pointEditor = false;
   }
 
   let throwJobId = () => {

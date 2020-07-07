@@ -75,7 +75,7 @@ export default {
       "QuerySet",
       ($stateParams, Wait, GetBasePath, qs) => {
         const searchParam = $stateParams.action_search;
-        const searchPath = GetBasePath("deploy_history") || 'api/v2/action/';
+        const searchPath = 'api/v2/action/';
         Wait("start");
         return qs.search(searchPath, searchParam).finally(() => Wait("stop"));
       }
