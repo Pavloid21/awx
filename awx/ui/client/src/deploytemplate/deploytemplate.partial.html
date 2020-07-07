@@ -132,6 +132,26 @@
       </div>
       <h3>Available templates</h3>
       <hr/>
+      <div class="at-List-toolbar">
+        <smart-search
+          class="at-List-search"
+          django-model="deploytemplate"
+          base-path="{{vm.searchBasePathTemplate}}"
+          iterator="deploy_template"
+          list="vm.listTemplate"
+          dataset="dataset"
+          collection="storedTemplates"
+          search-tags="searchTags"
+          search-bar-full-width="vm.isPortalMode">
+        </smart-search>
+      </div>
+      <at-list-toolbar
+        ng-if="deployHistoryRows.length > 0"
+        sort-only="true"
+        sort-value="vm.toolbarSortValue"
+        sort-options="vm.toolbarSortOptions"
+        on-sort="vm.onToolbarSortTemplate">
+      </at-list-toolbar>
       <at-list results="storedTemplates">
         <at-row
           ng-repeat="project in storedTemplates"
@@ -202,8 +222,8 @@
     ng-if="displayView === 'templates'"
     collection="storedTemplates"
     dataset="dataset"
-    iterator="deploytemplate"
-    base-path="api/v2/deploy_template"
+    iterator="deploy_template"
+    base-path="deploy_template"
   >
   </paginate>
 
@@ -227,6 +247,26 @@
       </div>
       <h3>Available actions</h3>
       <hr/>
+      <div class="at-List-toolbar">
+        <smart-search
+          class="at-List-search"
+          django-model="action"
+          base-path="{{vm.searchBasePathAction}}"
+          iterator="action"
+          list="vm.listAction"
+          dataset="actionsDataset"
+          collection="storedActions"
+          search-tags="searchTags"
+          search-bar-full-width="vm.isPortalMode">
+        </smart-search>
+      </div>
+      <at-list-toolbar
+        ng-if="storedActions.length > 0"
+        sort-only="true"
+        sort-value="vm.toolbarSortValue"
+        sort-options="vm.toolbarSortOptions"
+        on-sort="vm.onToolbarSortAction">
+      </at-list-toolbar>
       <at-list results="storedActions">
         <at-row
           ng-repeat="project in storedActions"
@@ -294,7 +334,7 @@
     collection="storedActions"
     dataset="actionsDataset"
     iterator="action"
-    base-path="api/v2/action"
+    base-path="action"
   >
   </paginate>
   </div>

@@ -17,6 +17,8 @@ export default [
   "Wait",
   "Uploader",
   "SearchBasePath",
+  "SearchBasePathTemplate",
+  "SearchBasePathAction",
   "resolvedModels",
   (
     $rootScope,
@@ -32,6 +34,8 @@ export default [
     Wait,
     Uploader,
     SearchBasePath,
+    SearchBasePathTemplate,
+    SearchBasePathAction,
     resolvedModels,
   ) => {
     const vm = this || {};
@@ -59,7 +63,17 @@ export default [
     };
 
     vm.searchBasePath = SearchBasePath;
+    vm.searchBasePathTemplate = SearchBasePathTemplate;
+    vm.searchBasePathAction = SearchBasePathAction;
     vm.list = { iterator, name };
+    vm.listTemplate = {
+      iterator: 'deploy_template',
+      value: 'deploy_template'
+    }
+    vm.listAction = {
+      iterator: 'action',
+      value: 'action'
+    }
     vm.isPortalMode = $state.includes('portalMode');
 
     vm.toolbarSortOptions = [
@@ -84,6 +98,38 @@ export default [
       // Update URL with params
       $state.go('.', {
           deploy_history_search: queryParams
+      }, { notify: false, location: 'replace' });
+    };
+
+    vm.onToolbarSortTemplate = (sort) => {
+      vm.toolbarSortValue = sort;
+
+      const queryParams = Object.assign(
+          {},
+          $state.params.deploy_template_search,
+          paginateQuerySet,
+          { order_by: sort.value }
+      );
+
+      // Update URL with params
+      $state.go('.', {
+          deploy_template_search: queryParams
+      }, { notify: false, location: 'replace' });
+    };
+
+    vm.onToolbarSortAction= (sort) => {
+      vm.toolbarSortValue = sort;
+
+      const queryParams = Object.assign(
+          {},
+          $state.params.action_search,
+          paginateQuerySet,
+          { order_by: sort.value }
+      );
+
+      // Update URL with params
+      $state.go('.', {
+          action_search: queryParams
       }, { notify: false, location: 'replace' });
     };
     

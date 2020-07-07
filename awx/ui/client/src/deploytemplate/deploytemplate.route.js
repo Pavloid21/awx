@@ -11,7 +11,7 @@ export default {
     label: N_("DEPLOY TEMPLATES")
   },
   params: {
-    deploytemplate_search: {
+    deploy_template_search: {
       dynamic: true,
       value: {
         page_size: 10,
@@ -50,8 +50,8 @@ export default {
       "GetBasePath",
       "QuerySet",
       ($stateParams, Wait, GetBasePath, qs) => {
-        const searchParam = $stateParams.deploytemplate_search;
-        const searchPath = GetBasePath("deploy_template") || 'api/v2/deploy_template/';
+        const searchParam = $stateParams.deploy_template_search;
+        const searchPath = GetBasePath("deploy_template");
         Wait("start");
         return qs.search(searchPath, searchParam).finally(() => Wait("stop"));
       }
@@ -75,7 +75,7 @@ export default {
       "QuerySet",
       ($stateParams, Wait, GetBasePath, qs) => {
         const searchParam = $stateParams.action_search;
-        const searchPath = 'api/v2/action/';
+        const searchPath = GetBasePath("action");
         Wait("start");
         return qs.search(searchPath, searchParam).finally(() => Wait("stop"));
       }
@@ -86,11 +86,27 @@ export default {
         return GetBasePath('deploy_history')
       }
     ],
+    SearchBasePathTemplate: [
+      'GetBasePath',
+      (GetBasePath) => {
+        return GetBasePath('deploy_template')
+      }
+    ],
+    SearchBasePathAction: [
+      'GetBasePath',
+      (GetBasePath) => {
+        return GetBasePath('action')
+      }
+    ],
     resolvedModels: [
       'DeployHistoryModel',
-      (DeployHistory) => {
+      'DeployTemplateModel',
+      'ActionModel',
+      (DeployHistory, DeployTemplateModel, ActionModel) => {
           const models = [
               new DeployHistory(['options']),
+              new DeployTemplateModel(['options']),
+              new ActionModel(['options']),
           ];
           return Promise.all(models);
       },

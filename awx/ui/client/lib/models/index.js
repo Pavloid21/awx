@@ -1,5 +1,6 @@
 import atLibServices from '~services';
 
+import Action from '~models/Action';
 import AdHocCommand from '~models/AdHocCommand';
 import Application from '~models/Application';
 import Base from '~models/Base';
@@ -7,6 +8,7 @@ import Config from '~models/Config';
 import Credential from '~models/Credential';
 import CredentialType from '~models/CredentialType';
 import DeployHistory from '~models/DeployHistory';
+import DeployTemplate from '~models/DeployTemplate';
 import Instance from '~models/Instance';
 import InstanceGroup from '~models/InstanceGroup';
 import Inventory from '~models/Inventory';
@@ -39,6 +41,7 @@ angular
     .module(MODULE_NAME, [
         atLibServices
     ])
+    .service('ActionModel', Action)
     .service('AdHocCommandModel', AdHocCommand)
     .service('ApplicationModel', Application)
     .service('BaseModel', Base)
@@ -46,6 +49,7 @@ angular
     .service('CredentialModel', Credential)
     .service('CredentialTypeModel', CredentialType)
     .service('DeployHistoryModel', DeployHistory)
+    .service('DeployTemplateModel', DeployTemplate)
     .service('InstanceGroupModel', InstanceGroup)
     .service('InstanceModel', Instance)
     .service('InventoryModel', Inventory)

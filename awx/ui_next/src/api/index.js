@@ -1,8 +1,10 @@
+import Action from './models/Action';
 import AdHocCommands from './models/AdHocCommands';
 import Config from './models/Config';
 import CredentialTypes from './models/CredentialTypes';
 import Credentials from './models/Credentials';
 import DeployHistory from './models/DeployHistory';
+import DeployTemplate from './models/DeployTemplate';
 import Groups from './models/Groups';
 import Hosts from './models/Hosts';
 import InstanceGroups from './models/InstanceGroups';
@@ -28,11 +30,13 @@ import WorkflowJobs from './models/WorkflowJobs';
 import WorkflowJobTemplateNodes from './models/WorkflowJobTemplateNodes';
 import WorkflowJobTemplates from './models/WorkflowJobTemplates';
 
+const ActionAPI = new Action();
 const AdHocCommandsAPI = new AdHocCommands();
 const ConfigAPI = new Config();
 const CredentialsAPI = new Credentials();
 const CredentialTypesAPI = new CredentialTypes();
 const DeployHistoryAPI = new DeployHistory();
+const DeployTemplateAPI = new DeployTemplate();
 const GroupsAPI = new Groups();
 const HostsAPI = new Hosts();
 const InstanceGroupsAPI = new InstanceGroups();
@@ -59,11 +63,13 @@ const WorkflowJobTemplateNodesAPI = new WorkflowJobTemplateNodes();
 const WorkflowJobTemplatesAPI = new WorkflowJobTemplates();
 
 export {
+  ActionAPI,
   AdHocCommandsAPI,
   ConfigAPI,
   CredentialsAPI,
   CredentialTypesAPI,
   DeployHistoryAPI,
+  DeployTemplateAPI,
   GroupsAPI,
   HostsAPI,
   InstanceGroupsAPI,
