@@ -11,6 +11,7 @@ export default [
     "$http",
     "Wait",
     ($rootScope, $scope, $location, ConfigService, Dataset, SQL2EXCEL, EXCEL2SQL, Uploadfile, lastPath, $http, Wait) => {
+        const vm = this || {};
         $scope.displayView = 'sql2excel'
         $scope.searchString = ''
         $scope.directory = ''
@@ -79,7 +80,28 @@ export default [
             method: 'GET',
             url: '/git/api/repos/'
           }).then(function success(response) {
-              $scope.environments = response.data.repositories;
+            function checkSQLDVMaccess () {
+              const SQLDVMaccess = `api/v2/users/${vm.currentUserId}/teams/?name=SQLDVM`;
+              $http.get(SQLDVMaccess)
+                  .then(({ data }) => {
+                      if (data.count > 0) {
+                        $scope.isSQLDVMmember = true;
+                        $scope.environments = response.data.repositories.filter(repo => {
+                          return repo.repo === 'sql2exel' || repo.repo === 'SQLDVM'
+                        });
+                      } else {
+                        $scope.isSQLDVMmember = false;
+                        $scope.environments = response.data.repositories;
+                      }
+                  })
+                  .catch(({ data, status }) => {
+                      ProcessErrors(null, data, status, null, {
+                          hdr: strings.get('error.HEADER'),
+                          msg: strings.get('error.CALL', { path: SQLDVMaccess, action: 'GET', status })
+                      });
+                  });
+              }
+              checkSQLDVMaccess();
               Wait('stop')
           }).catch( reason => {
               Wait('stop');
@@ -94,6 +116,15 @@ export default [
           $scope.sysenv = response.data;
           Wait('stop')
         })
+
+        $scope.$watch('$root.current_user', (val) => {
+          vm.isLoggedIn = val && val.username;
+          if (!_.isEmpty(val)) {
+              vm.isSuperUser = $scope.$root.user_is_superuser || $scope.$root.user_is_system_auditor;
+              vm.currentUsername = val.username;
+              vm.currentUserId = val.id;
+          }
+       });
 
         $scope.switchView = (view) => {
             $scope.displayView = view;
@@ -817,19 +848,6 @@ export default [
                             $scope.handleDownloadDSLButton(objString)
                             $scope.showPopup = true;
                             $scope.showCompleted = true;
-                            // $http({
-                            //   method: 'GET',
-                            //   url: `/diff/download/?hash=${$scope.typesHash}&file=${data.dsl.name}_jenkins.dsl`,
-                            // }).then(function success(response) {
-                            //   var link = document.createElement("a");
-                            //   link.download = name;
-                            //   link.href = `/diff/download/?hash=${$scope.typesHash}&file=${data.dsl.name}_jenkins.dsl`;
-                            //   document.body.appendChild(link);
-                            //   link.click();
-                            //   document.body.removeChild(link);
-                            //   $scope.showPopup = true;
-                            //   $scope.showCompleted = true;
-                            // })
                             Wait("stop");
                           });
                         }
@@ -839,64 +857,6 @@ export default [
                 }
               })
             })
-
-            // $http({
-            //   method: 'POST',
-            //   url: `deploy/getdsl/?repo=${$scope.env}&branch=${branch}&hash=${$scope.typesHash}`,
-            //   data: {
-            //     reponame: $scope.env,
-            //     branch: branch,
-            //     hash: $scope.typesHash
-            //   }
-            // })
-            // .then(function success(response) {
-            //   if (response.data.status === 'failed') {
-            //     $scope.final = { status: 'failed', job: response.data.job }
-            //   } else {
-            //     $scope.job = response.data.id;
-            //     console.log($scope.job)
-            //     let requestJob = () => {
-            //         $http({
-            //           method: "GET",
-            //           url: `/diff/results/?job=${$scope.job}`
-            //         }).then(function success(response) {
-            //           if (
-            //             response.data.status !== "successful" &&
-            //             response.data.status !== "failed"
-            //           ) {
-            //             setTimeout(() => requestJob(), 4 * 1000);
-            //           } else if (response.data.status === "failed") {
-            //             $scope.final = {
-            //               status: "failed",
-            //               job: $scope.job
-            //             };
-            //             Wait("stop");
-            //           } else {
-            //             $http({
-            //               method: "GET",
-            //               url: `/diff/getDSLfinal/?job=${$scope.job}&status=successful`
-            //             }).then(function success(response) {
-            //               $http({
-            //                 method: 'GET',
-            //                 url: `/diff/download/?hash=${$scope.typesHash}&file=${data.dsl.name}_jenkins.dsl`,
-            //               }).then(function success(response) {
-            //                 var link = document.createElement("a");
-            //                 link.download = name;
-            //                 link.href = `/diff/download/?hash=${$scope.typesHash}&file=${data.dsl.name}_jenkins.dsl`;
-            //                 document.body.appendChild(link);
-            //                 link.click();
-            //                 document.body.removeChild(link);
-            //                 $scope.showPopup = true;
-            //                 $scope.showCompleted = true;
-            //               })
-            //               Wait("stop");
-            //             });
-            //           }
-            //         });
-            //       };
-            //       requestJob();
-            //   }
-            // })
           })
         }
 

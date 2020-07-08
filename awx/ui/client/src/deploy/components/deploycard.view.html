@@ -71,7 +71,7 @@
     </div>
     <div
       class="play-button"
-      ng-class="{disabledButton: prevStepNotComplited}"
+      ng-class="{disabledButton: prevStepNotComplited || (!current.trigger && $ctrl.step !== '00')}"
       ng-if="final === undefined && status === 'start' && allowRun && isDisabledFields"
       ng-click="deployConfig($ctrl.step)"
     >

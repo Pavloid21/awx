@@ -497,7 +497,9 @@ export default [
                       sourcePositionY = Math.abs(_.min(checkPoints) - center)
                     }
                     let lines = coords.map(coord => {
-                      return `<line x1="6" y1=${sourcePositionY} x2=80 y2=${Math.abs(coord.y - _.min(checkPoints))} stroke="#C4C4C4"/>`
+                      let besie = `<path d="M 6, ${sourcePositionY} C 40, ${sourcePositionY}, 40, ${Math.abs(coord.y - _.min(checkPoints))}, 80, ${Math.abs(coord.y - _.min(checkPoints))}" stroke="#C4C4C4" fill="none"/>`
+                      // return `<line x1="6" y1=${sourcePositionY} x2=80 y2=${Math.abs(coord.y - _.min(checkPoints))} stroke="#C4C4C4"/>`
+                      return besie
                     })
                     circle.innerHTML = `
                       ${lines.join('\n')}

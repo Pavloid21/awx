@@ -113,6 +113,12 @@ export default function($rootScope, $scope, $element, Wait, $http) {
       if (data.unified_job_id === node.job) {
         node.status = data.status;
         $scope.current = node;
+        node.points.forEach((point, id) => {
+          if (point.type === 'Status' && point.value === data.status) {
+            node.children[id].trigger = true;
+          }
+        })
+
       }
       node.children.forEach(child => {
         dive(child)
