@@ -24,30 +24,21 @@ let repos = SSHStrings.map(str => {
   }
 });
 
-// let clone = (rep) => {
-//   Git.Clone(rep.ssh, rep.repo, cloneOptions).then(function(repository) {
-//     console.log(`Repo ${rep.repo} clonning done.`);
-//   }).catch(e => {
-//     rimraf(rep.repo, () => {
-//       console.log(`Done ${rep.repo} remove.`);
-//       console.log(rep)
-//       console.log(e)
-//       clone(rep)
-//     })
-//   });
-// }
-
-let clone = (rep) => {
+let clone = (rep, counter) => {
   cp.exec(`git clone ${rep.ssh}`, (error, stdout, stderr) => {
     if (error) {
       rimraf(rep.repo, () => {
         console.log(`Done ${rep.repo} remove.`);
         console.log(rep)
         console.log(error)
-        clone(rep)
+        clone(rep, counter)
       })
     }
-    console.log(`Repo ${rep.repo} clonning done.`);
+    else if (counter) {
+      counter.resolved += 1;
+      counter.onResolve();
+      console.log(`Repo ${rep.repo} clonning done.`);
+    }
   });
 }
 
@@ -93,12 +84,17 @@ app.use(bodyParser.json());
 
 //CLONE REPOS FROM SYS ENV
 app.get('/git/api/clone/', (req, res) => {
+  let counter = {resolved: 0, onResolve: () => {
+    if (counter.resolved === repos.length) {
+      res.json({
+        status: 'success'
+      })
+    }
+    return counter.resolved
+  }};
   repos.forEach(rep => {
-    clone(rep);
+    clone(rep, counter);
   });
-  res.json({
-    status: 'success'
-  })
 });
 
 app.get('/git/api/env/', (req, res) => {
