@@ -15,7 +15,6 @@ export default [
   'ProjectsStrings',
   'Alert',
   ($rootScope, $scope, $location, ConfigService, Dataset, lastPath, $http, Wait, Rest, strings, Alert) => {
-    Wait("start");
     const vm = this || {};
     vm.strings = strings;
 
@@ -88,13 +87,11 @@ export default [
     return tooltip;
 }
 
-Wait('start');
 $http({
   method: 'GET',
   url: '/api/v2/jobs/?page_size=1000&order_by=-finished&search=Compare'
 }).then(resp => {
   $scope.compareJobs = resp.data.results;
-  Wait('stop')
 })
 
 $scope.showSCMStatus = (id) => {
@@ -150,6 +147,7 @@ $scope.showSCMStatus = (id) => {
     observer.observe(document, config);
 
     //CLONE REPOS
+    Wait('start')
     $http({
       method: 'GET',
       url: '/git/api/clone/'
@@ -191,7 +189,6 @@ $scope.showSCMStatus = (id) => {
         $("html, body").animate({ scrollTop: 0 }, "slow");
         Wait("stop");
       })
-      Wait('stop')
     })
 
     $http({
@@ -214,9 +211,32 @@ $scope.showSCMStatus = (id) => {
       if (chapter === 'compare') {
         observer.observe(document, config)
       } else {
-        observer.disconnect()
+        observer.disconnect();
+        Wait('start');
+        $http({
+          method: 'GET',
+          url: '/api/v2/jobs/?page_size=10&order_by=-finished&search=Compare'
+        }).then(jobsResponse => {
+          $scope.dataset = jobsResponse.data;
+          $scope.storedJobs = jobsResponse.data.results.map(project => {
+            project.statusIcon = getJobStatusIcon(project);
+            project.statusTip = getStatusTooltip(project);
+            return project;
+          })
+          Wait('stop')
+        })
       }
       $scope.displayView = chapter
+    }
+
+    $scope.handleClearForm = () => {
+      $scope.final = null;
+      $scope.env1 = null;
+      $scope.env2 = null;
+      $scope.env1Versions = [];
+      $scope.env2Versions = [];
+      $scope.env1VersionChoosen = [];
+      $scope.env2VersionChoosen = [];
     }
     
     $scope.parse = (source) => {
@@ -414,6 +434,7 @@ $scope.showSCMStatus = (id) => {
               method: "GET",
               url: `/diff/read_json/?job=${$scope.job.id}&file=changes.json`
             }).then(function success(response) {
+              Wait("stop");
               $scope.compareData = response.data
               $scope.final = $scope.compareData.results;
               let added = $scope.compareData.results.added_in_second
@@ -433,7 +454,6 @@ $scope.showSCMStatus = (id) => {
               })
               $scope.isEmpty =
                 Object.keys($scope.final)[0] === undefined;
-              Wait("stop");
               $scope.isCalculating = false;
               $scope.final.difference = difference;
             }, () => {
@@ -500,7 +520,7 @@ $scope.showSCMStatus = (id) => {
       } else if (data.status === 'failed') {
         $scope.final = {
           status: "failed",
-          job: $scope.job.id
+          job: data.unified_job_id
         };
         $scope.isCalculating = false;
         Wait("stop");

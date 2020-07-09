@@ -32,14 +32,12 @@ export default {
     },
     Dataset: [
       "$stateParams",
-      "Wait",
       "GetBasePath",
       "QuerySet",
-      ($stateParams, Wait, GetBasePath, qs) => {
+      ($stateParams, GetBasePath, qs) => {
         const searchParam = $stateParams.diff_search;
-        const searchPath = '/api/v2/jobs/';
-        Wait("start");
-        return qs.search(searchPath, searchParam).finally(() => Wait("stop"));
+        const searchPath = GetBasePath('jobs');
+        return qs.search(searchPath, searchParam);
       }
     ],
   },

@@ -92,7 +92,7 @@
     </div>
   </div>
 
-  <div class="box" ng-show="diffView==='APP_CFG' && final != null">
+  <div class="box" ng-show="diffView ==='APP_CFG' && final != null">
     <div class="card_radio" ng-class="{green_box: env1Version.tag === 'master', blue_box: env1Version.tag === 'current'}">
       <div class="card_head">
         <p ng-show="env1Version.tag !== 'master' && env1Version.tag !== 'current'"><strong>{{env1Version.tag}}</strong></p>
@@ -119,6 +119,10 @@
         <p>{{env2Version.target}}</p>
       </div>
     </div>
+  </div>
+
+  <div class="box" ng-show="diffView ==='APP_CFG' && final != null">
+    <button class="btn btn-primary" ng-click="handleClearForm()">Start new compare</button>
   </div>
 
   </div>
@@ -243,7 +247,7 @@ border: 1px solid #c3e6cb; padding-bottom: 20px;">
 </div>
 
 <div
-  ng-if="diffView==='APP_CFG' && final != null && final['status'] !== 'failed' && !isEmpty"
+  ng-if="diffView==='APP_CFG' && final != null && final['status'] !== 'failed' && !isEmpty && displayView !== 'history'"
   class="DashboardGraphs"
 >
   <button class="btn btn-primary" ng-click="exportPDF()">Export to PDF</button>

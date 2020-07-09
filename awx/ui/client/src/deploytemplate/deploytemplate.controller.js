@@ -395,6 +395,7 @@ export default [
       $rootScope.tree = null;
       $rootScope.fieldsDisabled = false;
       $scope.isEditing = false;
+      $scope.isAdding = false;
     };
     $scope.actionsClick = () => {
       $scope.displayView = "actions";
