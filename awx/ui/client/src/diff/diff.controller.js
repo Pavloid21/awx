@@ -88,6 +88,15 @@ export default [
     return tooltip;
 }
 
+Wait('start');
+$http({
+  method: 'GET',
+  url: '/api/v2/jobs/?page_size=1000&order_by=-finished&search=Compare'
+}).then(resp => {
+  $scope.compareJobs = resp.data.results;
+  Wait('stop')
+})
+
 $scope.showSCMStatus = (id) => {
   const project = $scope.storedJobs.find((p) => p.id === id);
   Rest.setUrl(project.url);
@@ -118,7 +127,6 @@ $scope.showSCMStatus = (id) => {
     var config = { attributes: true, subtree: true };
     
     var callback = function(mutations) {
-      // console.log('CHANGES HOOK:>> ', mutations);
       function union() {
         var tds = document.querySelectorAll(`.${this.class}`)
         tds.forEach((item, index) => {
@@ -378,6 +386,7 @@ $scope.showSCMStatus = (id) => {
 
     const browseExistingCompareResults = () => {
       $scope.final = null;
+      let lastFoundJob = null;
       let env1 = $scope.diffEnvironments.versions.filter(version => {
         if (version.id === $scope.env1.id) return version;
       });
@@ -386,13 +395,13 @@ $scope.showSCMStatus = (id) => {
         if (version.id === $scope.env2.id) return version;
       });
       $scope.uiEnv2 = env2[0].name;
-      let lastFoundJob = $scope.storedJobs.filter(job => {
+      lastFoundJob = $scope.compareJobs.filter(job => {
         let extraVars = JSON.parse(job.extra_vars);
         if (extraVars.compare_hash_one === $scope.env1Version.hash &&
             extraVars.compare_hash_two === $scope.env2Version.hash &&
             extraVars.compare_only &&
-            extraVars.composite === $scope.confirmed.toString()) {
-              return true;
+            extraVars.composite === $scope.confirmed) {
+              return job;
         }
         return false;
       });
@@ -473,7 +482,6 @@ $scope.showSCMStatus = (id) => {
     };
 
     $scope.$on('ws-jobs', (e, data) => {
-      console.log('data :>> ', data);
       if (data.status === 'successful') {
         $http({
           method: "GET",
@@ -587,7 +595,6 @@ $scope.showSCMStatus = (id) => {
     };
 
     $scope.setCompareComposite = function() {
-      console.log("CHECKBOX", $scope.confirmed);
       browseExistingCompareResults();
     };
 
@@ -597,7 +604,6 @@ $scope.showSCMStatus = (id) => {
         method: 'GET',
         url: `/diff/download_pdf/?job=${$scope.job.id}`
       }).then(function success(response) {
-        console.log(response)
         var link = document.createElement("a");
         link.download = name;
         link.href = `/diff/download_pdf/?job=${$scope.job.id}`;
@@ -830,8 +836,6 @@ $scope.showSCMStatus = (id) => {
                   }
                 });
 
-                console.log(msgToSend);
-
                 $http({ method: "GET", url: jobTemplatesUrl }).then(
                   function success(responseJobs) {
                     responseJobs.data.results.forEach(jobElement => {
@@ -906,62 +910,6 @@ $scope.showSCMStatus = (id) => {
         $("html, body").animate({ scrollTop: 0 }, "slow");
       }
     };
-
-    // $scope.isDisabledEnvironment = function(env) {
-    //   var disabledEnvironments = $scope.disabledEnvironments;
-    //   var testDisabledEnv2 = false;
-    //   disabledEnvironments.forEach(element => {
-    //     if (env === element) {
-    //       testDisabledEnv2 = true;
-    //     }
-    //   });
-    //   return testDisabledEnv2;
-    // };
-
-    //     var msgToSend = {};
-    //     msgToSend.commit_id = $scope.env2Version;
-    //     msgToSend.env = $scope.env2;
-    //     msgToSend.extravars = [];
-
-    //     console.log(msgToSend);
-    //     $scope.compareData.APP_CFG.forEach(element => {
-
-    //         var DataToApply = {};
-    //         DataToApply.filepath = element.right_filepath;
-    //         DataToApply.path = 'APP_CFG';
-    //         DataToApply.changes = [];
-    //         if (element.diff != null && element.diff != 'incompatible') {
-    //             console.log('ELEMENT1: '.concat(element));
-    //             element.diff.forEach(element2 => {
-    //                 console.log('ELEMENT2: '.concat(element2));
-    //                 if (element2.properties != null) {
-    //                     var Data = {};
-    //                     Data.attrs = [];
-    //                     element2.properties.forEach(element3 => {
-    //                         console.log('ELEMENT3: '.concat(element3));
-    //                         if (element3 != null && element3.checked) {
-    //                             var propsdata = {};
-    //                             propsdata.name = element3.full_name;
-    //                             propsdata.value = element3.left_value;
-    //                             Data.attrs.push(propsdata);
-    //                             console.log('IN!');
-    //                         }
-    //                     })
-    //                     if (Data.attrs.length > 0) {
-    //                         Data.xpath = element2.right_xpath;
-    //                         // Data.param = element2.param;
-    //                         DataToApply.changes.push(Data);
-    //                         console.log(Data);
-    //                     }
-    //                 }
-    //             });
-
-    //         }
-    //         if (DataToApply.changes.length > 0) {
-    //             msgToSend.extravars.push(DataToApply);
-    //         }
-    //     });
-    // }
 
     $scope.generatePDF = function() {
       if ($scope.compareData !== null) {
@@ -1044,7 +992,6 @@ $scope.showSCMStatus = (id) => {
                 });
               }
             });
-            // console.log(element);
           }
         });
         $scope.compareData.SOACONFIG.data.forEach(element => {
@@ -1071,7 +1018,6 @@ $scope.showSCMStatus = (id) => {
                 });
               }
             });
-            console.log(element);
           }
         });
         $scope.compareData.DOMAIN_CFG.data.forEach(element => {
@@ -1098,7 +1044,6 @@ $scope.showSCMStatus = (id) => {
                 });
               }
             });
-            console.log(element);
           }
         });
         $scope.compareData.FMW_PATCH.data.forEach(element => {

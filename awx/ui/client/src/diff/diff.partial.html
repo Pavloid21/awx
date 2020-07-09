@@ -1,13 +1,5 @@
-<!-- <div ng-show="diffErrorMessage != null">
-  <font color="red">{{diffErrorMessage}}</font>
-</div>
-<div ng-show="diffSuccessMessage != null">
-  <font color="green">{{diffSuccessMessage}}</font>
-</div> -->
-
 <div class="DashboardGraphs" style="padding: 20px 20px;">
   <div class="btn-group">
-    <!-- <button id="diffAppButton" class="btn btn-xs btn-primary">{{version_commit}}</button> -->
     <button 
       class="btn btn-xs"
       ng-class="{'btn-primary': displayView === 'compare', 'Button-primary--hollow': displayView !== 'compare'}"
@@ -18,12 +10,8 @@
       ng-class="{'btn-primary': displayView === 'history', 'Button-primary--hollow': displayView !== 'history'}"
       ng-click="switchView('history')"
     >History</button>
-    <!-- <button 
-      class="btn btn-xs"
-      ng-class="{'btn-primary': displayView === 'commits', 'Button-primary--hollow': displayView !== 'commits'}"
-      ng-click="switchView('commits')"
-    >Versions</button> -->
   </div>
+
   <!-- VIEW COMPARE -->
   <div class="DashboardGraphs" ng-show="displayView === 'compare'">
   <div class="box">
@@ -48,16 +36,7 @@
           >{{env2option.name}}</option
         >
       </select>
-      <!-- {{env2}} -->
-
     </div>
-
-    <!-- <br>{{env1VersionChoosen}}<br>{{env1Version}}<br> -->
-  </div>
-  <!-- <br>{{env2VersionChoosen}}<br>{{env2Version}}<br> -->
-
-  <div>
-
   </div>
 
   <div class="box">
