@@ -118,22 +118,15 @@ export default function($rootScope, $scope, $element, Wait, $http) {
             node.children[id].trigger = true;
           }
         })
-
       }
       node.children.forEach(child => {
         dive(child)
       })
     }
-    if (data.status === 'successful') {
+    if (data.status === 'successful' || data.status === 'failed') {
       dive($rootScope.tree);
       $rootScope.treeToTreeView($rootScope.tree);
       $rootScope.job = data.id;
-      throwJobId();
-      updateTree();
-    } else if (data.status === 'failed') {
-      $rootScope.job = data.id;
-      dive($rootScope.tree);
-      $rootScope.treeToTreeView($rootScope.tree);
       throwJobId();
       updateTree();
     }
@@ -406,8 +399,6 @@ export default function($rootScope, $scope, $element, Wait, $http) {
             $rootScope.commitStrings = JSON.stringify(successJsonData.data.results).split('\n');
             $rootScope.tableData = successJsonData.data.results;
             $rootScope.showLogPopup[`card_`] = true;
-            // $rootScope.closePopup();
-            // $rootScope.handleViewLog()
           })
         })
       })
@@ -421,8 +412,6 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         $rootScope.logStrings = successJsonData.data.results.split('\n');
         $rootScope.tableData = successJsonData.data.results;
         $rootScope.showLogPopup[`card_`] = true;
-        // $rootScope.closePopup();
-        // $rootScope.handleViewLog();
       })
     } else {
       $rootScope.closePopup();

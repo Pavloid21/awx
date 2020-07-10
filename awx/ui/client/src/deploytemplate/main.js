@@ -23,6 +23,17 @@ export default angular
         }
      }
  })
+ .factory('NotifyingService', function($rootScope) {
+   return {
+     subscribe: function(scope, callback) {
+       let handler = $rootScope.$on('notifying-service-event', callback);
+       scope.$on('$destroy', handler);
+     },
+     notify: function() {
+       $rootScope.$emit('notifying-service-event')
+     }
+   }
+ })
   .run([
     "$stateExtender",
     function($stateExtender) {

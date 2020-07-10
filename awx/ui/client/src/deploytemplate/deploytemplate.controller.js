@@ -20,6 +20,7 @@ export default [
   "SearchBasePathTemplate",
   "SearchBasePathAction",
   "resolvedModels",
+  'NotifyingService',
   (
     $rootScope,
     $state,
@@ -37,6 +38,7 @@ export default [
     SearchBasePathTemplate,
     SearchBasePathAction,
     resolvedModels,
+    NotifyingService,
   ) => {
     const vm = this || {};
     const [deployHistory] = resolvedModels;
@@ -52,6 +54,10 @@ export default [
     $scope.selected = {};
     $rootScope.fieldsDisabled = false;
     $rootScope.treeView = [[]];
+
+    NotifyingService.subscribe($scope, function somethingChanged() {
+      console.log('CHANGES :>> ');
+    })
 
     // smart search
     const name = 'deploy_history';
@@ -269,7 +275,6 @@ export default [
 
   $rootScope.treeToTreeView = treeToTreeView;
   treeToTreeView($rootScope.tree);
-  
 
   $scope.$watch('$root.current_user', (val) => {
     vm.isLoggedIn = val && val.username;
@@ -499,7 +504,6 @@ export default [
                     }
                     let lines = coords.map(coord => {
                       let besie = `<path d="M 6, ${sourcePositionY} C 40, ${sourcePositionY}, 40, ${Math.abs(coord.y - _.min(checkPoints))}, 80, ${Math.abs(coord.y - _.min(checkPoints))}" stroke="#C4C4C4" fill="none"/>`
-                      // return `<line x1="6" y1=${sourcePositionY} x2=80 y2=${Math.abs(coord.y - _.min(checkPoints))} stroke="#C4C4C4"/>`
                       return besie
                     })
                     circle.innerHTML = `
@@ -897,6 +901,11 @@ export default [
             url: `/api/v2/jobs/${node.job}/`
           }).then((jobResponse) => {
             node.status = jobResponse.data.status;
+            node.points.forEach((point, index) => {
+              if (point.type === 'Status' && point.value === jobResponse.data.status) {
+                node.children[index].trigger = true;
+              }
+            })
             dive($rootScope.tree)
             $http({
               method: 'PATCH',

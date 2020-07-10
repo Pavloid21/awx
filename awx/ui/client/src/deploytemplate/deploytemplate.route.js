@@ -112,10 +112,5 @@ export default {
       },
     ],
   },
-  onExit: function() {
-    // hacky way to handle user browsing away via URL bar
-    $(".modal-backdrop").remove();
-    $("body").removeClass("modal-open");
-  },
   templateUrl: templateUrl("deploytemplate/deploytemplate")
 };

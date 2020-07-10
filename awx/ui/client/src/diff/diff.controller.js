@@ -516,6 +516,7 @@ $scope.showSCMStatus = (id) => {
         }, () => {
           $scope.isEmpty = true;
           $scope.isCalculating = false;
+          Wait("stop");
         });
       } else if (data.status === 'failed') {
         $scope.final = {
