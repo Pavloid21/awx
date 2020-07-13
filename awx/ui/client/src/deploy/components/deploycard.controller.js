@@ -1,4 +1,4 @@
-export default function($rootScope, $scope, $element, Wait, $http) {
+export default function($rootScope, $scope, $element, Wait, $http, $timeout) {
   this.index = null;
   this.allowRun = null;
   this.allowDelete = null;
@@ -116,6 +116,12 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         node.points.forEach((point, id) => {
           if (point.type === 'Status' && point.value === data.status) {
             node.children[id].trigger = true;
+            if (data.status === 'successful' || data.status === 'failed') {
+              $rootScope.treeToTreeView($rootScope.tree);
+              $rootScope.job = data.id;
+              throwJobId();
+              updateTree();
+            }
           }
         })
       }
@@ -123,13 +129,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
         dive(child)
       })
     }
-    if (data.status === 'successful' || data.status === 'failed') {
-      dive($rootScope.tree);
-      $rootScope.treeToTreeView($rootScope.tree);
-      $rootScope.job = data.id;
-      throwJobId();
-      updateTree();
-    }
+    dive($rootScope.tree);
   })
 
   $scope.skipStep = (id) => {
@@ -494,6 +494,7 @@ export default function($rootScope, $scope, $element, Wait, $http) {
                 })
                 .then(resp => {
                   $rootScope.historyId = resp.data.id;
+                  sessionStorage.lastJobLaunched = resp.data.id;
                 })                
               } else {
                 $http({

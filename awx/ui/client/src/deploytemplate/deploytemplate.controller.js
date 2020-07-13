@@ -54,6 +54,7 @@ export default [
     $scope.selected = {};
     $rootScope.fieldsDisabled = false;
     $rootScope.treeView = [[]];
+    $rootScope.hasBeenDestroyed = false;
 
     NotifyingService.subscribe($scope, function somethingChanged() {
       console.log('CHANGES :>> ');
@@ -545,7 +546,19 @@ export default [
     $rootScope.rerenderTree = $scope.some;
 
     $scope.$on('$viewContentLoaded', () => {
-      console.log('LOADED :>> ', $rootScope.tree);
+      if (sessionStorage.lastJobLaunched !== 'null' && sessionStorage.hasBeenDestroyed === 'true') {
+        $http({
+          method: 'GET',
+          url: `/api/v2/deploy_history/${sessionStorage.lastJobLaunched}/`
+        }).then(lastRowResponse => {
+          $scope.historyRowClick(lastRowResponse.data)
+        })
+      }
+    })
+
+    $rootScope.$on('$locationChangeStart', () => {
+      sessionStorage.hasBeenDestroyed = true;
+      sessionStorage.lastJobLaunched = null;
     })
 
     $scope.handleAddTemplate = () => {
